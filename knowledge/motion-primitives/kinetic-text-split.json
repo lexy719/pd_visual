@@ -1,0 +1,67 @@
+{
+  "id": "kinetic-text-split",
+  "name": "Kinetic Text Split",
+  "effect": "kinetic-text-split",
+  "framework": "react",
+  "tags": [
+    "motion",
+    "kinetic",
+    "text-reveal",
+    "split-text",
+    "scroll",
+    "headline",
+    "aggressive",
+    "playful",
+    "editorial"
+  ],
+  "code": "\"use client\";\n\nimport React from \"react\";\nimport * as Scrollytelling from \"@bsmnt/scrollytelling\";\n\ntype Intensity = \"subtle\" | \"aggressive\";\n\nexport interface KineticTextSplitProps {\n  /** the headline to animate, one word at a time */\n  text: string;\n  intensity?: Intensity;\n  className?: string;\n  as?: \"h1\" | \"h2\" | \"h3\" | \"p\";\n}\n\n/*\n * A kinetic per-word scroll reveal built on @bsmnt/scrollytelling (declarative GSAP ScrollTrigger).\n * SAFETY IS BAKED IN, not left to the caller: prefers-reduced-motion and empty/one-word text both\n * degrade to plain static text, and all scroll timing (start/end percentages, stagger, from-state)\n * has sane defaults derived from the intensity prop. The agent supplies only the text (+ optional\n * intensity); a bad or missing prop can never produce a broken animation.\n */\nexport function KineticTextSplit({ text, intensity = \"aggressive\", className, as = \"h1\" }: KineticTextSplitProps) {\n  const Tag = as;\n  const words = String(text ?? \"\").trim().split(/\\s+/).filter(Boolean);\n\n  const reduced =\n    typeof window !== \"undefined\" &&\n    typeof window.matchMedia === \"function\" &&\n    window.matchMedia(\"(prefers-reduced-motion: reduce)\").matches;\n\n  // Static fallback — reduced motion or nothing to split.\n  if (reduced || words.length === 0) {\n    return <Tag className={className}>{text}</Tag>;\n  }\n\n  const span = intensity === \"aggressive\" ? 55 : 40; // total scroll % the reveal occupies\n  const step = words.length > 1 ? span / words.length : span;\n  const from =\n    intensity === \"aggressive\"\n      ? { opacity: 0, yPercent: 120, rotate: 6 }\n      : { opacity: 0, yPercent: 40 };\n\n  return (\n    <Scrollytelling.Root start=\"top 80%\" end=\"bottom 55%\">\n      <Tag className={className} style={{ display: \"flex\", flexWrap: \"wrap\", gap: \"0.25em\" }}>\n        {words.map((word, i) => {\n          const start = Math.min(98, Math.round(i * step));\n          const end = Math.min(100, Math.round(i * step + step * 1.6));\n          return (\n            <span key={i} style={{ display: \"inline-block\", overflow: \"hidden\", lineHeight: 1.1 }}>\n              <Scrollytelling.Animation tween={{ start, end: end > start ? end : start + 1, from }}>\n                <span style={{ display: \"inline-block\" }}>{word}</span>\n              </Scrollytelling.Animation>\n            </span>\n          );\n        })}\n      </Tag>\n    </Scrollytelling.Root>\n  );\n}\n\nexport default KineticTextSplit;",
+  "dependencies": [
+    "@bsmnt/scrollytelling",
+    "gsap"
+  ],
+  "registry_files": [],
+  "client_component": true,
+  "params": [
+    {
+      "name": "intensity",
+      "type": "enum",
+      "options": [
+        "subtle",
+        "aggressive"
+      ],
+      "default": "aggressive",
+      "describe": "reveal energy — sets stagger amount and the from-state"
+    },
+    {
+      "name": "start",
+      "type": "percent",
+      "min": 0,
+      "max": 100,
+      "default": 0,
+      "lessThan": "end",
+      "describe": "scroll % where the first word begins (baked default; only override to retune)"
+    },
+    {
+      "name": "end",
+      "type": "percent",
+      "min": 0,
+      "max": 100,
+      "default": 60,
+      "describe": "scroll % where the last word finishes (baked default)"
+    }
+  ],
+  "wraps": "headline",
+  "fitsCompositions": [
+    "cinematic",
+    "immersive",
+    "editorial"
+  ],
+  "motion_language": [
+    "kinetic",
+    "aggressive"
+  ],
+  "usage_example": "import { KineticTextSplit } from './component'\n\n// ONE headline with a per-word scroll reveal. Pass the headline text as the 'text' prop (a string).\n// Timing + reduced-motion fallback are handled inside — you only choose the words and intensity.\nexport default function Section() {\n  return (\n    <section className=\"min-h-[70vh] flex items-center justify-center px-6 bg-background\">\n      <KineticTextSplit\n        text=\"Your bold on-brief headline\"\n        intensity=\"aggressive\"\n        as=\"h1\"\n        className=\"text-foreground text-5xl md:text-7xl font-bold tracking-tight max-w-4xl\"\n      />\n    </section>\n  )\n}",
+  "source_url": "https://github.com/basementstudio/scrollytelling",
+  "license": "MIT (@bsmnt/scrollytelling © 2023 basement.studio — LICENSE file verified) + GSAP under GreenSock's standard license, which became free for all commercial use in Apr 2025 after Webflow's acquisition (ScrollTrigger/SplitText now included free). Both deps confirmed free to ship.",
+  "notes": "Per-word kinetic headline reveal on scroll via @bsmnt/scrollytelling. Wraps a SINGLE headline (wraps:headline) — lowest composition risk. Fits cinematic/immersive/editorial compositions but only when the run motion is kinetic/aggressive. Ships its own prefers-reduced-motion static fallback and default timing; the agent supplies only the headline text. Verified live by driving ScrollTrigger by hand: the four words stagger in on tweens at 0/14/28/41% and all resolve by 63% of the trigger range, from-state (opacity 0, yPercent 120, rotate 6deg) confirmed applied. Scroll range is h1 height + 180px, so the whole reveal lands in roughly 160-260px of scroll - deliberately snappy. Above-the-fold hero placement degrades safely: both trigger bounds compute negative, progress pins to 1 at scroll 0 and the headline renders fully visible and static rather than invisible."
+}

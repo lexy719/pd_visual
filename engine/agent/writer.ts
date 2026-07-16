@@ -1,0 +1,443 @@
+/**
+ * Materialize a generated page into the Vite preview app (reused from last session):
+ *   src/generated/lib-<id>.tsx     — library components used, verbatim from the knowledge base
+ *   src/generated/section-<i>.tsx  — each generated section (a wrapper or a scratch section)
+ *   src/App.tsx                    — deterministic composition (agent wires this, not the model)
+ *   src/lib, src/hooks             — registry files the used components need
+ *
+ * Two safety rails against imperfect model output:
+ *   - import sanitization: a section may only import allowed modules; anything else is stripped,
+ *     so a hallucinated dependency can't break the whole build.
+ *   - per-section error boundary: a runtime error in one section shows a fallback, the rest renders.
+ */
+
+import { spawnSync } from 'node:child_process'
+import { copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { createRequire } from 'node:module'
+import type { ComponentDoc } from '../types.js'
+import type { GenerateResult } from './generate.js'
+import type { ArtDirection, InteractionSpec, Palette } from './art-direction.js'
+import type { Plan, SectionResult } from './types.js'
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
+const APP = join(ROOT, 'preview', 'app')
+const SRC = join(APP, 'src')
+const GENERATED = join(SRC, 'generated')
+const REGISTRY = join(ROOT, 'preview', 'registry')
+const QUARANTINE = join(ROOT, 'logs', 'quarantine')
+const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+
+/**
+ * Dump a quarantined section's source so the failure is diagnosable AFTER the fact.
+ *
+ * Without this the stub overwrites the only copy of the broken code and the evidence is gone — a
+ * quarantine becomes an esbuild message with nothing behind it, which is exactly the dead end that
+ * made one of these undiagnosable. Writes what the writer actually tried to parse (post-transform),
+ * plus each tier's raw attempt when generation recorded them. Best-effort: never fail a run over it.
+ */
+function dumpQuarantine(label: string, finalCode: string, err: string, s: SectionResult): string | undefined {
+  try {
+    mkdirSync(QUARANTINE, { recursive: true })
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const rel = `logs/quarantine/${label}-${stamp}.tsx`
+    const attempts = s.parseAttempts ?? []
+    const head = [
+      '/* QUARANTINE EVIDENCE — this section was replaced with a stub because it did not parse.',
+      ` * section : ${s.index}-${s.name} (${s.composition}, strategy:${s.strategy}, tier:${s.tier})`,
+      ` * error   : ${err}`,
+      ` * tiers   : ${attempts.length ? attempts.map((a) => `${a.tier} FAILED`).join(', ') : `only the final ${s.tier} output failed`}`,
+      ' *',
+      ' * Below: [1] the exact code the writer parsed (post sanitize/deNextify/react-import/default-export),',
+      attempts.length ? ' * then [2..] each model tier’s RAW output with its own parse error.' : ' * (generation recorded no per-tier failures — the transforms are the prime suspect.)',
+      ' */',
+      ''
+    ].join('\n')
+    const body = [
+      `// ---------- [1] FINAL (what the writer parsed) — ${err}`,
+      finalCode,
+      ...attempts.flatMap((a, i) => [
+        '',
+        `// ---------- [${i + 2}] RAW ${a.tier} output — ${a.error}`,
+        a.code
+      ])
+    ].join('\n')
+    writeFileSync(join(ROOT, rel), `${head}${body}\n`, 'utf8')
+    return rel
+  } catch {
+    return undefined // evidence capture must never take a run down with it
+  }
+}
+
+/**
+ * Guarantee a default export. A section with none breaks App.tsx's default import at module-load
+ * time — which the per-section error boundary can't catch, so it blanks the WHOLE page.
+ * If missing, alias a top-level component; if there's nothing to alias, emit a visible stub so
+ * the rest of the page still renders.
+ */
+export function ensureDefaultExport(code: string, label: string): { code: string; repaired: boolean } {
+  if (/export\s+default/.test(code)) return { code, repaired: false }
+  const named = code.match(/(?:export\s+)?(?:function|const)\s+([A-Z][A-Za-z0-9_]*)/)
+  if (named) {
+    return { code: `${code}\n\nexport default ${named[1]}\n`, repaired: true }
+  }
+  return {
+    code: `export default function BrokenSection() {
+  return <div style={{ padding: 24, color: '#fca5a5', font: '13px ui-monospace, monospace' }}>Section "${label}" produced no usable component.</div>
+}
+`,
+    repaired: true
+  }
+}
+
+// Load esbuild (Vite's own parser) so the syntax-check matches EXACTLY what will break the build —
+// tsc's transpileModule misses grammar errors like a stray top-level `return`. tsc is the fallback.
+// Loaded via require so the writer stays sync; fails open (no quarantine) if neither resolves.
+const modRequire = createRequire(import.meta.url)
+let esbuild: typeof import('esbuild') | null = null
+let ts: typeof import('typescript') | null = null
+try {
+  esbuild = modRequire('esbuild')
+} catch {
+  esbuild = null
+}
+try {
+  ts = modRequire('typescript')
+} catch {
+  ts = null
+}
+
+/**
+ * Return a syntax-error message if `code` won't parse as an ESM TSX module, else null. Prefers
+ * esbuild (identical to Vite's parser, so it catches everything Vite would reject — bad strings,
+ * stray top-level return, unbalanced JSX). Only SYNTAX is checked; undefined names / types are fine.
+ */
+export function parseError(code: string): string | null {
+  if (esbuild) {
+    try {
+      esbuild.transformSync(code, { loader: 'tsx', format: 'esm' })
+      return null
+    } catch (e) {
+      const err = e as { errors?: Array<{ text?: string }>; message?: string }
+      return err.errors?.[0]?.text ?? err.message ?? 'syntax error'
+    }
+  }
+  if (ts) {
+    const out = ts.transpileModule(code, {
+      reportDiagnostics: true,
+      compilerOptions: { jsx: ts.JsxEmit.Preserve, target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext }
+    })
+    const err = (out.diagnostics ?? []).find((d) => d.category === ts!.DiagnosticCategory.Error)
+    return err ? ts.flattenDiagnosticMessageText(err.messageText, ' ') : null
+  }
+  return null
+}
+
+/** A valid, self-contained section that renders a visible notice — used to quarantine broken output. */
+function quarantineStub(label: string, why: string): string {
+  // The error message can contain JSX-hostile chars ({ } < > " ' `). Stripping them to word/basic
+  // punctuation keeps the STUB itself parseable — otherwise it'd reproduce the very syntax error.
+  const safe = why.replace(/[^\w .,:;()\-]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 150)
+  const id = label.replace(/[^A-Za-z0-9]/g, '_')
+  return `export default function Quarantined_${id}() {
+  return <div style={{ padding: 20, background: '#2a0d0d', color: '#fca5a5', font: '13px ui-monospace, monospace' }}>Section ${label} was quarantined (syntax error): ${safe}</div>
+}
+`
+}
+
+/** Remove import statements whose module isn't in `allowed` (handles multiline + side-effect imports). */
+export function sanitizeImports(code: string, allowed: string[]): string {
+  const ok = new Set(allowed)
+  return code
+    .replace(/import\s+[^'";]*?\s+from\s+['"]([^'"]+)['"];?/g, (full, mod) => (ok.has(mod) ? full : ''))
+    .replace(/import\s+['"]([^'"]+)['"];?/g, (full, mod) => (ok.has(mod) ? full : ''))
+}
+
+/** React named APIs a generated section might reference but forget to import (or have stripped). */
+const REACT_NAMED = [
+  'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo', 'useId', 'useContext', 'useReducer',
+  'useLayoutEffect', 'useImperativeHandle', 'useTransition', 'useDeferredValue', 'useSyncExternalStore',
+  'createContext', 'forwardRef', 'memo', 'Fragment'
+]
+
+/**
+ * Guarantee React + any hooks a section uses are imported. Scratch sections legitimately need hooks
+ * (e.g. a scroll-reveal useEffect) but their import gets stripped by sanitizeImports, and the model
+ * often omits it anyway — either way `useState is not defined` crashes the section. We re-derive a
+ * single canonical react import from what the code actually references. Runs AFTER sanitize so it
+ * can't be stripped. Idempotent: strips any existing react import first, then re-adds the correct one.
+ */
+export function ensureReactImport(code: string): string {
+  const usesNamed = REACT_NAMED.filter((h) => new RegExp(`(?<![\\w.$])${h}\\b`).test(code))
+  const usesNamespace = /(?<![\w.$])React\./.test(code)
+  if (!usesNamed.length && !usesNamespace) return code
+  const body = code.replace(/^[ \t]*import[^\n]*?from\s*['"]react['"];?[ \t]*\r?\n?/gm, '')
+  const named = usesNamed.length ? `, { ${usesNamed.join(', ')} }` : ''
+  return `import React${named} from 'react'\n${body.replace(/^\s*\n/, '')}`
+}
+
+/**
+ * De-Next.js guardrail: the target is plain React + Vite, but models drift into Next.js APIs. A
+ * stripped `next/image` import leaves `<Image>` to collide with the global DOM Image constructor
+ * ("Failed to construct 'Image'"). Drop next/* imports and rewrite the tags to plain HTML.
+ */
+export function deNextify(code: string): string {
+  return code
+    .replace(/^[ \t]*import[^\n]*?from\s*['"]next\/[^'"]+['"];?[ \t]*\r?\n?/gm, '')
+    .replace(/<Image(\s|\/|>)/g, '<img$1')
+    .replace(/<\/Image>/g, '')
+    .replace(/<Link(\s|>)/g, '<a$1')
+    .replace(/<\/Link>/g, '</a>')
+}
+
+/**
+ * Node-globals guardrail: sections run in the BROWSER, but models reach for Node globals
+ * (`process.env`, `require`, `module`, `__dirname`, `__filename`) → "process is not defined" crashes.
+ * If a section actually references one, prepend a safe browser stub so the reference resolves to a
+ * harmless value instead of throwing. Same pattern as deNextify — deterministic, applied post-sanitize.
+ * Detection targets real usage (property access / call), not the word appearing in copy.
+ */
+const NODE_GLOBALS: Array<{ name: string; re: RegExp; decl: string }> = [
+  { name: 'process', re: /(?<![\w.$])process\s*[.[]/, decl: 'const process = { env: {}, platform: "browser", version: "", browser: true };' },
+  { name: 'require', re: /(?<![\w.$])require\s*\(/, decl: 'const require = () => undefined;' },
+  { name: 'module', re: /(?<![\w.$])module\s*[.[]/, decl: 'const module = { exports: {} };' },
+  { name: '__dirname', re: /(?<![\w.$])__dirname\b/, decl: 'const __dirname = "";' },
+  { name: '__filename', re: /(?<![\w.$])__filename\b/, decl: 'const __filename = "";' }
+]
+
+export function neutralizeNodeGlobals(code: string): string {
+  const decls: string[] = []
+  for (const g of NODE_GLOBALS) {
+    const declared = new RegExp(`(?:const|let|var|function)\\s+${g.name}\\b`).test(code)
+    if (g.re.test(code) && !declared) decls.push(g.decl)
+  }
+  return decls.length ? `${decls.join('\n')}\n${code}` : code
+}
+
+function ensureDeps(deps: string[]): void {
+  if (!deps.length) return
+  if (!existsSync(join(APP, 'node_modules'))) {
+    spawnSync(npm, ['install'], { cwd: APP, stdio: 'inherit', shell: true })
+  }
+  const missing = deps.filter((d) => !existsSync(join(APP, 'node_modules', ...d.split('/'))))
+  if (missing.length) {
+    console.log(`  installing deps: ${missing.join(', ')}`)
+    spawnSync(npm, ['install', ...missing], { cwd: APP, stdio: 'inherit', shell: true })
+  }
+}
+
+function writeRegistry(files: string[]): void {
+  rmSync(join(SRC, 'lib'), { recursive: true, force: true })
+  rmSync(join(SRC, 'hooks'), { recursive: true, force: true })
+  for (const rel of files) {
+    const from = join(REGISTRY, rel)
+    if (!existsSync(from)) throw new Error(`missing registry file preview/registry/${rel}`)
+    const to = join(SRC, rel)
+    mkdirSync(dirname(to), { recursive: true })
+    copyFileSync(from, to)
+  }
+}
+
+/**
+ * Regenerate globals.css from the run's committed palette. THIS is the deterministic enforcement
+ * point for art-direction: sections consume theme tokens (bg-background, text-primary, …), so
+ * rewriting the variables re-skins the whole page with zero per-section model compliance.
+ * The same palette is written to both :root and .dark so it applies whichever class is active.
+ */
+export function themeCss(p: Palette, mi: InteractionSpec): string {
+  const vars = `  --background: ${p.background};
+  --foreground: ${p.foreground};
+  --card: ${p.card};
+  --card-foreground: ${p.cardForeground};
+  --popover: ${p.card};
+  --popover-foreground: ${p.cardForeground};
+  --primary: ${p.primary};
+  --primary-foreground: ${p.primaryForeground};
+  --secondary: ${p.secondary};
+  --secondary-foreground: ${p.foreground};
+  --muted: ${p.secondary};
+  --muted-foreground: ${p.mutedForeground};
+  --accent: ${p.accent};
+  --accent-foreground: ${p.accentForeground};
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: ${p.border};
+  --input: ${p.border};
+  --ring: ${p.accent};
+  --radius: 0.5rem;
+  --mi-dur: ${mi.durationMs}ms;
+  --mi-ease: ${mi.easing};
+  --mi-tap: ${mi.tapScale};`
+  return `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * GENERATED PER RUN by the art-direction step (engine/agent/art-direction.ts) — a committed brand
+ * palette expressed as full-hex CSS variables. Same values in :root and .dark so the brand shows
+ * whichever class is active. Full hex (not HSL channels) so components that read var(--x) inside a
+ * gradient stay valid.
+ */
+:root {
+${vars}
+}
+
+.dark {
+${vars}
+}
+
+* {
+  border-color: var(--border);
+}
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * GENERATED PER RUN by the art-direction step — the committed micro-interaction contract. Sections
+ * apply these classes to interactive elements instead of inventing their own durations/easings, so
+ * hover/press feel is identical across the whole page. Reduced-motion is baked in.
+ */
+.mi {
+  transition: transform var(--mi-dur) var(--mi-ease), opacity var(--mi-dur) var(--mi-ease), box-shadow var(--mi-dur) var(--mi-ease), color var(--mi-dur) var(--mi-ease), background-color var(--mi-dur) var(--mi-ease), border-color var(--mi-dur) var(--mi-ease);
+  cursor: ${css(mi.cursor)};
+}
+.mi-lift:hover {
+  transform: ${css(mi.hoverTransform)};
+  box-shadow: ${css(mi.hoverShadow)};
+}
+.mi-press:active {
+  transform: scale(var(--mi-tap));
+}
+.mi:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mi, .mi-lift, .mi-press { transition: none; }
+  .mi-lift:hover, .mi-press:active { transform: none; }
+}
+`
+}
+
+/** Guard: only literal transform/shadow/cursor tokens (already validated upstream) reach the stylesheet. */
+function css(v: string): string {
+  return /^[-0-9a-z.,()#%/ ]+$/i.test(v) ? v : 'none'
+}
+
+function composeApp(gen: GenerateResult): string {
+  const imports = gen.sections
+    .map((s) => `import Section${s.index} from '${s.moduleName}'`)
+    .join('\n')
+  const body = gen.sections
+    .map((s) => `      <Boundary name="${s.index}-${s.name}"><Section${s.index} /></Boundary>`)
+    .join('\n')
+  return `import React from 'react'
+${imports}
+
+class Boundary extends React.Component<{ name: string; children: React.ReactNode }, { err?: Error }> {
+  state: { err?: Error } = {}
+  static getDerivedStateFromError(err: Error) { return { err } }
+  render() {
+    if (this.state.err) {
+      return (
+        <div style={{ padding: 20, background: '#2a0d0d', color: '#fca5a5', font: '13px ui-monospace, monospace' }}>
+          Section "{this.props.name}" crashed: {String(this.state.err.message)}
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+export default function App() {
+  return (
+    <>
+${body}
+    </>
+  )
+}
+`
+}
+
+export interface WriteResult {
+  files: string[]
+  deps: string[]
+  registry: string[]
+}
+
+export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): WriteResult {
+  // Clear the active component / previous generated page so nothing stale leaks in.
+  rmSync(GENERATED, { recursive: true, force: true })
+  mkdirSync(GENERATED, { recursive: true })
+  rmSync(join(SRC, 'active-component.tsx'), { force: true })
+
+  // Deterministic art-direction: re-skin the whole page by rewriting the theme variables.
+  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions), 'utf8')
+
+  const files: string[] = []
+  const depSet = new Set<string>()
+  const regSet = new Set<string>()
+
+  // 1. used motion primitives → verbatim files
+  for (const [id, comp] of gen.usedComponents) {
+    writeFileSync(join(GENERATED, `lib-${id}.tsx`), `${comp.code}\n`, 'utf8')
+    files.push(`generated/lib-${id}.tsx`)
+    for (const d of comp.dependencies ?? []) depSet.add(d)
+    for (const r of comp.registry_files ?? []) regSet.add(r)
+  }
+
+  // 2. section files, with imports sanitized to what each section is allowed to use
+  for (const s of gen.sections) {
+    let allowed: string[]
+    if (s.strategy === 'motion-primitive' && s.motionPrimitiveId) {
+      const comp = gen.usedComponents.get(s.motionPrimitiveId) as ComponentDoc
+      allowed = [`./lib-${comp.id}`, 'react', 'react-dom', ...(comp.dependencies ?? [])]
+    } else {
+      // scratch = pure React + Tailwind: only React itself (for hooks); no other packages/files.
+      allowed = ['react', 'react-dom']
+    }
+    // filename tracks the section's moduleName so App.tsx's import resolves (free names → slugged).
+    const base = s.moduleName.replace(/^\.\/generated\//, '')
+    // sanitize → de-Next.js → neutralize Node globals → guarantee react/hook import → default export.
+    const label = `${s.index}-${s.name}`
+    let sanitized = deNextify(sanitizeImports(s.code, allowed))
+    sanitized = neutralizeNodeGlobals(sanitized)
+    sanitized = ensureReactImport(sanitized)
+    let { code, repaired } = ensureDefaultExport(sanitized, label)
+    if (repaired) console.warn(`  \x1b[33mfixup\x1b[0m [${label}] had no default export — injected one.`)
+    // Quarantine a syntactically-broken section so ONE bad section can't fail the whole Vite build
+    // (a compile error escapes the per-section ErrorBoundary). It renders a visible notice instead.
+    const perr = parseError(code)
+    if (perr) {
+      const evidence = dumpQuarantine(label, code, perr, s)
+      const tiersFailed = (s.parseAttempts ?? []).map((a) => a.tier)
+      console.warn(`  \x1b[31mQUARANTINE\x1b[0m [${label}] syntax error → stub: ${perr.slice(0, 90)}`)
+      console.warn(
+        `  \x1b[31mQUARANTINE\x1b[0m [${label}] ${
+          tiersFailed.length ? `tiers failed: ${tiersFailed.join(' + ')}` : 'generation parsed OK — broken by a writer transform'
+        }${evidence ? ` | evidence: ${evidence}` : ' | evidence dump FAILED'}`
+      )
+      // Carry it on the result so the run summary + Studio UI show a stubbed section, not just a warn.
+      s.quarantined = { error: perr, tiersFailed, evidence }
+      code = quarantineStub(label, perr)
+    }
+    writeFileSync(join(GENERATED, `${base}.tsx`), `${code}\n`, 'utf8')
+    files.push(`generated/${base}.tsx`)
+  }
+
+  // 3. composition + registry + deps
+  writeFileSync(join(SRC, 'App.tsx'), composeApp(gen), 'utf8')
+  files.push('App.tsx', 'globals.css')
+  writeRegistry([...regSet])
+  ensureDeps([...depSet])
+
+  return { files, deps: [...depSet], registry: [...regSet] }
+}
+
+export { APP }

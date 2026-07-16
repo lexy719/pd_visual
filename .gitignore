@@ -1,0 +1,16 @@
+node_modules/
+knowledge/knowledge.db
+knowledge/knowledge.db-*
+projects/*/
+!projects/.gitkeep
+
+# preview app: generated per-run files (the harness writes these)
+preview/app/src/active-component.tsx
+preview/app/src/App.tsx
+preview/app/src/generated/
+preview/app/src/lib/
+preview/app/src/hooks/
+preview/app/dist/
+
+# agent LLM config (contains API key)
+.env

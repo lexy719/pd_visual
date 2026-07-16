@@ -1,0 +1,174 @@
+
+brief:      "Refugio, a third-generation mezcal from a family palenque in Oaxaca — one bottle, one agave, premium and calm"
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-haiku-4-5-20251001   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+brand:  Refugio
+mood:   premium, calm
+layout: editorial-brand-story, asymmetric-grid, von-restorff-single-anchor
+sections:
+  0. the-mark         [36mcinematic[0m/xl  Establish the bottle as singular object and symbol — Refugio, one bottle, one agave, before any explanation is given
+  1. the-palenque     [36meditorial[0m/lg  Ground the brand in place — the family palenque in Oaxaca where three generations have worked the same land
+  2. one-agave        [36masymmetric[0m/lg  Isolate the single agave varietal as the entire story — no blending, no shortcuts, one plant per bottle
+  3. three-generations [36mtimeline[0m/md  Trace the lineage of the maker's family as a vertical sequence, not a corporate timeline — grandfather, father, current maestro mezcalero
+  4. the-still        [36mgallery[0m/lg  Show the physical process — copper still, wood fire, roasted agave — as proof of the labor behind the calm exterior
+  5. the-bottle-isolated [36mcinematic[0m/xl  Return to the single bottle as the von-Restorff anchor of the page — the one thing that must be remembered above all else
+  6. refugio-en-casa  [36meditorial[0m/sm  Close with an invitation to bring the bottle home — availability, provenance certificate, quiet call to acquire
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated (no recurring subject) · establishing → wide → macro → medium → detail → wide → detail[0m
+  primary   [48;2;122;46;29m   [0m #7A2E1D
+  accent    [48;2;181;101;29m   [0m #B5651D
+  bg / fg   [48;2;247;242;234m   [0m #F7F2EA  /  [48;2;33;26;18m   [0m #211A12
+  card/bord [48;2;252;249;243m   [0m #FCF9F3  /  [48;2;228;217;199m   [0m #E4D9C7
+  motion    [36mparallax-slow[0m  (locked for the whole run)
+  interact  [36m260ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-2px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2mA warm monochrome oxblood-on-parchment base with one saturated amber-clay accent signals inherited wealth rather than shouted luxury, while slow parallax and 260ms translateY(-2px) interactions keep every motion felt-not-seen, honoring restraint-through-scroll-only-motion as the site's premium logic.[0m
+  [2manchors: Calm / wellness / health, Playful / consumer / lifestyle, Premium / luxury / editorial, parallax-depth, premium / calm micro-interactions, duration scale, Micro-interactions, Type scale ratios by mood, Calm / wellness typography, Premium / editorial typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, PP Neue Montreal — throughline, Bucks Sauce — The "No Corn Syrup / No Seed Oils / No Additives / Glut…[0m
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Refugio  ·  premium/calm  ·  editorial-brand-story
+  motion: parallax-slow   palette: Amber
+┌──────────────────────────────────────────────────┐
+│ the-mark  ·  cinematic  ·  parallax-depth (motio │
+│   ↳ Establish the bottle as singular object and  │
+│     media: full-bleed vertical shot of the singl │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-palenque  ·  editorial  ·  parallax-depth (m │
+│   ↳ Ground the brand in place — the family palen │
+│     media: wide daylight photograph of the palen │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ one-agave  ·  asymmetric  ·  asymmetric-grid     │
+│   ↳ Isolate the single agave varietal as the ent │
+│     media: close, textural macro of a single esp │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ three-generations  ·  timeline  ·  sticky-scroll │
+│   ↳ Trace the lineage of the maker's family as a │
+│     media: three sepia-toned portraits, consiste │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-still  ·  gallery  ·  parallax-depth (motion │
+│   ↳ Show the physical process — copper still, wo │
+│     media: loose masonry of process photography: │
+│   [--] [--] [--] [--]                            │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-bottle-isolated  ·  cinematic  ·  pinned-cro │
+│   ↳ Return to the single bottle as the von-Resto │
+│     media: the bottle alone on a deep monochrome │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ refugio-en-casa  ·  editorial  ·  parallax-depth │
+│   ↳ Close with an invitation to bring the bottle │
+│     media: small still-life of the poured mezcal │
+│   [--] [--]                                      │
+└──────────────────────────────────────────────────┘
+
+  Approve this structure? [Y]es / [r]eject: 
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] the-mark/cinematic     → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [1] the-palenque/editorial → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [2] one-agave/asymmetric   → scratch  [structure: asymmetric-grid, When to break the grid on purpose, split-hero]
+       ↳ [bulk]
+  [3] three-generations/timeline → scratch  [structure: sticky-scroll-narrative, horizontal-scroll-gallery, Section padding]
+       ↳ [bulk]
+  [4] the-still/gallery      → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [5] the-bottle-isolated/cinematic → motion-primitive pinned-crossfade (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [6] refugio-en-casa/editorial → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+       ↳ shot plan [generated]: upgraded 17 image(s) → 17 Flux (staged)
+
+[1m── SELF-CRITIQUE ───────────────────────────────────────────[0m
+[2m  reviewing [0] the-mark…[0m
+[2m  reviewing [1] the-palenque…[0m
+[2m  reviewing [2] one-agave…[0m
+[2m  reviewing [3] three-generations…[0m
+[2m  reviewing [4] the-still…[0m
+[2m  reviewing [5] the-bottle-isolated…[0m
+[2m  reviewing [6] refugio-en-casa…[0m
+  [31mFLAG[0m [0:the-mark] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [31mFLAG[0m [1:the-palenque] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [31mFLAG[0m [4:the-still] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [31mFLAG[0m [5:the-bottle-isolated] uses pinned-crossfade, which carries a known caveat: "Two-panel pinned crossfade on the proven @bsmnt/scrollytelling rail (same as kinetic-text-split). Panel one dissolves into panel two while t"
+  [31mFLAG[0m [6:refugio-en-casa] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [33mwarn[0m [0:the-mark] Section spacing lacks premium generosity — no 140–180px section padding/margins defined; content sits directly in viewport with only px-6 horizontal padding
+  [33mwarn[0m [0:the-mark] Text measure not controlled — no max-width constraint on paragraph/copy blocks; 65ch measure rule not applied
+  [33mwarn[0m [0:the-mark] Card/content padding insufficient — mt-8 and space-y-3 are below 32px+ minimum for premium luxury mood
+  [33mwarn[0m [0:the-mark] No micro-interaction defined — ParallaxDepth 'subtle' intensity and image lack explicit 260ms standard-out easing; motion behavior unspecified
+  [33mwarn[0m [1:the-palenque] Transition duration not specified on link hover — should be 260ms cubic-bezier(0.22, 1, 0.36, 1) per premium/calm rules
+  [33mwarn[0m [1:the-palenque] Section vertical spacing (pb-16 md:pb-20) falls short of premium rule minimum 140–180px — should be 36–44 at minimum
+  [33mwarn[0m [1:the-palenque] Card/content padding (px-6) is below premium minimum of 32px+
+  [33mwarn[0m [1:the-palenque] space-y-6 between stacked elements is too tight for premium/calm; should use 32px+ gaps (space-y-8 or higher)
+  [33mwarn[0m [2:one-agave] Motion duration 700ms violates premium/calm rule (must be 260ms, cubic-bezier(0.22, 1, 0.36, 1))
+  [33mwarn[0m [2:one-agave] Section padding py-24 (96px) falls short of premium/calm spacing rule (140–180px sections)
+  [33mwarn[0m [2:one-agave] Accent line width w-12 (48px) with bg-primary/40 is arbitrary; no design justification against restraint principle
+  [33mwarn[0m [3:three-generations] Motion easing not specified — code has no cubic-bezier(0.22, 1, 0.36, 1) transitions; missing 260ms standard-out easing on visibility animations
+  [33mwarn[0m [3:three-generations] Spacing violation — py-24 md:py-28 is 96–112px, below premium 140–180px section requirement
+  [33mwarn[0m [3:three-generations] Spacing violation — gap-8 md:gap-16 (32–64px) is tight; premium calm requires 32px+ card padding but overall grid spacing feels constrained against 65ch measure guidance
+  [33mwarn[0m [3:three-generations] Missing color strategy — no visible monochrome + desaturated accent or analogous pair; code references only 'background', 'foreground', 'muted-foreground' with no saturation or warmth specification
+  [33mwarn[0m [4:the-still] No animation duration/easing defined. Rules require 260ms standard-out cubic-bezier(0.22, 1, 0.36, 1) for premium micro-interactions
+  [33mwarn[0m [4:the-still] Missing explicit spacing tokens. Gallery container and card padding not declared—rules require 32px+ card padding and 140–180px section spacing
+  [33mwarn[0m [4:the-still] No color scheme documented. Rules require monochrome + desaturated accent or analogous pair with <45% saturation—code contains only neutral image URLs with no color palette definition
+  [33mwarn[0m [4:the-still] Intersection Observer threshold 0.1 may trigger animations too early for 'motion felt not seen' restraint—should be higher (0.3–0.5)
+  [33mwarn[0m [5:the-bottle-isolated] Spacing violation: gap-8 (32px) between image and text is below premium minimum of 32px+, and overall section lacks the 140–180px generous spacing characteristic of premium calm mood
+  [33mwarn[0m [5:the-bottle-isolated] Color saturation violation: amber-100, amber-200, amber-50 are too saturated (~60%+) for calm/wellness mood requirement of <45% saturation
+  [33mwarn[0m [5:the-bottle-isolated] Warmth/tone violation: amber accent on neutral-950/900 reads as warm luxury whiskey rather than serene wellness analogous or monochrome+desaturated accent
+  [33mwarn[0m [5:the-bottle-isolated] Micro-interaction missing: PinnedCrossfade hold={3} lacks explicit 260ms standard-out easing commitment for premium calm motion requirement
+  [33mwarn[0m [6:refugio-en-casa] Button transition lacks specified micro-interaction duration (260ms standard-out). Uses generic 'transition-colors' without cubic-bezier easing.
+  [33mwarn[0m [6:refugio-en-casa] Section padding (py-20) and gap (gap-12 md:gap-16) fall short of premium calm spacing rule (140–180px sections). Should be 140px+ vertical spacing between major blocks.
+  [33mwarn[0m [6:refugio-en-casa] No motion/hover state defined on 'mi mi-lift' class—premium calm requires felt (not seen) micro-interactions with 260ms duration. Current hover only affects color, not transform/scale.
+  [33mwarn[0m [6:refugio-en-casa] CTA button uses 'bg-primary' without saturation check against calm/wellness rule (<45% saturation). Primary accent saturation unverified.
+
+[1m── WRITE  → preview/app ────────────────────────────────────[0m
+  7 sections  (5 motion-primitive, 2 from scratch)
+  primitives: parallax-depth, pinned-crossfade
+  [36mTIERS[0m  plan/art-direction/questions: [35m[reasoning][0m claude-sonnet-5
+         sections: 7 [36m[bulk][0m (none needed escalation)
+           [0] the-mark/cinematic → [36m[bulk][0m
+           [1] the-palenque/editorial → [36m[bulk][0m
+           [2] one-agave/asymmetric → [36m[bulk][0m
+           [3] three-generations/timeline → [36m[bulk][0m
+           [4] the-still/gallery → [36m[bulk][0m
+           [5] the-bottle-isolated/cinematic → [36m[bulk][0m
+           [6] refugio-en-casa/editorial → [36m[bulk][0m
+  deps:       motion, motion/react, @bsmnt/scrollytelling, gsap
+  files:      11 written under preview/app/src
+  [36mMOTION[0m [0:the-mark] wrapped by motion-primitive parallax-depth
+  [36mMOTION[0m [1:the-palenque] wrapped by motion-primitive parallax-depth
+  [36mMOTION[0m [4:the-still] wrapped by motion-primitive parallax-depth
+  [36mMOTION[0m [5:the-bottle-isolated] wrapped by motion-primitive pinned-crossfade
+  [36mMOTION[0m [6:refugio-en-casa] wrapped by motion-primitive parallax-depth
+  [36mIMAGES[0m upgraded 17 placeholder(s) to on-theme imagery (Unsplash or Flux-generated).
+
+[1m── SERVE  → http://localhost:5199 ──────────────────────────[0m
+
+> dev
+> vite
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m1777[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5199[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m

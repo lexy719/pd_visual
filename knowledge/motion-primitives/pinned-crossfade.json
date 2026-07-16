@@ -1,0 +1,49 @@
+{
+  "id": "pinned-crossfade",
+  "name": "Pinned Crossfade",
+  "effect": "pinned-crossfade",
+  "framework": "react",
+  "tags": [
+    "motion",
+    "pinned",
+    "pin",
+    "crossfade",
+    "scroll-scrubbed",
+    "storytelling",
+    "premium",
+    "calm",
+    "editorial",
+    "immersive",
+    "parallax-slow"
+  ],
+  "code": "\"use client\";\n\nimport React from \"react\";\nimport * as Scrollytelling from \"@bsmnt/scrollytelling\";\nimport { ScrollTrigger } from \"gsap/ScrollTrigger\";\n\nexport interface PinnedCrossfadeProps {\n  /** the panel shown first — pinned, then dissolves away */\n  first: React.ReactNode;\n  /** the panel that resolves in over the first */\n  second: React.ReactNode;\n  /** how long the section stays pinned, in viewport heights (clamped 1.5-3) */\n  hold?: number;\n  className?: string;\n}\n\nconst prefers = (q: string): boolean =>\n  typeof window !== \"undefined\" &&\n  typeof window.matchMedia === \"function\" &&\n  window.matchMedia(q).matches;\n\n/*\n * Two-panel pinned crossfade: the section pins for a controlled distance while panel one dissolves\n * into panel two, tied to scroll position rather than to time.\n *\n * SAFETY IS BAKED IN, not left to the caller:\n *  - prefers-reduced-motion OR a coarse pointer (touch) renders the two panels as a plain vertical\n *    stack with no pin and no fade. Both panels stay fully readable, which is the required fallback\n *    anyway -- \"never pin on touch\" is a hard rule, not a preference.\n *  - the pin distance is clamped to 1.5-3 viewport heights, so the page can never trap the reader.\n *  - the crossfade window is fixed at 30-70% of the pinned timeline: each panel is fully opaque at\n *    its own end of the scroll, so neither is ever stuck half-legible.\n *  - only opacity animates (never layout), and each panel stands alone if motion never runs.\n *  - STALE-POSITION GUARD: an image that finishes loading late (generated imagery renders on demand)\n *    shifts the layout ABOVE this section after ScrollTrigger measured its start/end -- the observed\n *    failure is both panels stuck at full opacity. Any document image still pending at mount gets a\n *    settle listener that schedules ONE trailing ScrollTrigger.refresh(), so positions re-measure\n *    after the page reaches its real height. refresh() is idempotent; multiple instances coexist.\n *\n * Deliberately NOT video-backed. A pinned <video> is the documented low-end-hardware failure mode\n * (see the PP Neue Montreal critique) -- this variant carries the same narrative beat with two\n * ordinary content panels.\n */\nexport function PinnedCrossfade({ first, second, hold = 2, className }: PinnedCrossfadeProps) {\n  const staticFallback = prefers(\"(prefers-reduced-motion: reduce)\") || prefers(\"(pointer: coarse)\");\n\n  React.useEffect(() => {\n    if (staticFallback) return;\n    const pending = Array.from(document.querySelectorAll(\"img\")).filter((i) => !i.complete);\n    if (!pending.length) return;\n    let timer: ReturnType<typeof setTimeout> | undefined;\n    const settle = () => {\n      if (timer) clearTimeout(timer);\n      timer = setTimeout(() => ScrollTrigger.refresh(), 150);\n    };\n    for (const img of pending) {\n      img.addEventListener(\"load\", settle, { once: true });\n      img.addEventListener(\"error\", settle, { once: true });\n    }\n    return () => {\n      if (timer) clearTimeout(timer);\n      for (const img of pending) {\n        img.removeEventListener(\"load\", settle);\n        img.removeEventListener(\"error\", settle);\n      }\n    };\n  }, [staticFallback]);\n\n  if (staticFallback) {\n    return (\n      <section className={className}>\n        <div>{first}</div>\n        <div>{second}</div>\n      </section>\n    );\n  }\n\n  // Clamp the pin distance. A bad prop degrades to a sane hold rather than a scroll trap.\n  const held = Math.min(3, Math.max(1.5, Number(hold) || 2));\n\n  return (\n    <section className={className}>\n      <Scrollytelling.Root start=\"top top\" end=\"bottom bottom\" scrub={0.8}>\n        <Scrollytelling.Pin childHeight=\"100vh\" pinSpacerHeight={String(held * 100) + \"vh\"}>\n          <div style={{ position: \"relative\", height: \"100vh\", overflow: \"hidden\" }}>\n            {/* ease:\"none\" is mandatory here, not taste: the scroll position IS the clock, and gsap's\n                default power1.out would ease on top of the scrub -- measured 25/75 at the scroll\n                midpoint instead of 50/50, so panel two reads as arriving early. Linear keeps the\n                dissolve locked to the reader's own scrolling. */}\n            <Scrollytelling.Animation tween={{ start: 30, end: 70, fromTo: [{ opacity: 1 }, { opacity: 0, ease: \"none\" }] }}>\n              <div style={{ position: \"absolute\", inset: 0 }}>{first}</div>\n            </Scrollytelling.Animation>\n            <Scrollytelling.Animation tween={{ start: 30, end: 70, fromTo: [{ opacity: 0 }, { opacity: 1, ease: \"none\" }] }}>\n              <div style={{ position: \"absolute\", inset: 0 }}>{second}</div>\n            </Scrollytelling.Animation>\n          </div>\n        </Scrollytelling.Pin>\n      </Scrollytelling.Root>\n    </section>\n  );\n}\n\nexport default PinnedCrossfade;",
+  "dependencies": [
+    "@bsmnt/scrollytelling",
+    "gsap"
+  ],
+  "registry_files": [],
+  "client_component": true,
+  "params": [
+    {
+      "name": "hold",
+      "type": "number",
+      "min": 1.5,
+      "max": 3,
+      "default": 2,
+      "describe": "how long the section stays pinned, in viewport heights. Clamped 1.5-3 so a bad value can never trap the reader."
+    }
+  ],
+  "wraps": "section-block",
+  "fitsCompositions": [
+    "immersive",
+    "cinematic"
+  ],
+  "motion_language": [
+    "parallax-slow",
+    "subtle"
+  ],
+  "usage_example": "import { PinnedCrossfade } from \"./component\"\n\n// TWO full-viewport panels; the first dissolves into the second while the section is pinned.\n// Pass real, on-brief content for each panel -- each must stand alone if motion never runs.\nexport default function Section() {\n  return (\n    <PinnedCrossfade\n      hold={2}\n      className=\"bg-background\"\n      first={\n        <div className=\"h-full flex items-center justify-center px-6\">\n          <h2 className=\"text-foreground text-5xl md:text-7xl font-bold tracking-tight max-w-3xl text-center\">\n            The first on-brief statement\n          </h2>\n        </div>\n      }\n      second={\n        <div className=\"h-full flex items-center justify-center px-6 bg-card\">\n          <p className=\"text-card-foreground text-2xl md:text-3xl max-w-2xl text-center\">\n            The second beat it resolves into, in the brand voice.\n          </p>\n        </div>\n      }\n    />\n  )\n}",
+  "source_url": "https://github.com/basementstudio/scrollytelling/blob/main/docs/api.md#pin",
+  "license": "MIT (@bsmnt/scrollytelling (c) 2023 basement.studio - LICENSE file verified) + GSAP under GreenSock standard license, free for all commercial use since Webflow Apr 2025. Same rail as kinetic-text-split.",
+  "notes": "Two-panel pinned crossfade on the proven @bsmnt/scrollytelling rail (same as kinetic-text-split). Panel one dissolves into panel two while the section is pinned, scrubbed to scroll. Ships a hard fallback: prefers-reduced-motion OR touch renders both panels as a plain vertical stack with no pin and no fade (never pin on touch). Pin distance clamped 1.5-3vh; crossfade window fixed at 30-70% so neither panel is ever stuck half-legible; only opacity animates. Both tweens use ease:'none' because scroll IS the clock - gsap's default power1.out eases on top of the scrub and measured 25/75 at the scroll midpoint; linear gives an exact 50/50. Verified live across 21 sampled positions in the pinned range: opacity A+B sums to 1.00 at every one (no dip to background, no double-exposure) and the pin holds top=0 throughout. Ships a stale-position guard: any document image still pending at mount gets a settle listener that schedules one trailing ScrollTrigger.refresh(), so a late-loading image above the section (generated imagery renders on demand) cannot leave the pin/crossfade holding stale positions - verified live: an 800px late image shifted the trigger start/end by exactly +800 with no manual refresh, and the crossfade then read exactly 50/50 at the refreshed midpoint. NON-video by design - a pinned video is the documented low-end-hardware failure (PP Neue Montreal critique)."
+}

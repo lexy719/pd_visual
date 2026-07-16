@@ -1,0 +1,61 @@
+// card-001 — the stored code exports the Carousel/Card PRIMITIVES, not a demo.
+// This mount supplies representative data (the shape Card expects: category/title/src/content).
+import { Carousel, Card } from './active-component'
+
+const data = [
+  {
+    category: 'Artificial Intelligence',
+    title: 'You can do more with AI.',
+    src: 'https://images.unsplash.com/photo-1593508512255-86ab42a8e620?q=80&w=1200&auto=format&fit=crop',
+    content: <DemoContent />
+  },
+  {
+    category: 'Productivity',
+    title: 'Enhance your productivity.',
+    src: 'https://images.unsplash.com/photo-1531554694128-c4c6665f59c2?q=80&w=1200&auto=format&fit=crop',
+    content: <DemoContent />
+  },
+  {
+    category: 'Product',
+    title: 'Launching the new Apple Vision Pro.',
+    src: 'https://images.unsplash.com/photo-1713869791518-a770879e60dc?q=80&w=1200&auto=format&fit=crop',
+    content: <DemoContent />
+  },
+  {
+    category: 'iOS',
+    title: 'Photography just got better.',
+    src: 'https://images.unsplash.com/photo-1602081957921-9137a5d6eaee?q=80&w=1200&auto=format&fit=crop',
+    content: <DemoContent />
+  },
+  {
+    category: 'Hiring',
+    title: 'Hiring for a Staff Software Engineer',
+    src: 'https://images.unsplash.com/photo-1511984804822-e16ba72f5848?q=80&w=1200&auto=format&fit=crop',
+    content: <DemoContent />
+  }
+]
+
+function DemoContent() {
+  return (
+    <div className="bg-[#F5F5F7] dark:bg-neutral-800 p-8 md:p-14 rounded-3xl mb-4">
+      <p className="text-neutral-600 dark:text-neutral-400 text-base md:text-2xl font-sans max-w-3xl mx-auto">
+        <span className="font-bold text-neutral-700 dark:text-neutral-200">
+          The first rule of Apple club is that you boast about Apple club.
+        </span>{' '}
+        Keep a journal, quickly jot down a grocery list, and take amazing class notes.
+      </p>
+    </div>
+  )
+}
+
+export default function App() {
+  const cards = data.map((card, index) => <Card key={card.src} card={card} index={index} />)
+  return (
+    <div className="w-full h-full py-20">
+      <h2 className="max-w-7xl pl-4 mx-auto text-xl md:text-5xl font-bold text-neutral-800 dark:text-neutral-200 font-sans">
+        Get to know your iSad.
+      </h2>
+      <Carousel items={cards} />
+    </div>
+  )
+}

@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * GENERATED PER RUN by the art-direction step (engine/agent/art-direction.ts) — a committed brand
+ * palette expressed as full-hex CSS variables. Same values in :root and .dark so the brand shows
+ * whichever class is active. Full hex (not HSL channels) so components that read var(--x) inside a
+ * gradient stay valid.
+ */
+:root {
+  --background: #F7F2EA;
+  --foreground: #211A12;
+  --card: #FCFAF5;
+  --card-foreground: #0a0a0a;
+  --popover: #FCFAF5;
+  --popover-foreground: #0a0a0a;
+  --primary: #7A2E1D;
+  --primary-foreground: #fafafa;
+  --secondary: #e6e1d9;
+  --secondary-foreground: #211A12;
+  --muted: #e6e1d9;
+  --muted-foreground: #6B5E4E;
+  --accent: #B5601F;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #E4DAC8;
+  --input: #E4DAC8;
+  --ring: #B5601F;
+  --radius: 0.5rem;
+  --mi-dur: 260ms;
+  --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mi-tap: 0.98;
+}
+
+.dark {
+  --background: #F7F2EA;
+  --foreground: #211A12;
+  --card: #FCFAF5;
+  --card-foreground: #0a0a0a;
+  --popover: #FCFAF5;
+  --popover-foreground: #0a0a0a;
+  --primary: #7A2E1D;
+  --primary-foreground: #fafafa;
+  --secondary: #e6e1d9;
+  --secondary-foreground: #211A12;
+  --muted: #e6e1d9;
+  --muted-foreground: #6B5E4E;
+  --accent: #B5601F;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #E4DAC8;
+  --input: #E4DAC8;
+  --ring: #B5601F;
+  --radius: 0.5rem;
+  --mi-dur: 260ms;
+  --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mi-tap: 0.98;
+}
+
+* {
+  border-color: var(--border);
+}
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * GENERATED PER RUN by the art-direction step — the committed micro-interaction contract. Sections
+ * apply these classes to interactive elements instead of inventing their own durations/easings, so
+ * hover/press feel is identical across the whole page. Reduced-motion is baked in.
+ */
+.mi {
+  transition: transform var(--mi-dur) var(--mi-ease), opacity var(--mi-dur) var(--mi-ease), box-shadow var(--mi-dur) var(--mi-ease), color var(--mi-dur) var(--mi-ease), background-color var(--mi-dur) var(--mi-ease), border-color var(--mi-dur) var(--mi-ease);
+  cursor: pointer;
+}
+.mi-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(33, 26, 18, 0.12);
+}
+.mi-press:active {
+  transform: scale(var(--mi-tap));
+}
+.mi:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mi, .mi-lift, .mi-press { transition: none; }
+  .mi-lift:hover, .mi-press:active { transform: none; }
+}

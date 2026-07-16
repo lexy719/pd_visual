@@ -1,0 +1,50 @@
+{
+  "site": "PP Neue Montreal",
+  "url": "https://pangrampangram.com/products/neue-montreal",
+  "screenshot": "/media-refs/pp-neue-montreal.png",
+  "observations": [
+    {
+      "what": "Entire site framed as an 'Official Travel Guide' to Montréal — every product-demo section (weights, ligatures, language support) reskinned as travel media: boarding pass, postcard, stamp, departure board.",
+      "why": "Gives an otherwise dry subject an emotional throughline, making the page memorable instead of a checklist."
+    },
+    {
+      "what": "The circular 'NM' logomark doubles as a loading spinner on entry and later stands in for the letter 'o' in body copy.",
+      "why": "Ties the brand mark directly into the typographic argument of the site instead of being purely decorative."
+    },
+    {
+      "what": "A full-bleed pinned background video plays while foreground headline text scrubs continuously through the entire weight axis (Black to Hairline) tied precisely to scroll position.",
+      "why": "Demonstrates a variable font's actual range better than a static weight chart — the product feature IS the demo mechanism. Reads as continuous, not stepped, because it's well executed."
+    },
+    {
+      "what": "A giant single glyph fills the viewport, swapped for other glyphs as you scroll, split top/bottom for Display vs Text weight comparison at huge scale.",
+      "why": "Lets you inspect letterforms like a monument; trades efficiency for spectacle deliberately."
+    },
+    {
+      "what": "A year-by-year evolution timeline pins years in a sticky left column while a scattered, rotated collage of stamps/postcards drifts and reorders in the main viewport (a 'corkboard' effect).",
+      "why": "A tactile, memorable way to present chronology instead of a static timeline graphic."
+    },
+    {
+      "what": "Near the end, three posters fan out and overlap like a hand of cards.",
+      "why": "Mirrors physical card-stacking — same underlying metaphor as Bucks Sauce's card-stack-deal, different execution."
+    },
+    {
+      "what": "A persistent pill-shaped nav anchors to in-page sections; a single CTA stays fixed and never disappears across the ~22,000px page.",
+      "why": "One conversion point, always available, protects against the page's own indulgence in long-form storytelling."
+    },
+    {
+      "what": "Motion relies almost entirely on scroll-linked (scrubbed) animation rather than autoplaying loops.",
+      "why": "Deliberate, disciplined — never nags for attention; pacing stays entirely under the visitor's control. Note: heavy scroll-linked reveal is historically poor for screen readers/reduced-motion unless carefully guarded, and bespoke-per-section animation with no shared component system is expensive to maintain."
+    }
+  ],
+  "throughline": "Discipline through restraint of interaction, not restraint of scale — every individual moment is visually maximal, but nothing moves without the visitor's own scroll input. That's what actually reads as calm and premium, not the color or scale choices themselves.",
+  "tags": [
+    "premium",
+    "editorial",
+    "calm",
+    "technical",
+    "minimal",
+    "scroll-scrubbed",
+    "restrained",
+    "typography-led"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "web-design-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first web design agent. Phase 1: knowledge base + retrieval only.",
+  "scripts": {
+    "ingest": "tsx engine/ingest/ingest.ts",
+    "ingest:file": "tsx engine/ingest/ingest-file.ts",
+    "add:component": "tsx engine/tools/add-component.ts",
+    "new:critique": "tsx engine/tools/new-critique.ts",
+    "query": "tsx engine/retrieval/cli.ts",
+    "eval": "tsx engine/retrieval/eval.ts",
+    "preview": "tsx engine/preview/preview.ts",
+    "generate": "tsx engine/agent/run.ts",
+    "test:wireframe": "tsx engine/agent/wireframe-svg.test.ts",
+    "typecheck": "tsc --noEmit",
+    "ui": "concurrently -k -n api,web -c cyan,magenta \"tsx studio/server.ts\" \"vite --config studio/ui/vite.config.ts\"",
+    "studio:server": "tsx studio/server.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.5.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sqlite-vec": "^0.1.6"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.9.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}

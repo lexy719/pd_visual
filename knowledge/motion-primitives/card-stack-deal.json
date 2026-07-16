@@ -1,0 +1,58 @@
+{
+  "id": "card-stack-deal",
+  "name": "Card Stack Deal",
+  "effect": "card-stack-deal",
+  "framework": "react",
+  "tags": [
+    "motion",
+    "card-stack",
+    "deal",
+    "fan",
+    "stagger",
+    "scroll-scrubbed",
+    "cards",
+    "kinetic",
+    "playful",
+    "aggressive",
+    "premium",
+    "editorial"
+  ],
+  "code": "\"use client\";\n\nimport React from \"react\";\nimport * as Scrollytelling from \"@bsmnt/scrollytelling\";\n\ntype Intensity = \"subtle\" | \"aggressive\";\n\nexport interface CardStackDealProps {\n  /** the cards to deal, in order — each must stand alone if motion never runs */\n  cards: React.ReactNode[];\n  intensity?: Intensity;\n  className?: string;\n}\n\nconst prefers = (q: string): boolean =>\n  typeof window !== \"undefined\" &&\n  typeof window.matchMedia === \"function\" &&\n  window.matchMedia(q).matches;\n\n/*\n * A dealt-hand card reveal on @bsmnt/scrollytelling (declarative GSAP ScrollTrigger) — the same rail as\n * kinetic-text-split / parallax-depth / pinned-crossfade. Cards rise and rotate into a fanned hand,\n * staggered in array order, scrubbed to scroll.\n *\n * SAFETY IS BAKED IN, not left to the caller:\n *  - prefers-reduced-motion OR a coarse pointer renders a plain vertical list: no fan, no overlap, no\n *    motion. This is not a lesser fallback -- a fanned row of overlapping cards on a 375px screen is\n *    genuinely unreadable, so touch gets the readable layout by design, not as a concession.\n *  - fewer than 2 cards has no hand to deal, so it degrades to the same plain list.\n *  - the fan angle and travel derive from `intensity` and the card COUNT; there is no per-card timing\n *    knob for the agent to get wrong. A bad prop degrades, it cannot desynchronise the deal.\n *  - only transform + opacity animate (never layout), and every card is fully readable at rest.\n *\n * The resting fan angle is plain CSS on an outer wrapper; GSAP only ever owns the deal-in delta on an\n * inner node. Keeping the two on separate elements means the library and the stylesheet never fight\n * over one transform property.\n */\nexport function CardStackDeal({ cards, intensity = \"aggressive\", className }: CardStackDealProps) {\n  const list = (Array.isArray(cards) ? cards : []).filter((c) => c !== null && c !== undefined && c !== false);\n\n  const staticFallback = prefers(\"(prefers-reduced-motion: reduce)\") || prefers(\"(pointer: coarse)\");\n\n  if (staticFallback || list.length < 2) {\n    return (\n      <section className={className}>\n        {list.map((card, i) => (\n          <div key={i}>{card}</div>\n        ))}\n      </section>\n    );\n  }\n\n  const n = list.length;\n  // Total scroll % the deal occupies; each card gets an overlapping slice of it, in array order.\n  const span = intensity === \"aggressive\" ? 60 : 45;\n  const step = span / n;\n  const fanDeg = intensity === \"aggressive\" ? 5 : 2.5;\n  const from =\n    intensity === \"aggressive\"\n      ? { opacity: 0, yPercent: 55, rotate: -10 }\n      : { opacity: 0, yPercent: 25, rotate: -4 };\n  const center = (n - 1) / 2;\n\n  return (\n    <section className={className}>\n      <Scrollytelling.Root start=\"top 75%\" end=\"bottom 60%\">\n        <div style={{ display: \"flex\", justifyContent: \"center\", alignItems: \"flex-end\", flexWrap: \"nowrap\" }}>\n          {list.map((card, i) => {\n            const start = Math.min(98, Math.round(i * step));\n            const raw = Math.round(i * step + step * 1.8);\n            const end = Math.min(100, raw > start ? raw : start + 1);\n            return (\n              <div\n                key={i}\n                style={{\n                  transform: \"rotate(\" + ((i - center) * fanDeg).toFixed(2) + \"deg)\",\n                  transformOrigin: \"bottom center\",\n                  marginLeft: i === 0 ? 0 : \"-2%\",\n                  zIndex: i,\n                  flex: \"0 1 auto\"\n                }}\n              >\n                <Scrollytelling.Animation tween={{ start, end, from }}>\n                  <div>{card}</div>\n                </Scrollytelling.Animation>\n              </div>\n            );\n          })}\n        </div>\n      </Scrollytelling.Root>\n    </section>\n  );\n}\n\nexport default CardStackDeal;\n",
+  "dependencies": [
+    "@bsmnt/scrollytelling",
+    "gsap"
+  ],
+  "registry_files": [],
+  "client_component": true,
+  "params": [
+    {
+      "name": "intensity",
+      "type": "enum",
+      "options": [
+        "subtle",
+        "aggressive"
+      ],
+      "default": "aggressive",
+      "describe": "deal energy — sets the fan angle and the travel distance each card covers as it lands"
+    }
+  ],
+  "wraps": "card-list",
+  "cardList": {
+    "prop": "cards",
+    "min": 3,
+    "max": 6
+  },
+  "fitsCompositions": [
+    "modular",
+    "gallery"
+  ],
+  "motion_language": [
+    "kinetic",
+    "aggressive",
+    "parallax-slow"
+  ],
+  "usage_example": "import { CardStackDeal } from './component'\n\n// An ORDERED array of cards, dealt in like a hand as the section scrolls into view.\n// Pass 3-6 real, on-brief cards -- each must stand alone if motion never runs. The deal timing and\n// fan angle are computed inside from the card count; there is no per-card timing to set.\nexport default function Section() {\n  return (\n    <section className=\"py-24 px-6 bg-background\">\n      <CardStackDeal\n        intensity=\"aggressive\"\n        cards={[\n          <article key=\"1\" className=\"w-[190px] h-[250px] rounded-xl bg-card border border-border p-4\">\n            <h3 className=\"text-card-foreground font-semibold\">First step</h3>\n            <p className=\"mt-2 text-sm text-muted-foreground\">What happens first, in the brand voice.</p>\n          </article>,\n          <article key=\"2\" className=\"w-[190px] h-[250px] rounded-xl bg-card border border-border p-4\">\n            <h3 className=\"text-card-foreground font-semibold\">Second step</h3>\n            <p className=\"mt-2 text-sm text-muted-foreground\">The next beat it resolves into.</p>\n          </article>,\n          <article key=\"3\" className=\"w-[190px] h-[250px] rounded-xl bg-card border border-border p-4\">\n            <h3 className=\"text-card-foreground font-semibold\">Third step</h3>\n            <p className=\"mt-2 text-sm text-muted-foreground\">Where it lands.</p>\n          </article>\n        ]}\n      />\n    </section>\n  )\n}",
+  "source_url": "https://github.com/basementstudio/scrollytelling/blob/main/docs/api.md#animation",
+  "license": "MIT (@bsmnt/scrollytelling (c) 2023 basement.studio - LICENSE file verified) + GSAP under GreenSock standard license, free for all commercial use since Webflow Apr 2025. Same rail as kinetic-text-split / parallax-depth / pinned-crossfade.",
+  "notes": "Dealt-hand card reveal on the proven @bsmnt/scrollytelling rail. Cards rise and rotate into a fanned hand, staggered in ARRAY ORDER, scrubbed to scroll. The FIRST multi-child primitive (wraps:card-list): it takes an ordered array rather than one tweened node, so it declares a cardList contract (prop/min/max) that validatePrimitive enforces on the generated section - too few cards and the deal does not read, too many and the stagger window collapses. Deal timing and fan angle are computed inside from the card count; there is NO per-card timing knob, so the agent cannot desynchronise the deal. Resting fan angle is CSS on an outer wrapper while GSAP owns only the deal-in delta on an inner node, so library and stylesheet never fight over one transform. Ships a hard fallback: prefers-reduced-motion OR touch renders a plain vertical list with no fan, no overlap and no motion - a fanned row of overlapping cards on a 375px screen is unreadable, so touch gets the readable layout by design. Fewer than 2 cards degrades to the same list. Verified live by driving ScrollTrigger by hand across the scroll range: 5 cards deal in strict array order on tweens at 0/12/24/36/48% (dur 22 each), from-state opacity 0 / rotate -10deg / translateY 137.5px (yPercent 55 of a 250px card) measured exactly, all at rest by 70%, and both fallbacks confirmed to create ZERO ScrollTriggers."
+}

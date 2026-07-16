@@ -1,0 +1,53 @@
+{
+  "id": "parallax-depth",
+  "name": "Parallax Depth",
+  "effect": "parallax-depth",
+  "framework": "react",
+  "tags": [
+    "motion",
+    "parallax",
+    "depth",
+    "scroll-linked",
+    "hero",
+    "media",
+    "premium",
+    "calm",
+    "cinematic",
+    "immersive",
+    "parallax-slow"
+  ],
+  "code": "\"use client\";\n\nimport React, { useRef } from \"react\";\nimport { motion, useReducedMotion, useScroll, useTransform } from \"motion/react\";\n\ntype Intensity = \"subtle\" | \"medium\";\n\nexport interface ParallaxDepthProps {\n  /** background image URL — a full-bleed layer that drifts slower than the foreground */\n  image: string;\n  /** foreground content that sits over the parallax backdrop */\n  children?: React.ReactNode;\n  intensity?: Intensity;\n  /** section min-height, e.g. \"80vh\" */\n  minHeight?: string;\n  className?: string;\n  /** dark scrim (0-1) so foreground text stays readable over the photo */\n  overlay?: number;\n}\n\n/*\n * Depth parallax: the background media layer scrolls slower than the foreground content, implying\n * depth. SAFETY IS BAKED IN, not left to the caller - prefers-reduced-motion freezes the image (no\n * drift), the drift magnitude is CLAMPED by `intensity` to a range whose oversized layer (scale)\n * always overscans further than the shift, so an edge gap can never appear, and a readability scrim\n * defaults on. The agent supplies only the image + foreground content (+ optional intensity); a bad\n * prop degrades to a plain static hero. Only transform is animated (GPU), never layout.\n */\nexport function ParallaxDepth({\n  image,\n  children,\n  intensity = \"subtle\",\n  minHeight = \"80vh\",\n  className,\n  overlay = 0.35,\n}: ParallaxDepthProps) {\n  const ref = useRef<HTMLElement>(null);\n  const reduced = useReducedMotion();\n  const { scrollYProgress } = useScroll({\n    target: ref,\n    offset: [\"start end\", \"end start\"],\n  });\n  // subtle: +/-8% drift on a 1.3x layer (15% overscan each side); medium: +/-14% on 1.4x (20%).\n  // Overscan always exceeds the drift, so the image never reveals an edge.\n  const cfg = intensity === \"medium\" ? { shift: 14, scale: 1.4 } : { shift: 8, scale: 1.3 };\n  const y = useTransform(scrollYProgress, [0, 1], [\"-\" + cfg.shift + \"%\", cfg.shift + \"%\"]);\n\n  return (\n    <section ref={ref} className={className} style={{ position: \"relative\", minHeight, overflow: \"hidden\" }}>\n      <motion.div\n        aria-hidden\n        style={{\n          position: \"absolute\",\n          inset: 0,\n          backgroundImage: \"url(\" + image + \")\",\n          backgroundSize: \"cover\",\n          backgroundPosition: \"center\",\n          scale: cfg.scale,\n          y: reduced ? \"0%\" : y,\n          willChange: \"transform\",\n        }}\n      />\n      {overlay > 0 ? (\n        <div aria-hidden style={{ position: \"absolute\", inset: 0, background: \"rgba(0,0,0,\" + overlay + \")\" }} />\n      ) : null}\n      <div style={{ position: \"relative\", zIndex: 1 }}>{children}</div>\n    </section>\n  );\n}\n\nexport default ParallaxDepth;",
+  "dependencies": [
+    "motion",
+    "motion/react"
+  ],
+  "registry_files": [],
+  "client_component": true,
+  "params": [
+    {
+      "name": "intensity",
+      "type": "enum",
+      "options": [
+        "subtle",
+        "medium"
+      ],
+      "default": "subtle",
+      "describe": "parallax magnitude - subtle (+/-8% drift, premium/calm) or medium (+/-14%). Both clamped so the oversized layer always overscans further than the shift; an edge gap is impossible."
+    }
+  ],
+  "wraps": "section-block",
+  "fitsCompositions": [
+    "cinematic",
+    "immersive",
+    "editorial",
+    "gallery"
+  ],
+  "motion_language": [
+    "parallax-slow",
+    "subtle"
+  ],
+  "usage_example": "import { ParallaxDepth } from \"./component\"\n\n// A full-bleed section with a parallax background. Pass the background image + your foreground content.\nexport default function Section() {\n  return (\n    <ParallaxDepth\n      image=\"https://picsum.photos/seed/parallax-hero/1920/1080\"\n      intensity=\"subtle\"\n      minHeight=\"90vh\"\n      className=\"flex items-center justify-center\"\n    >\n      <div className=\"max-w-3xl mx-auto px-6 text-center\">\n        <h1 className=\"text-white text-5xl md:text-7xl font-bold tracking-tight\">Your on-brief headline</h1>\n        <p className=\"mt-4 text-lg text-white/80\">A short supporting line that earns the full-bleed image.</p>\n      </div>\n    </ParallaxDepth>\n  )\n}",
+  "source_url": "https://motion.dev/docs/react-scroll-animations",
+  "license": "MIT - Motion (motion.dev), (c) 2024 Motion B.V. (LICENSE.md verified). The `motion` package is already a dependency of preview/app; `motion/react` is its React entrypoint. Free for commercial use.",
+  "notes": "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:section-block). Fills the parallax-slow motion language, which previously had NO primitive - so premium/calm briefs finally get a motion primitive. Ships prefers-reduced-motion freeze + clamped drift with scale-overscan so no edge gap is possible; the agent supplies only image + content + optional intensity."
+}

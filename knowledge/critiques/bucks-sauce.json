@@ -1,0 +1,47 @@
+{
+  "site": "Bucks Sauce",
+  "url": "https://buckssauce.com/",
+  "screenshot": "/media-refs/bucks-sauce.png",
+  "observations": [
+    {
+      "what": "Preloader animation — an orange dot on a mustard-gold circle expands outward in concentric rings until it fills the screen, then dissolves into the homepage."
+    },
+    {
+      "what": "Hero section pairs a bold condensed display headline with a product bottle shot; a hand-drawn cartoon face (sunglasses, changing mouth expression) is overlaid on a real pineapple wedge photo."
+    },
+    {
+      "what": "Ingredients statement uses kinetic typography — individual words fly in from different directions and rotations, settling into a clean sentence as you scroll, with inline emoji-style icons.",
+      "why": "Scroll-tied kinetic typography rewards continued scrolling instead of just decorating a static paragraph."
+    },
+    {
+      "what": "The \"No Corn Syrup / No Seed Oils / No Additives / Gluten Free\" section: cards slide up from below at slightly different rotations and stack like dealt playing cards, while realistic ingredient photos (cherries, habanero, tomato, garlic, chili, onion) drift past at different parallax speeds behind them.",
+      "why": "The card-stack's rotation and overlap mimic real paper stacking, giving digital scroll a tactile, physical feel instead of generic motion."
+    },
+    {
+      "what": "\"Choose Your Weapon\" section: outline-only bold type contrasts with solid filled headline above; hovering over a product bottle triggers faint antler line-art fanning out behind it, plus a fruit graphic and CTA buttons sliding into view.",
+      "why": "The antler hover motif reuses the brand's actual identity as a micro-interaction, rather than a generic hover reveal effect."
+    },
+    {
+      "what": "\"Why Bucks Sauce\" section: giant outlined numerals with a mascot peeking from behind them; as you scroll, the previous card's text visibly skews and tilts as it exits, based on scroll velocity (GSAP/Lenis-style).",
+      "why": "Skew-on-exit gives text physical weight and momentum instead of a flat fade — the difference between \"animated\" and \"feels alive.\""
+    },
+    {
+      "what": "Reviews section uses a hand-lettered, sketchy outline typeface for \"REVIEWS\", contrasting with the clean condensed font used elsewhere; testimonial cards auto-scroll horizontally in a continuous marquee that keeps drifting even without interaction."
+    },
+    {
+      "what": "Hamburger menu opens a full-panel slide-in from the right in a contrasting cream color, with oversized bold nav links — treated as its own design moment rather than an afterthought."
+    }
+  ],
+  "tags": [
+    "playful",
+    "premium",
+    "motion",
+    "card-stack",
+    "kinetic-typography",
+    "scroll-skew",
+    "hover-reveal",
+    "brand-mascot",
+    "marquee"
+  ],
+  "throughline": "The throughline across the whole site is consistency of restraint: a tight three-color palette (near-black, cream, one accent per flavor), one condensed display font, a reused mascot, and every animation reinforcing a physical metaphor (cards dealt, words tossed and settling, text skewing under momentum) rather than generic fades. That consistency — not any single effect — is what actually reads as \"award-winning.\""
+}
