@@ -1,5 +1,31 @@
 [
   {
+    "id": "c4c059b7-cfe6-4dac-aad4-4a909e98499f",
+    "brief": "A small bookbindery called Verso, run by two sisters in Porto. They hand-bind editions of out-of-print Portuguese poetry — books nobody reprints because they don't sell. Each edition is 40 copies, sewn by hand, in paper they make themselves from cotton rag. Positioning: not a luxury press, not a hobby — an argument that some books deserve to physically outlive their commercial life. Mood: quiet, literary, tactile, slightly stubborn.\n\nClarifications: How should the site feel to move through — what's the core composition? → Editorial columns + whitespace; The single persistent CTA the critique insight highlights — what should it actually invite people to do? → Reserve a copy; Who is this site really speaking to first? → Poetry collectors; What tone of voice should carry the writing throughout? → Plainly stubborn. Use these as creative constraints; you still decide the sections and layout — the structure is not a fixed template.",
+    "choices": {
+      "q0": "Editorial columns + whitespace",
+      "q1": "Reserve a copy",
+      "q2": "Poetry collectors",
+      "q3": "Plainly stubborn"
+    },
+    "createdAt": "2026-07-17T13:41:57.025Z",
+    "updatedAt": "2026-07-17T13:48:52.888Z",
+    "previewUrl": "http://localhost:3001/sessions/c4c059b7-cfe6-4dac-aad4-4a909e98499f/site/"
+  },
+  {
+    "id": "02663dba-64fc-4fa6-adad-7792152a2c7f",
+    "brief": "A small bookbindery called Verso, run by two sisters in Porto. They hand-bind editions of out-of-print Portuguese poetry — books nobody reprints because they don't sell. Each edition is 40 copies, sewn by hand, in paper they make themselves from cotton rag. Positioning: not a luxury press, not a hobby — an argument that some books deserve to physically outlive their commercial life. Mood: quiet, literary, tactile, slightly stubborn.\n\nClarifications: How should the site feel structurally as someone scrolls through it? → Editorial columns + whitespace; The brief mentions a persistent single CTA pattern — what should that one action actually be? → See current edition; Given the 'isolation effect' insight — what single element should stand out as the one thing visitors remember? → The number 40; Who is this site really speaking to first? → Curious newcomers. Use these as creative constraints; you still decide the sections and layout — the structure is not a fixed template.",
+    "choices": {
+      "q0": "Editorial columns + whitespace",
+      "q1": "See current edition",
+      "q2": "The number 40",
+      "q3": "Curious newcomers"
+    },
+    "createdAt": "2026-07-17T12:57:15.416Z",
+    "updatedAt": "2026-07-17T13:11:43.437Z",
+    "previewUrl": "http://localhost:3001/sessions/02663dba-64fc-4fa6-adad-7792152a2c7f/site/"
+  },
+  {
     "id": "7be11fe0-7de4-46d7-9417-8b99b545ffa5",
     "brief": "A small bookbindery called Verso, run by two sisters in Porto. They hand-bind editions of\n\nout-of-print Portuguese poetry — books nobody reprints because they don't sell. Each edition\n\nis 40 copies, sewn by hand, in paper they make themselves from cotton rag. Positioning: not\n\na luxury press, not a hobby — an argument that some books deserve to physically outlive their\n\ncommercial life. Mood: quiet, literary, tactile, slightly stubborn.",
     "choices": {},

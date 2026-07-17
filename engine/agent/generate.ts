@@ -14,6 +14,7 @@ import { completeBulk, completeReasoning, extractCode } from '../llm/llm.js'
 import { parseError } from './writer.js'
 import { queryKnowledge, retrieveForSection } from '../retrieval/query.js'
 import type { Composition, ComponentDoc, MotionPrimitiveDoc, SearchHit } from '../types.js'
+import { SCALE_ASPECT } from './art-direction.js'
 import type { ArtDirection, InteractionSpec, ShotBeat, ShotPlan, ShotScale, ShotWorld } from './art-direction.js'
 import type { Plan, SectionPlan, SectionResult } from './types.js'
 
@@ -63,7 +64,17 @@ const LAYOUT_SYSTEM =
   'for the outermost wrapper — the container width is decided once per page.\n' +
   '- HEADINGS: the page has exactly ONE <h1>, in the dominant section only — this section uses <h2>/<h3> unless ' +
   'told it is dominant. Heading font/size/weight/tracking are locked in CSS; do NOT fight them with ' +
-  'text-*/font-*/tracking-* classes on h1/h2 (they will lose). Style paragraphs and small text freely.'
+  'text-*/font-*/tracking-* classes on h1/h2 (they will lose). Style paragraphs and small text freely.\n' +
+  '- GRID: compose on a disciplined column grid of your choice (the pre-built "grid-page" + ' +
+  '"col-main/col-side/col-wide/col-narrow/col-full" utilities exist if useful, or roll your own 12-col). ' +
+  'The INVARIANTS are what matter: every element stays inside container-page (nothing may exceed the ' +
+  'viewport width — no fixed pixel widths wider than a column, no percentage soup), and body-copy blocks ' +
+  'get className "measure" (readable line length). Item grids inside a column (cards, thumbnails) are free.\n' +
+  '- IMAGES: every image is shaped by a locked aspect class (shot-establishing 21:9 / shot-wide 16:9 / ' +
+  'shot-medium 4:3 / shot-detail 4:5 / shot-macro 1:1, object-fit cover — stamped automatically). Do NOT ' +
+  'set your own h-*/aspect-* on images; size them by COLUMN width and let the locked aspect set the height.\n' +
+  '- DENSITY: never min-h-screen/h-screen outside the hero — the locked section-pad provides the air. ' +
+  'A section is as tall as its content.'
 
 /** Moods for which stock photos read as random/cheap — steer scratch to non-photo imagery instead. */
 const NON_PHOTO_MOODS = ['technical', 'minimal', 'brutalist']
@@ -355,7 +366,8 @@ export async function resolveImages(sections: SectionResult[], shot: ShotPlan, l
       const subjectShot = isSubjectKw(seg, head)
       const seed = subjectShot ? baseSeed : baseSeed + 5000 + templated * 13
       const runtimePrompt = '${encodeURIComponent(`' + seg.replace(/-/g, ' ') + ', ' + worldSuffix(world, beat) + '`)}'
-      return `https://image.pollinations.ai/prompt/${runtimePrompt}?width=${w}&height=${h}&nologo=true&model=flux&seed=${seed}`
+      const shape = beat ? SCALE_ASPECT[beat.scale] : { w: Number(w), h: Number(h) }
+      return `https://image.pollinations.ai/prompt/${runtimePrompt}?width=${shape.w}&height=${shape.h}&nologo=true&model=flux&seed=${seed}`
     })
   }
 
@@ -372,7 +384,8 @@ export async function resolveImages(sections: SectionResult[], shot: ShotPlan, l
       const subjectShot = isSubjectKw(staticSeg, head) // the dynamic half is unknowable statically
       const seed = subjectShot ? baseSeed : baseSeed + 5000 + templated * 13
       const runtimePrompt = '${encodeURIComponent(`' + staticSeg + '${' + expr + '}, ' + worldSuffix(world, beat) + '`)}'
-      return '`https://image.pollinations.ai/prompt/' + runtimePrompt + `?width=${w}&height=${h}&nologo=true&model=flux&seed=${seed}` + '`'
+      const shape = beat ? SCALE_ASPECT[beat.scale] : { w: Number(w), h: Number(h) }
+      return '`https://image.pollinations.ai/prompt/' + runtimePrompt + `?width=${shape.w}&height=${shape.h}&nologo=true&model=flux&seed=${seed}` + '`'
     })
   }
 
@@ -402,7 +415,9 @@ export async function resolveImages(sections: SectionResult[], shot: ShotPlan, l
       // CTAs). Subject shots share ONE stable seed + the verbatim identity phrase.
       const subjectShot = !!world.subject && isSubjectKw(r.kw, head)
       const seed = subjectShot ? baseSeed : baseSeed + 101 + variant++ * 7
-      url = fluxUrl(shotPrompt(world, beat, r.kw, subjectShot), r.w, r.h, seed)
+      // the LOCKED shape: the beat's aspect overrides whatever box the model improvised
+      const shape = beat ? SCALE_ASPECT[beat.scale] : { w: r.w, h: r.h }
+      url = fluxUrl(shotPrompt(world, beat, r.kw, subjectShot), shape.w, shape.h, seed)
       fluxCount++
     }
     resolved.set(mapKey, url)
@@ -498,7 +513,34 @@ export function lintDesign(code: string): string[] {
   if (!/\bcontainer-page\b/.test(code) && /max-w-(?:xl|2xl|3xl|4xl|5xl|6xl|7xl)[^"]*"?[^>]*mx-auto|mx-auto[^>]*max-w-/.test(code)) {
     warns.push('hand-rolled max-w container instead of the locked container-page')
   }
+  // Interior escapes — content that breaks OUT of the locked container (observed live: text flush
+  // against the viewport edge, a numeral clipped in half at the right edge).
+  if (/\bw-screen\b/.test(code)) warns.push('w-screen escapes the locked container (content touches/clips at viewport edges)')
+  if (/(?:^|[\s"'])-m[xlr]-(?:\d|\[)/.test(code)) warns.push('negative horizontal margin escapes the locked container')
+  if (/\bmax-w-none\b/.test(code)) warns.push('max-w-none defeats the locked container width')
   return warns
+}
+
+/**
+ * DENSITY FLOOR — a section with two lines of copy must not occupy a full viewport of void. Only the
+ * dominant (hero) section may claim viewport height; everywhere else min-h-screen / h-screen and
+ * near-viewport min-heights are stripped deterministically (observed live: an entire 800px viewport
+ * holding one heading and two lines). The locked section-pad rhythm already provides the air.
+ */
+export function enforceDensity(sections: SectionResult[], dominantIndex: number): number {
+  let stripped = 0
+  // no trailing \b — `]` and the following quote are both non-word chars, so a boundary never exists
+  // there and the bracket variants would silently survive (caught by the fixture test)
+  const re = /(?:\b(?:min-h-screen|h-screen)\b|min-h-\[(?:100|9\d|8\d)[sd]?vh\]) ?/g
+  for (const s of sections) {
+    if (s.index === dominantIndex) continue
+    const n = (s.code.match(re) ?? []).length
+    if (n) {
+      s.code = s.code.replace(re, '')
+      stripped += n
+    }
+  }
+  return stripped
 }
 
 /** The corrective block for a design-system retry — names the exact utilities, same as themeCorrection. */
@@ -554,7 +596,7 @@ function jsxTagEnd(code: string, start: number): { end: number; selfClosing: boo
   return null
 }
 
-export function hardenImages(sections: SectionResult[]): number {
+export function hardenImages(sections: SectionResult[], beats?: ShotBeat[]): number {
   let changed = 0
   for (const s of sections) {
     // collect tag starts first, then edit back-to-front so earlier indices stay valid
@@ -581,9 +623,20 @@ export function hardenImages(sections: SectionResult[]): number {
       if (dims && !hasAttr('width')) add += ` width={${dims.w}} height={${dims.h}}`
       if (!hasAttr('loading') && s.index > 0) add += ` loading="lazy"`
       if (!hasAttr('decoding')) add += ` decoding="async"`
-      if (!add) continue
+      // the LOCKED shape class — aspect-ratio + object-fit: cover from globals.css; stamped
+      // deterministically so an image can never be stretched into an improvised box
+      const beat = beats?.[s.index]
+      const shotClass = beat && /pollinations|picsum|unsplash|data:image/.test(attrs) ? `shot-${beat.scale}` : null
+      let classInsert: { at: number; text: string } | null = null
+      if (shotClass && !attrs.includes('shot-')) {
+        const cm = /className="/.exec(attrs)
+        if (cm) classInsert = { at: starts[k] + 4 + cm.index + cm[0].length, text: `${shotClass} ` }
+        else add += ` className="${shotClass}"`
+      }
+      if (!add && !classInsert) continue
       changed++
       s.code = s.code.slice(0, insertAt) + add + (tag.selfClosing ? ' ' : '') + s.code.slice(insertAt)
+      if (classInsert) s.code = s.code.slice(0, classInsert.at) + classInsert.text + s.code.slice(classInsert.at)
     }
   }
   return changed
@@ -673,20 +726,27 @@ export async function prewarmImages(
 
   // SERIAL on purpose: Pollinations rate-limits concurrency per IP (measured: 11 of 12 parallel
   // requests → instant 429). One at a time with a courtesy gap is the fastest reliable shape.
+  // Progress is logged PER IMAGE — a healthy pre-warm is minutes of network silence otherwise,
+  // which reads as a hang in the studio (it did, to a real user).
+  let done = 0
+  const total = urls.size
   for (const url of urls) {
+    const t0 = Date.now()
     if ((await verifyImage(url, log)) === 'ok') {
       out.verified++
+      log(`       ↳ pre-warm ${++done}/${total} ok (${Math.round((Date.now() - t0) / 1000)}s — generating fresh imagery, ~1min each)`)
     } else {
       const retryUrl = shiftSeed(url)
       if (retryUrl !== url && (await verifyImage(retryUrl, log)) === 'ok') {
         replaceEverywhere(url, retryUrl)
         out.retried++
         out.verified++
+        log(`       ↳ pre-warm ${++done}/${total} ok on a retried seed`)
       } else {
         const { w, h } = dims(url)
         replaceEverywhere(url, fallbackSvg(palette, w, h))
         out.fallbacks++
-        log(`       ↳ image failed twice (content, not rate limit) → on-palette fallback (${w}x${h})`)
+        log(`       ↳ pre-warm ${++done}/${total} failed twice (content, not rate limit) → on-palette fallback (${w}x${h})`)
       }
     }
     await new Promise((r) => setTimeout(r, 400))
@@ -1235,6 +1295,8 @@ export async function generateSections(
   // collapse to one photo), THEN upgrade every one to on-theme imagery (Unsplash photo or Flux generation).
   // ONE h1 per page — the dominant section owns it; every other h1 demotes to h2. Deterministic:
   // the one-anchor rule stopped being a suggestion the day a run cited it and shipped three h1s.
+  const voidStripped = enforceDensity(sections, art.shotPlan.dominantIndex)
+  if (voidStripped) log(`       ↳ stripped ${voidStripped} viewport-height claim(s) outside the hero (density floor)`)
   const h1Delta = enforceSingleH1(sections, art.shotPlan.dominantIndex)
   if (h1Delta > 0) log(`       ↳ demoted ${h1Delta} extra <h1> heading(s) to <h2> (one h1 per page, owned by the dominant section)`)
   if (h1Delta === -1) log(`       ↳ page had NO <h1> — promoted the dominant section's first <h2> (a page needs exactly one anchor)`)
@@ -1243,7 +1305,7 @@ export async function generateSections(
   const imagesResolved = await resolveImages(sections, art.shotPlan, log)
   // AFTER resolution, so dimensions come from the final URLs. Kills the late-image layout shift that
   // both collides content and leaves scroll primitives holding stale positions.
-  const hardened = hardenImages(sections)
+  const hardened = hardenImages(sections, art.shotPlan.beats)
   if (hardened) log(`       ↳ hardened ${hardened} <img> tag(s): explicit width/height + lazy below the fold`)
 
   // Every image is fetched, VERIFIED real, and cached server-side before the page ships — a browser

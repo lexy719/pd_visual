@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import type { ComponentDoc } from '../types.js'
 import type { GenerateResult } from './generate.js'
+import { SCALE_ASPECT } from './art-direction.js'
 import type { ArtDirection, InteractionSpec, LayoutSpec, Palette, TypographySpec } from './art-direction.js'
 import type { Plan, SectionResult } from './types.js'
 
@@ -310,6 +311,10 @@ function headingSizes(r: number): { h1: string; h2: string; h3: string } {
   }
 }
 
+const SCALE_ASPECT_CSS = Object.entries(SCALE_ASPECT)
+  .map(([scale, a]) => `.shot-${scale} { aspect-ratio: ${a.css}; object-fit: cover; width: 100%; height: auto; }`)
+  .join('\n')
+
 export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec): string {
   const h = headingSizes(type.scaleRatio)
   const vars = `  --background: ${p.background};
@@ -395,6 +400,29 @@ h3 { font-size: ${css(h.h3)}; }
 .container-page { max-width: var(--container); margin-inline: auto; padding-inline: clamp(20px, 4vw, 48px); }
 .section-pad { padding-block: var(--section-pad); }
 .section-pad-hero { padding-block: calc(var(--section-pad) * 1.25); }
+
+/*
+ * GENERATED PER RUN — the LOCKED GRID. Sections compose INSIDE this 12-column system using the
+ * allowed splits; they do not invent their own geometry. (Item grids inside a column — cards,
+ * galleries — remain free.) .measure caps body text at a readable line length.
+ */
+.grid-page { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.col-main { grid-column: span 7; }
+.col-side { grid-column: span 5; }
+.col-wide { grid-column: span 8; }
+.col-narrow { grid-column: span 4; }
+.col-full { grid-column: 1 / -1; }
+.measure { max-width: 62ch; }
+@media (max-width: 820px) {
+  .col-main, .col-side, .col-wide, .col-narrow { grid-column: 1 / -1; }
+}
+
+/*
+ * GENERATED PER RUN — the LOCKED IMAGE SHAPES (shot plan, part of staging). One aspect per beat
+ * scale; object-fit: cover means the committed crop always fills the box — an image can no longer
+ * be stretched into an improvised container. Classes are stamped deterministically at write time.
+ */
+${SCALE_ASPECT_CSS}
 
 /*
  * GENERATED PER RUN by the art-direction step — the committed micro-interaction contract. Sections

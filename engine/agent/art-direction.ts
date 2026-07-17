@@ -114,6 +114,20 @@ export const SHOT_ROLES = ['establish', 'prove', 'humanize'] as const
 export type ShotRole = (typeof SHOT_ROLES)[number]
 
 /**
+ * The LOCKED image shape per beat scale. An image's proportion is part of the staging, not the
+ * model's whim — arbitrary per-image dimensions stretched into improvised boxes is exactly how a
+ * page loses its sense of layout. Enforced twice: generated URLs are rewritten to these dims, and
+ * matching aspect-ratio CSS (`.shot-<scale>`, object-fit: cover) is stamped onto every image.
+ */
+export const SCALE_ASPECT: Record<ShotScale, { css: string; w: number; h: number }> = {
+  establishing: { css: '21 / 9', w: 1680, h: 720 },
+  wide: { css: '16 / 9', w: 1440, h: 810 },
+  medium: { css: '4 / 3', w: 1200, h: 900 },
+  detail: { css: '4 / 5', w: 880, h: 1100 },
+  macro: { css: '1 / 1', w: 960, h: 960 }
+}
+
+/**
  * Part A of the shot plan: the ONE visual world every image on the page lives in. This replaces the
  * old imageStyle() suffix as the single source of truth for image prompting — light/lens/texture are
  * committed here once instead of a global "photorealistic" suffix silently fighting per-section

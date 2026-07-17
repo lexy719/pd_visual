@@ -4,6 +4,30 @@ import './globals.css'
 import App from './App'
 
 /**
+ * Generated-image retry (app shell infra, NOT generated code). Dynamic-src images compose their
+ * URL at runtime, so the server-side pre-warm cannot cache them — at view time they can burst into
+ * Pollinations' one-at-a-time rate limit and 429 (observed live: a broken image with bare alt text).
+ * Any failed generated image retries itself with growing backoff; error events don't bubble, so
+ * this listens in the capture phase.
+ */
+window.addEventListener(
+  'error',
+  (e) => {
+    const img = e.target as HTMLImageElement
+    if (!img || img.tagName !== 'IMG' || !/image\.pollinations\.ai/.test(img.src)) return
+    const tries = Number(img.dataset.retry ?? '0')
+    if (tries >= 4) return
+    img.dataset.retry = String(tries + 1)
+    const src = img.src
+    setTimeout(() => {
+      img.src = ''
+      img.src = src // same URL on purpose: hits Pollinations' cache once the earlier request lands
+    }, 4000 * (tries + 1))
+  },
+  true
+)
+
+/**
  * Preview shell. Deliberately NOT wrapped in StrictMode — StrictMode double-mounts effects,
  * which would fire the scroll listeners in components like hero-004 twice and muddy the exact
  * behaviour we're here to observe. We want production-shaped single mounting.

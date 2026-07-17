@@ -9,67 +9,130 @@
  * gradient stay valid.
  */
 :root {
-  --background: #FBFAF7;
-  --foreground: #211E1A;
-  --card: #F4F1EA;
+  --background: #f2ede4;
+  --foreground: #241f1a;
+  --card: #e9e2d5;
   --card-foreground: #0a0a0a;
-  --popover: #F4F1EA;
+  --popover: #e9e2d5;
   --popover-foreground: #0a0a0a;
-  --primary: #7A2E1F;
+  --primary: #7a2e22;
   --primary-foreground: #fafafa;
-  --secondary: #eae8e5;
-  --secondary-foreground: #211E1A;
-  --muted: #eae8e5;
-  --muted-foreground: #6B655A;
-  --accent: #C2410C;
+  --secondary: #e2ddd4;
+  --secondary-foreground: #241f1a;
+  --muted: #e2ddd4;
+  --muted-foreground: #6b6255;
+  --accent: #7a2e22;
   --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #E3DDD0;
-  --input: #E3DDD0;
-  --ring: #C2410C;
+  --border: #d8cfbe;
+  --input: #d8cfbe;
+  --ring: #7a2e22;
   --radius: 0.5rem;
   --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --mi-tap: 0.98;
+  --font-display: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --container: 1152px;
+  --section-pad: clamp(128px, 14vh, 176px);
 }
 
 .dark {
-  --background: #FBFAF7;
-  --foreground: #211E1A;
-  --card: #F4F1EA;
+  --background: #f2ede4;
+  --foreground: #241f1a;
+  --card: #e9e2d5;
   --card-foreground: #0a0a0a;
-  --popover: #F4F1EA;
+  --popover: #e9e2d5;
   --popover-foreground: #0a0a0a;
-  --primary: #7A2E1F;
+  --primary: #7a2e22;
   --primary-foreground: #fafafa;
-  --secondary: #eae8e5;
-  --secondary-foreground: #211E1A;
-  --muted: #eae8e5;
-  --muted-foreground: #6B655A;
-  --accent: #C2410C;
+  --secondary: #e2ddd4;
+  --secondary-foreground: #241f1a;
+  --muted: #e2ddd4;
+  --muted-foreground: #6b6255;
+  --accent: #7a2e22;
   --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #E3DDD0;
-  --input: #E3DDD0;
-  --ring: #C2410C;
+  --border: #d8cfbe;
+  --input: #d8cfbe;
+  --ring: #7a2e22;
   --radius: 0.5rem;
   --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --mi-tap: 0.98;
+  --font-display: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --container: 1152px;
+  --section-pad: clamp(128px, 14vh, 176px);
 }
 
 * {
   border-color: var(--border);
 }
+/*
+ * GENERATED PER RUN — the LOCKED TYPE SYSTEM (art-direction's TypographySpec, applied for real).
+ * Heading identity (family/weight/tracking/leading/scale) is decided once per run and enforced with
+ * !important so a section's ad-hoc text-/font- utilities cannot re-decide it — the same
+ * "model compliance is irrelevant" discipline as the palette. The scale derives from the committed
+ * modular ratio; hand-picked per-section sizes never cohere.
+ */
 body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
+h1, h2, h3 {
+  font-family: var(--font-display) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.05 !important;
+  margin: 0;
+}
+h1 { font-size: clamp(50px, 6.5vw, 82px) !important; }
+h2 { font-size: clamp(36px, 4vw, 47px) !important; }
+h3 { font-size: 32px; }
+
+/*
+ * GENERATED PER RUN — the LOCKED LAYOUT SYSTEM. One container width, one section-padding rhythm
+ * for the whole page (spacing.md numbers per mood). Sections apply these instead of inventing
+ * py-*/max-w-* per section — a page whose sections each re-decide spacing reads as seven designers.
+ */
+.container-page { max-width: var(--container); margin-inline: auto; padding-inline: clamp(20px, 4vw, 48px); }
+.section-pad { padding-block: var(--section-pad); }
+.section-pad-hero { padding-block: calc(var(--section-pad) * 1.25); }
+
+/*
+ * GENERATED PER RUN — the LOCKED GRID. Sections compose INSIDE this 12-column system using the
+ * allowed splits; they do not invent their own geometry. (Item grids inside a column — cards,
+ * galleries — remain free.) .measure caps body text at a readable line length.
+ */
+.grid-page { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.col-main { grid-column: span 7; }
+.col-side { grid-column: span 5; }
+.col-wide { grid-column: span 8; }
+.col-narrow { grid-column: span 4; }
+.col-full { grid-column: 1 / -1; }
+.measure { max-width: 62ch; }
+@media (max-width: 820px) {
+  .col-main, .col-side, .col-wide, .col-narrow { grid-column: 1 / -1; }
+}
+
+/*
+ * GENERATED PER RUN — the LOCKED IMAGE SHAPES (shot plan, part of staging). One aspect per beat
+ * scale; object-fit: cover means the committed crop always fills the box — an image can no longer
+ * be stretched into an improvised container. Classes are stamped deterministically at write time.
+ */
+.shot-establishing { aspect-ratio: 21 / 9; object-fit: cover; width: 100%; height: auto; }
+.shot-wide { aspect-ratio: 16 / 9; object-fit: cover; width: 100%; height: auto; }
+.shot-medium { aspect-ratio: 4 / 3; object-fit: cover; width: 100%; height: auto; }
+.shot-detail { aspect-ratio: 4 / 5; object-fit: cover; width: 100%; height: auto; }
+.shot-macro { aspect-ratio: 1 / 1; object-fit: cover; width: 100%; height: auto; }
 
 /*
  * GENERATED PER RUN by the art-direction step — the committed micro-interaction contract. Sections
@@ -82,7 +145,7 @@ body {
 }
 .mi-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(33, 30, 26, 0.08);
+  box-shadow: none;
 }
 .mi-press:active {
   transform: scale(var(--mi-tap));

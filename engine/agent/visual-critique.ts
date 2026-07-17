@@ -70,9 +70,13 @@ RULES:
 - Every defect MUST cite its screenshot label in "evidence". A defect you cannot point at does not exist.
 - severity: "blocking" = the page is visibly broken there (crash text, clipped/unreadable content,
   overlapping text, an obviously empty image slot). "major" = clearly wrong but content survives.
-  "minor" = judgment/taste. "taste" and "dead-zone" are ALWAYS minor.
+  "minor" = judgment/taste. "taste" is ALWAYS minor. "dead-zone" is MAJOR when roughly a full
+  viewport (or more) is effectively empty — that is a layout failure, not breathing room; smaller
+  intentional whitespace stays minor.
+- An EMPTY tinted/bordered panel WITH a caption is a "broken-image" defect (major) — a caption
+  promises a subject, and an empty framed rectangle reads as a loading failure, never as restraint.
 - Do NOT flag: image subject choice or art style (imagery is generated and staged elsewhere);
-  whitespace that reads as intentional pacing; anything you merely suspect.
+  whitespace that reads as intentional pacing (unframed, uncaptioned); anything you merely suspect.
 - An empty defects array is a good answer when the page is clean. Do not invent findings.`
 
 const digestSectionMap = (
@@ -125,6 +129,18 @@ List the visible defects now (empty array if clean).`
     const raw = await completeVision(CRITIC_SYSTEM, user, capture.shots.map((s) => ({ label: s.label, png: s.png })), { maxTokens: 2000 })
     const parsed = extractJson<{ defects?: unknown[] }>(raw)
     const defects: VisualDefect[] = []
+    // MEASURED defect first — DOM facts outrank vision. A page wider than its viewport shifts and
+    // clips everything; the offender is identified by measurement, so the revise prompt is exact.
+    if (capture.horizontalOverflow) {
+      const o = capture.horizontalOverflow
+      defects.push({
+        sectionIndex: Math.max(0, o.sectionIndex),
+        defectClass: 'overflow',
+        severity: 'blocking',
+        evidence: `MEASURED (DOM, not vision): page scrollWidth ${o.scrollWidth}px > viewport ${o.viewport}px; widest offender <${o.offender}> spans x ${o.offenderLeft}..${o.offenderRight}`,
+        fix: `constrain <${o.offender}> inside the container — remove fixed widths / column overflow so nothing exceeds the viewport`
+      })
+    }
     for (const d of parsed.defects ?? []) {
       const x = d as Partial<VisualDefect>
       const idx = Number(x.sectionIndex)
@@ -132,8 +148,10 @@ List the visible defects now (empty array if clean).`
       if (!SEVERITIES.has(String(x.severity))) continue
       const cls = String(x.defectClass ?? 'taste')
       let severity = x.severity as VisualDefect['severity']
-      // hard cap: taste/dead-zone can never drive regeneration
-      if ((cls === 'taste' || cls === 'dead-zone') && severity !== 'minor') severity = 'minor'
+      // hard caps: taste never drives regeneration; dead-zone caps at major (a full-viewport void
+      // IS actionable — it was the user's exact complaint — but never "blocking")
+      if (cls === 'taste' && severity !== 'minor') severity = 'minor'
+      if (cls === 'dead-zone' && severity === 'blocking') severity = 'major'
       defects.push({
         sectionIndex: idx,
         defectClass: cls,

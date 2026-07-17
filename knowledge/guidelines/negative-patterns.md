@@ -43,3 +43,13 @@ tags: aggressive, playful, performance, avoid, color, typography, motion
 Avoid equating energy with noise: five accent colors, every word animating, constant rotation, and competing
 effects make a brand feel cheap rather than fast. Pick one kinetic principle—velocity, impact, interruption, or
 rhythm—and use stillness around it so the moments of motion have weight.
+
+## Decorative panels: a caption needs a subject
+
+tags: image, media, panel, caption, avoid, universal, dead-zone
+
+A captioned panel must contain an image or a real texture — an empty tinted rectangle with a caption
+underneath reads as a loading failure, not as restraint, because readers have learned that shape from
+broken pages. If a panel exists to hold imagery, it holds imagery; if the design calls for quiet, use
+whitespace without a frame. Never ship a bordered or tinted box whose only content is its own label —
+the caption promises a subject, and an absent subject breaks the promise in the most literal way.

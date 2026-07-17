@@ -79,12 +79,27 @@ export interface SectionRect {
   height: number
 }
 
+/** A MEASURED horizontal overflow — DOM facts, not vision. One widened element shifts/clips the
+ *  whole page (observed live: text flush at x=0 AND captions clipped at the right edge, same cause). */
+export interface HorizontalOverflow {
+  scrollWidth: number
+  viewport: number
+  /** tag.class of the widest offender and its measured extent */
+  offender: string
+  offenderLeft: number
+  offenderRight: number
+  /** index of the top-level section containing the offender (-1 if outside any) */
+  sectionIndex: number
+}
+
 export interface CaptureResult {
   shots: PageShot[]
   pageHeight: number
   consoleErrors: string[]
   /** top-level section geometry, so a critic can map a shot's scroll range to section indexes */
   sectionRects: SectionRect[]
+  /** set when the page is wider than the viewport — an automatic blocking defect, no vision needed */
+  horizontalOverflow: HorizontalOverflow | null
 }
 
 /**
@@ -107,6 +122,32 @@ export async function capturePage(url: string, opts?: { maxViewportShots?: numbe
     await page.waitForTimeout(900)
 
     const pageHeight = (await page.evaluate('document.documentElement.scrollHeight')) as number
+    // MEASURED overflow check — same "catch the unknown shape" principle as the image residual
+    // warning: no enumeration of CSS escape hatches (w-screen, fixed widths, col-start overflow…)
+    // can be complete, but scrollWidth > viewport catches every one of them, with the offender
+    // identified by measurement instead of vision.
+    const horizontalOverflow = (await page.evaluate(`(() => {
+      const vw = document.documentElement.clientWidth
+      const sw = document.documentElement.scrollWidth
+      if (sw <= vw + 1) return null
+      let worst = null
+      for (const el of document.querySelectorAll('body *')) {
+        const r = el.getBoundingClientRect()
+        if (r.width < 40) continue
+        const over = Math.max(0, r.right - vw) + Math.max(0, -r.left)
+        if (over > 8 && (!worst || over > worst.over)) {
+          const cls = typeof el.className === 'string' ? el.className.split(/\\s+/).slice(0, 3).join('.') : ''
+          const sec = el.closest('section')
+          let idx = -1
+          if (sec) {
+            const tops = Array.from(document.querySelectorAll('section')).filter((s) => !s.parentElement.closest('section'))
+            idx = tops.indexOf(sec.parentElement.closest('section') || sec)
+          }
+          worst = { over, offender: el.tagName.toLowerCase() + (cls ? '.' + cls : ''), offenderLeft: Math.round(r.left), offenderRight: Math.round(r.right), sectionIndex: idx }
+        }
+      }
+      return worst ? { scrollWidth: sw, viewport: vw, offender: worst.offender, offenderLeft: worst.offenderLeft, offenderRight: worst.offenderRight, sectionIndex: worst.sectionIndex } : null
+    })()`)) as HorizontalOverflow | null
     // top-level sections only (a nested <section> belongs to its parent's index)
     const sectionRects = (await page.evaluate(`
       Array.from(document.querySelectorAll('section'))
@@ -124,16 +165,21 @@ export async function capturePage(url: string, opts?: { maxViewportShots?: numbe
     }
 
     // narrow full-page overview — composition at a glance. Anthropic caps image dimensions at
-    // 8000px, and a real page measured 8648px tall — scale the capture down via deviceScaleFactor
-    // so the overview always fits, shrinking further for very long pages.
-    const overviewScale = Math.min(0.5, 7600 / Math.max(1, pageHeight))
+    // 8000px. TWO-PHASE on purpose: the scale must come from the page's height AT 720px WIDTH —
+    // content reflows far taller in a narrow column, and scaling by the 1280px height blew the cap
+    // on a real 20k-px page. Measure first, then reopen at the right deviceScaleFactor.
+    const probe = await browser.newPage({ viewport: { width: 720, height: 800 } })
+    await probe.goto(url, { waitUntil: 'load', timeout: 30000 })
+    const h720 = (await probe.evaluate('document.documentElement.scrollHeight')) as number
+    await probe.close()
+    const overviewScale = Math.min(0.5, 7600 / Math.max(1, h720))
     const overviewPage = await browser.newPage({ viewport: { width: 720, height: 800 }, deviceScaleFactor: overviewScale })
     await overviewPage.goto(url, { waitUntil: 'load', timeout: 30000 })
     await overviewPage.waitForTimeout(700)
     shots.push({ label: 'overview', png: await overviewPage.screenshot({ type: 'png', fullPage: true }), scrollY: -1 })
     await overviewPage.close()
 
-    return { shots, pageHeight, consoleErrors, sectionRects }
+    return { shots, pageHeight, consoleErrors, sectionRects, horizontalOverflow }
   } finally {
     await browser.close()
   }
