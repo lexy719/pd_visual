@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import type { ComponentDoc } from '../types.js'
 import type { GenerateResult } from './generate.js'
-import type { ArtDirection, InteractionSpec, Palette } from './art-direction.js'
+import type { ArtDirection, InteractionSpec, LayoutSpec, Palette, TypographySpec } from './art-direction.js'
 import type { Plan, SectionResult } from './types.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -177,6 +177,56 @@ export function ensureReactImport(code: string): string {
   return `import React${named} from 'react'\n${body.replace(/^\s*\n/, '')}`
 }
 
+const editDistance = (a: string, b: string): number => {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)])
+  for (let j = 1; j <= b.length; j++) d[0][j] = j
+  for (let i = 1; i <= a.length; i++)
+    for (let j = 1; j <= b.length; j++)
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+  return d[a.length][b.length]
+}
+
+/**
+ * Undefined-component guardrail: a capitalized JSX tag that matches no import/declaration crashes at
+ * RUNTIME ("X is not defined") — parseError can't see it because it is valid syntax. Observed live:
+ * the model imported ParallaxDepth and rendered <ParallexDepth>, killing the page's hero (and its
+ * only h1) inside the error boundary. When a tag is within edit-distance 2 of exactly the kind of
+ * name it obviously meant (an import/local declaration), rename it; otherwise leave it for the
+ * boundary. Returns the repaired code.
+ */
+export function repairUndefinedJsxTags(code: string, log?: (m: string) => void): string {
+  const defined = new Set<string>()
+  for (const m of code.matchAll(/import\s+(?:([A-Z][\w$]*)|\{([^}]*)\}|\*\s+as\s+([A-Z][\w$]*))/g)) {
+    if (m[1]) defined.add(m[1])
+    if (m[3]) defined.add(m[3])
+    if (m[2]) for (const part of m[2].split(',')) {
+      const name = part.split(/\s+as\s+/).pop()?.trim()
+      if (name) defined.add(name)
+    }
+  }
+  for (const m of code.matchAll(/\b(?:function|const|let|var|class)\s+([A-Z][\w$]*)/g)) defined.add(m[1])
+
+  const tags = new Set<string>()
+  for (const m of code.matchAll(/<([A-Z][\w$]*)[\s/>]/g)) tags.add(m[1])
+  for (const tag of tags) {
+    if (defined.has(tag)) continue
+    if (tag.includes('.')) continue
+    let best: string | null = null
+    let bestD = 3
+    for (const name of defined) {
+      const dist = editDistance(tag, name)
+      if (dist < bestD) { bestD = dist; best = name }
+    }
+    if (best && bestD <= 2) {
+      log?.(`  \x1b[33mfixup\x1b[0m JSX tag <${tag}> matches no import — renamed to <${best}> (edit distance ${bestD})`)
+      code = code
+        .replace(new RegExp(`<${tag}(?=[\\s/>])`, 'g'), `<${best}`)
+        .replace(new RegExp(`</${tag}>`, 'g'), `</${best}>`)
+    }
+  }
+  return code
+}
+
 /**
  * De-Next.js guardrail: the target is plain React + Vite, but models drift into Next.js APIs. A
  * stripped `next/image` import leaves `<Image>` to collide with the global DOM Image constructor
@@ -245,7 +295,23 @@ function writeRegistry(files: string[]): void {
  * rewriting the variables re-skins the whole page with zero per-section model compliance.
  * The same palette is written to both :root and .dark so it applies whichever class is active.
  */
-export function themeCss(p: Palette, mi: InteractionSpec): string {
+/**
+ * The locked heading scale, derived from the committed modular ratio (typography.md: "pick the
+ * ratio, then generate every size from it — hand-picked sizes never cohere"). Body base 17px;
+ * h1/h2 are responsive clamps so a fixed utility class can't starve the hero.
+ */
+function headingSizes(r: number): { h1: string; h2: string; h3: string } {
+  const body = 17
+  const s = (pow: number): number => Math.round(body * Math.pow(r, pow))
+  return {
+    h1: `clamp(${s(3.4)}px, 6.5vw, ${Math.round(s(4.6) * 1.12)}px)`,
+    h2: `clamp(${s(2.4)}px, 4vw, ${s(3.2)}px)`,
+    h3: `${s(2)}px`
+  }
+}
+
+export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec): string {
+  const h = headingSizes(type.scaleRatio)
   const vars = `  --background: ${p.background};
   --foreground: ${p.foreground};
   --card: ${p.card};
@@ -268,7 +334,11 @@ export function themeCss(p: Palette, mi: InteractionSpec): string {
   --radius: 0.5rem;
   --mi-dur: ${mi.durationMs}ms;
   --mi-ease: ${mi.easing};
-  --mi-tap: ${mi.tapScale};`
+  --mi-tap: ${mi.tapScale};
+  --font-display: ${type.displayFamily};
+  --font-body: ${type.bodyFamily};
+  --container: ${layout.containerPx}px;
+  --section-pad: clamp(${layout.sectionPadMin}px, 14vh, ${layout.sectionPadMax}px);`
   return `@tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -290,13 +360,41 @@ ${vars}
 * {
   border-color: var(--border);
 }
+/*
+ * GENERATED PER RUN — the LOCKED TYPE SYSTEM (art-direction's TypographySpec, applied for real).
+ * Heading identity (family/weight/tracking/leading/scale) is decided once per run and enforced with
+ * !important so a section's ad-hoc text-/font- utilities cannot re-decide it — the same
+ * "model compliance is irrelevant" discipline as the palette. The scale derives from the committed
+ * modular ratio; hand-picked per-section sizes never cohere.
+ */
 body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-body);
+  font-weight: ${type.bodyWeight};
+  line-height: ${type.bodyLineHeight};
   -webkit-font-smoothing: antialiased;
 }
+h1, h2, h3 {
+  font-family: var(--font-display) !important;
+  font-weight: ${type.displayWeight} !important;
+  letter-spacing: ${css(type.displayTracking)} !important;
+  line-height: ${type.displayLineHeight} !important;
+  margin: 0;
+}
+h1 { font-size: ${css(h.h1)} !important; }
+h2 { font-size: ${css(h.h2)} !important; }
+h3 { font-size: ${css(h.h3)}; }
+
+/*
+ * GENERATED PER RUN — the LOCKED LAYOUT SYSTEM. One container width, one section-padding rhythm
+ * for the whole page (spacing.md numbers per mood). Sections apply these instead of inventing
+ * py-*/max-w-* per section — a page whose sections each re-decide spacing reads as seven designers.
+ */
+.container-page { max-width: var(--container); margin-inline: auto; padding-inline: clamp(20px, 4vw, 48px); }
+.section-pad { padding-block: var(--section-pad); }
+.section-pad-hero { padding-block: calc(var(--section-pad) * 1.25); }
 
 /*
  * GENERATED PER RUN by the art-direction step — the committed micro-interaction contract. Sections
@@ -378,7 +476,7 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
   rmSync(join(SRC, 'active-component.tsx'), { force: true })
 
   // Deterministic art-direction: re-skin the whole page by rewriting the theme variables.
-  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions), 'utf8')
+  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions, art.typography, art.layout), 'utf8')
 
   const files: string[] = []
   const depSet = new Set<string>()
@@ -408,6 +506,7 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
     const label = `${s.index}-${s.name}`
     let sanitized = deNextify(sanitizeImports(s.code, allowed))
     sanitized = neutralizeNodeGlobals(sanitized)
+    sanitized = repairUndefinedJsxTags(sanitized, console.warn)
     sanitized = ensureReactImport(sanitized)
     let { code, repaired } = ensureDefaultExport(sanitized, label)
     if (repaired) console.warn(`  \x1b[33mfixup\x1b[0m [${label}] had no default export — injected one.`)

@@ -182,6 +182,68 @@ export const completeReasoning = (system: string, user: string, opts?: { tempera
 export const completeBulk = (system: string, user: string, opts?: { temperature?: number; maxTokens?: number }): Promise<string> =>
   callTier(BULK, asMessages(system, user), opts)
 
+/** A labelled screenshot for a vision call. */
+export interface VisionImage {
+  label: string
+  png: Buffer
+}
+
+/**
+ * REASONING tier with IMAGES — the visual critique's eyes-to-judgment call. Anthropic-only: content
+ * blocks interleave each labelled screenshot with its caption, then the text prompt. Guarded because
+ * an OpenAI-flavoured reasoning tier (e.g. a local model) has no comparable image contract here.
+ */
+export async function completeVision(
+  system: string,
+  user: string,
+  images: VisionImage[],
+  opts?: { maxTokens?: number }
+): Promise<string> {
+  if (REASONING.flavor !== 'anthropic') {
+    throw new Error(`completeVision requires an Anthropic reasoning tier (got ${REASONING.base})`)
+  }
+  const content: Array<Record<string, unknown>> = []
+  for (const img of images) {
+    content.push({ type: 'text', text: `[screenshot: ${img.label}]` })
+    content.push({ type: 'image', source: { type: 'base64', media_type: 'image/png', data: img.png.toString('base64') } })
+  }
+  content.push({ type: 'text', text: user })
+
+  const body: Record<string, unknown> = {
+    model: REASONING.model,
+    max_tokens: opts?.maxTokens ?? ANTHROPIC_DEFAULT_MAX_TOKENS,
+    thinking: { type: 'disabled' },
+    system,
+    messages: [{ role: 'user', content }]
+  }
+  const url = `${REASONING.base}/messages`
+  const headers = { 'content-type': 'application/json', 'x-api-key': REASONING.key, 'anthropic-version': '2023-06-01' }
+  let lastErr = ''
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    let res: Response
+    try {
+      res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
+    } catch (e) {
+      lastErr = (e as Error).message
+      if (attempt < MAX_ATTEMPTS) { await sleep(waitMs(null, attempt)); continue }
+      throw new Error(`Can't reach the reasoning LLM for vision after ${MAX_ATTEMPTS} tries.\n  ${lastErr}`)
+    }
+    if (res.ok) {
+      const out = parseResponse(REASONING, await res.json())
+      if (out == null) throw new Error('reasoning LLM returned no content for vision call')
+      return out
+    }
+    const text = (await res.text()).slice(0, 300)
+    if (RETRIABLE_STATUS.has(res.status) && attempt < MAX_ATTEMPTS) {
+      console.warn(`  \x1b[2m⏳ [vision] LLM ${res.status} — retry ${attempt}/${MAX_ATTEMPTS - 1}…\x1b[0m`)
+      await sleep(waitMs(res, attempt))
+      continue
+    }
+    throw new Error(`vision LLM ${res.status}: ${text}`)
+  }
+  throw new Error(`vision LLM failed after ${MAX_ATTEMPTS} attempts. Last error: ${lastErr || 'unknown'}`)
+}
+
 /** Pull the first balanced JSON object/array out of a model reply (tolerates prose + fences). */
 export function extractJson<T>(text: string): T {
   const cleaned = text.replace(/```(?:json)?/gi, '').trim()

@@ -18,9 +18,12 @@ import { randomUUID } from 'node:crypto'
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { plan } from '../engine/agent/plan.js'
+import { briefWithConcept, synthesizeConcepts, type Concept } from '../engine/agent/concepts.js'
+import { MOODS, type Mood } from '../engine/agent/types.js'
 import { artDirect } from '../engine/agent/art-direction.js'
 import { generateSections } from '../engine/agent/generate.js'
 import { writePage, APP } from '../engine/agent/writer.js'
+import { visualPass } from '../engine/agent/visual-critique.js'
 import { hexToRgb, rgbToHsl } from '../engine/agent/color.js'
 import { retrievePlanningEvidence } from '../engine/retrieval/query.js'
 import { completeReasoning, extractJson } from '../engine/llm/llm.js'
@@ -80,6 +83,8 @@ interface Run {
   brief: string
   /** the answers the user picked in the questions step — threaded into what plan() sees */
   choices: Record<string, string>
+  /** the creative concept the user approved — its mood BINDS plan(); its premise rides the brief */
+  concept?: Concept
   isEdit: boolean
   sessionId: string
   buffer: StudioEvent[]
@@ -154,8 +159,17 @@ async function runPipeline(run: Run): Promise<void> {
   try {
     emit(run, { type: 'run-start', runId: run.id, brief: run.brief, isEdit: run.isEdit })
 
-    const augmentedBrief = briefWithChoices(run.brief, run.choices)
-    const p = await plan(augmentedBrief)
+    let augmentedBrief = briefWithChoices(run.brief, run.choices)
+    if (run.concept) {
+      augmentedBrief = briefWithConcept(augmentedBrief, run.concept)
+      emit(run, {
+        type: 'notice',
+        level: 'info',
+        text: `Concept locked: "${run.concept.name}" (${run.concept.mood.join('/')}) — ${run.concept.premise} · grounded in ${run.concept.anchor.source}`
+      })
+    }
+    // The concept's mood is a HARD constraint on plan() — deterministic, not prompt compliance.
+    const p = await plan(augmentedBrief, run.concept ? { mood: run.concept.mood } : undefined)
     emit(run, { type: 'plan', brand: p.brand, mood: p.mood, sections: p.sections.map((s) => `${s.name} · ${s.composition}`), layout: p.layoutPatterns ?? [] })
 
     const art = await artDirect(p, (l) => parseGenLine(l, run))
@@ -172,6 +186,19 @@ async function runPipeline(run: Run): Promise<void> {
     }
     const w = writePage(p, gen, art)
     console.warn = origWarn
+
+    // SEE — render → screenshot → critique → revise (accept-if-better). Ship-with-warning: a page
+    // with surviving visible defects still ships, loudly, because seeing the defect is the point.
+    emit(run, { type: 'log', text: 'Looking at the rendered page…' })
+    const visual = await visualPass(p, gen.sections, APP, () => writePage(p, gen, art), (l) => parseGenLine(l, run))
+    if (visual.ran && visual.surviving.length) {
+      emit(run, {
+        type: 'notice', level: 'warn',
+        text: `Shipped with ${visual.surviving.length} visible defect(s) after the visual pass: ${visual.surviving.map((d) => `s${d.sectionIndex} ${d.defectClass}`).join(', ')} — screenshots in ${visual.shotsDir}`
+      })
+    } else if (visual.ran) {
+      emit(run, { type: 'notice', level: 'info', text: `Visual pass clean (${visual.defectsBefore.length} finding(s), ${visual.revisedSections.length} section(s) revised)` })
+    }
 
     // Quarantine is the most severe per-section outcome (the page is missing that content), so emit it
     // STRUCTURALLY from the result rather than relying on the console.warn scrape above — a stubbed
@@ -216,9 +243,9 @@ function buildSessionSnapshot(sessionId: string): Promise<void> {
   })
 }
 
-function startRun(brief: string, isEdit: boolean, sessionId: string, choices: Record<string, string>): string {
+function startRun(brief: string, isEdit: boolean, sessionId: string, choices: Record<string, string>, concept?: Concept): string {
   const id = randomUUID()
-  const run: Run = { id, brief, choices, isEdit, sessionId, buffer: [], clients: new Set(), done: false }
+  const run: Run = { id, brief, choices, concept, isEdit, sessionId, buffer: [], clients: new Set(), done: false }
   runs.set(id, run)
   inFlight = true
   void runPipeline(run)
@@ -378,14 +405,50 @@ app.post('/questions', async (req, res) => {
   res.json({ intro: 'A few quick questions so I build exactly what you need:', questions: FALLBACK_QUESTIONS, grounded: false })
 })
 
+/**
+ * Concept step — between the questions and the build: 2-3 grounded, named creative directions for
+ * the user to approve. Empty `concepts` = the step failed (loudly logged engine-side); the UI then
+ * proceeds straight to generation as before rather than blocking on a failed reasoning call.
+ */
+app.post('/concepts', async (req, res) => {
+  const brief = String(req.body?.brief ?? '').trim()
+  const choices = (req.body?.choices && typeof req.body.choices === 'object' ? req.body.choices : {}) as Record<string, string>
+  if (!brief) return res.status(400).json({ error: 'brief is required' })
+  const result = await synthesizeConcepts(briefWithChoices(brief, choices))
+  if (!result) return res.json({ concepts: [], grounded: false })
+  if (result.adjustments.length) console.log(`  \x1b[2mconcepts repaired: ${result.adjustments.join(' | ')}\x1b[0m`)
+  console.log(`  \x1b[2mconcepts grounded on ${result.groundCount} evidence hits: ${result.concepts.map((c) => `"${c.name}" [${c.mood[0]}]`).join(', ')}\x1b[0m`)
+  res.json({ concepts: result.concepts, grounded: result.groundCount >= 3 })
+})
+
+/** Clamp a client-supplied concept to a safe shape — the mood it binds must be from the vocabulary. */
+function parseConcept(raw: unknown): Concept | undefined {
+  const c = raw as { name?: unknown; mood?: unknown; premise?: unknown; anchor?: { source?: unknown; why?: unknown } } | undefined
+  if (!c || typeof c !== 'object') return undefined
+  const name = String(c.name ?? '').trim().slice(0, 60)
+  const premise = String(c.premise ?? '').trim().slice(0, 220)
+  const mood = (Array.isArray(c.mood) ? c.mood : [])
+    .map((m) => String(m).toLowerCase().trim())
+    .filter((m): m is Mood => (MOODS as readonly string[]).includes(m))
+    .slice(0, 3)
+  if (!name || !premise || !mood.length) return undefined
+  return {
+    name,
+    mood,
+    premise,
+    anchor: { source: String(c.anchor?.source ?? '').slice(0, 120), why: String(c.anchor?.why ?? '').slice(0, 200) }
+  }
+}
+
 app.post('/generate', (req, res) => {
   const brief = String(req.body?.brief ?? '').trim()
   const choices = (req.body?.choices && typeof req.body.choices === 'object' ? req.body.choices : {}) as Record<string, string>
+  const concept = parseConcept(req.body?.concept)
   const sessionId = String(req.body?.sessionId ?? '').trim() || randomUUID()
   if (!brief) return res.status(400).json({ error: 'brief is required' })
   if (inFlight) return res.status(409).json({ error: 'a generation is already running (single shared preview)' })
   upsertSession(sessionId, brief, choices)
-  res.json({ runId: startRun(brief, false, sessionId, choices), sessionId })
+  res.json({ runId: startRun(brief, false, sessionId, choices, concept), sessionId })
 })
 
 // Edit mode isn't built yet — a follow-up runs a FRESH generation. The UI shows a loud banner.

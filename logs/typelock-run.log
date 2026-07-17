@@ -1,0 +1,175 @@
+
+brief:      "Refugio, a third-generation mezcal from a family palenque in Oaxaca — one bottle, one agave, premium and calm"
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-haiku-4-5-20251001   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+brand:  Refugio
+mood:   premium, calm
+layout: editorial-brand-story, von-restorff-single-anchor, asymmetric-grid
+sections:
+  0. the-single-bottle [36mcinematic[0m/xl  Open on the one bottle alone in frame — no clutter, no comparison — establishing that Refugio is singular by design: one bottle, one agave, one family.
+  1. three-generations [36mnarrative[0m/lg  Introduce the family lineage — grandfather, father, current maestro mezcalero — as the source of the bottle's authority, not a marketing claim.
+  2. the-agave        [36masymmetric[0m/lg  Isolate the single agave varietal (Espadín, hand-selected) as the one differentiator worth remembering — everything else in the process serves this one plant.
+  3. the-palenque     [36mtimeline[0m/xl  Walk through the traditional production process — roasting in earthen pits, stone-mill crushing, wild fermentation, copper-still distillation — as ritual, not manufacturing steps.
+  4. tasting-notes    [36meditorial[0m/md  Slow down further into sensory language — smoke, earth, citrus, mineral — giving the visitor a reason to imagine drinking it, not just admire it.
+  5. the-maker's-word [36meditorial[0m/sm  A single quote from the current maestro mezcalero grounding the brand's calm confidence in one authentic human voice, isolated for weight.
+  6. one-bottle-again [36mcinematic[0m/lg  Return to the bottle in full, now with reverence earned by the story — closing the loop and inviting acquisition without hard-selling.
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated, subject="a squat hand-blown amber-glass mezcal bottle with " · establishing → medium → wide → medium → macro → detail → wide[0m
+  primary   [48;2;90;42;30m   [0m #5A2A1E
+  accent    [48;2;181;105;30m   [0m #B5691E
+  bg / fg   [48;2;247;243;236m   [0m #F7F3EC  /  [48;2;33;26;19m   [0m #211A13
+  card/bord [48;2;252;250;245m   [0m #FCFAF5  /  [48;2;228;218;203m   [0m #E4DACB
+  motion    [36mparallax-slow[0m  (locked for the whole run)
+  interact  [36m260ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-2px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2mA warm monochrome oxblood-on-parchment palette with a single saturated copper-amber accent signals inherited, unshowy luxury per the premium restraint rule, while slow scroll-triggered parallax and a gentle 260ms translateY interaction contract keep every moment felt rather than seen, matching the calm-premium micro-interaction spec.[0m
+  [2manchors: Calm / wellness / health, Playful / consumer / lifestyle, Premium / luxury / editorial, parallax-depth, premium / calm micro-interactions, duration scale, Micro-interactions, Type scale ratios by mood, Calm / wellness typography, Premium / editorial typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, PP Neue Montreal — throughline, Bucks Sauce — The "No Corn Syrup / No Seed Oils / No Additives / Glut…[0m
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Refugio  ·  premium/calm  ·  editorial-brand-story
+  motion: parallax-slow   palette: Amber
+┌──────────────────────────────────────────────────┐
+│ the-single-bottle  ·  cinematic  ·  pinned-cross │
+│   ↳ Open on the one bottle alone in frame — no c │
+│     media: Full-bleed still of the bottle on a d │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ three-generations  ·  narrative  ·  Premium / ca │
+│   ↳ Introduce the family lineage — grandfather,  │
+│     media: Three warm-toned portrait photographs │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-agave  ·  asymmetric  ·  asymmetric-grid     │
+│   ↳ Isolate the single agave varietal (Espadín,  │
+│     media: Oversized offset photo of a single ji │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-palenque  ·  timeline  ·  sticky-scroll-narr │
+│   ↳ Walk through the traditional production proc │
+│     media: Sequential documentary-style photogra │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ tasting-notes  ·  editorial  ·  parallax-depth ( │
+│   ↳ Slow down further into sensory language — sm │
+│     media: Close macro shot of mezcal in a copit │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-maker's-word  ·  editorial  ·  parallax-dept │
+│   ↳ A single quote from the current maestro mezc │
+│     media: One quiet portrait of the maestro, cr │
+│   [--] [--]                                      │
+├──────────────────────────────────────────────────┤
+│ one-bottle-again  ·  cinematic  ·  parallax-dept │
+│   ↳ Return to the bottle in full, now with rever │
+│     media: Same bottle, same light as the openin │
+│                                                  │
+│                                                  │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+  Approve this structure? [Y]es / [r]eject: 
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] the-single-bottle/cinematic → motion-primitive pinned-crossfade (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [1] three-generations/narrative → scratch  [structure: Premium / calm spacing, Container and grid, When to break the grid on purpose]
+       ↳ [bulk]
+  [2] the-agave/asymmetric   → scratch  [structure: asymmetric-grid, When to break the grid on purpose, bento-grid]
+       ↳ [bulk]
+  [3] the-palenque/timeline  → scratch  [structure: sticky-scroll-narrative, stacked-void]
+       ↳ [bulk]
+  [4] tasting-notes/editorial → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [5] the-maker's-word/editorial → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [6] one-bottle-again/cinematic → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+       ↳ shot plan [generated, subject-locked]: upgraded 8 image(s) → 5 Flux (staged) + 3 dynamic src(s) rewritten to staged templates
+       ↳ hardened 5 <img> tag(s): explicit width/height + lazy below the fold
+
+[1m── SELF-CRITIQUE ───────────────────────────────────────────[0m
+[2m  reviewing [0] the-single-bottle…[0m
+[2m  reviewing [1] three-generations…[0m
+[2m  reviewing [2] the-agave…[0m
+[2m  reviewing [3] the-palenque…[0m
+[2m  reviewing [4] tasting-notes…[0m
+[2m  reviewing [5] the-maker's-word…[0m
+[2m  reviewing [6] one-bottle-again…[0m
+  [31mFLAG[0m [0:the-single-bottle] uses pinned-crossfade, which carries a known caveat: "Two-panel pinned crossfade on the proven @bsmnt/scrollytelling rail (same as kinetic-text-split). Panel one dissolves into panel two while t"
+  [33mwarn[0m [2:the-agave] no obvious vertical padding — guideline wants 96-140px section padding.
+  [31mFLAG[0m [4:tasting-notes] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [31mFLAG[0m [5:the-maker's-word] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [31mFLAG[0m [6:one-bottle-again] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [33mwarn[0m [0:the-single-bottle] Second section padding insufficient for premium/calm rule: needs 32px+ card padding, current appears to use default px-6 (24px)
+  [33mwarn[0m [0:the-single-bottle] Line measure exceeds 65ch rule: max-w-2xl (~80ch) violates generous-whitespace/calm spacing constraint
+  [33mwarn[0m [0:the-single-bottle] Missing micro-interaction detail: no transition/animation values specified (should declare 260ms cubic-bezier(0.22, 1, 0.36, 1) for premium calm feel)
+  [33mwarn[0m [0:the-single-bottle] Section spacing between first/second not explicit: no gap/margin between pinned sections—should show 140–180px section separation for premium rule
+  [33mwarn[0m [1:three-generations] Transition duration 700ms violates premium calm rule (must be 260ms standard-out cubic-bezier)
+  [33mwarn[0m [1:three-generations] Opacity fade is visible motion; premium calm requires restraint—motion should be felt, not seen
+  [33mwarn[0m [1:three-generations] Gap spacing 12px/16px is too tight for premium calm rule (32px+ minimum for card padding and generous whitespace)
+  [33mwarn[0m [1:three-generations] space-y-32 (~128px) falls below premium calm minimum section spacing (140–180px)
+  [33mwarn[0m [2:the-agave] Transition duration 700ms violates premium/calm rule (must be 260ms, cubic-bezier(0.22, 1, 0.36, 1))
+  [33mwarn[0m [2:the-agave] Gap spacing gap-8 lg:gap-12 is below generous premium standard (140–180px sections); asymmetric layout needs larger whitespace to signal restraint
+  [33mwarn[0m [2:the-agave] Missing easing function; using default ease instead of standard-out cubic-bezier(0.22, 1, 0.36, 1)
+  [33mwarn[0m [2:the-agave] Image offset -mx-6 creates visual tension that contradicts calm/serene positioning for premium editorial feel
+  [33mwarn[0m [3:the-palenque] Transition duration 500ms violates premium rule (260ms standard-out cubic-bezier)
+  [33mwarn[0m [3:the-palenque] Section padding uses 'section-pad' (undefined scale) — should explicitly use 140–180px spacing
+  [33mwarn[0m [3:the-palenque] Gap 12/16 (48px/64px) insufficient for premium/calm mood requiring 32px+ card padding + generous whitespace between sections
+  [33mwarn[0m [3:the-palenque] No color palette declared — cannot verify monochrome + desaturated accent or <45% saturation requirement for calm/wellness
+  [33mwarn[0m [4:tasting-notes] Spacing between descriptor items (space-y-6) is 24px, below the 32px+ minimum for premium calm mood
+  [33mwarn[0m [4:tasting-notes] Left padding on bordered descriptors (pl-4 = 16px) is too tight; should be 24px+ for premium card padding
+  [33mwarn[0m [4:tasting-notes] No transition/duration defined on border-l or hover states; premium mood requires 260ms standard-out micro-interactions
+  [33mwarn[0m [4:tasting-notes] gap-12 lg:gap-16 (48–64px) is below the 140–180px section spacing target for premium/calm whitespace
+  [33mwarn[0m [5:the-maker's-word] Parallax depth motion violates 'motion should be felt, not seen' — intensity 'subtle' still creates visible depth shift that contradicts premium restraint
+  [33mwarn[0m [5:the-maker's-word] Missing transition timing — no explicit 260ms cubic-bezier(0.22, 1, 0.36, 1) standard-out easing defined on interactive elements
+  [33mwarn[0m [5:the-maker's-word] Footer tracking-wide increases letter-spacing, reducing readability at small font size — conflicts with calm/wellness legibility principle
+  [33mwarn[0m [5:the-maker's-word] mt-8 gap between quote and footer is ~32px — insufficient for 'generous 140–180px sections' spacing scale expectation
+  [33mwarn[0m [6:one-bottle-again] Button easing syntax invalid: `cubic-bezier(0.22, 1, 0.36, 1)` is in className string instead of CSS custom property or Tailwind config. Should use proper duration-[260ms] with configured easing, not inline cubic-bezier.
+  [33mwarn[0m [6:one-bottle-again] Button lacks hover state definition for 'calm' micro-interaction—shadow-lg alone is too visible/abrupt. Should have subtle opacity or scale shift (motion felt, not seen) with 260ms standard-out easing.
+  [33mwarn[0m [6:one-bottle-again] Spacing hierarchy unclear: space-y-8 + pt-4 + pt-8 creates inconsistent rhythm. Premium/calm requires consistent 32px+ increments aligned to 140–180px section rhythm.
+  [33mwarn[0m [6:one-bottle-again] Copy 'Discover Refugio' is generic call-to-action verb. Should be more editorial/specific to brand voice (e.g., 'Learn the story' or 'Explore Refugio').
+
+[1m── WRITE  → preview/app ────────────────────────────────────[0m
+  7 sections  (4 motion-primitive, 3 from scratch)
+  primitives: pinned-crossfade, parallax-depth
+  [36mTIERS[0m  plan/art-direction/questions: [35m[reasoning][0m claude-sonnet-5
+         sections: 7 [36m[bulk][0m (none needed escalation)
+           [0] the-single-bottle/cinematic → [36m[bulk][0m
+           [1] three-generations/narrative → [36m[bulk][0m
+           [2] the-agave/asymmetric → [36m[bulk][0m
+           [3] the-palenque/timeline → [36m[bulk][0m
+           [4] tasting-notes/editorial → [36m[bulk][0m
+           [5] the-maker's-word/editorial → [36m[bulk][0m
+           [6] one-bottle-again/cinematic → [36m[bulk][0m
+  deps:       @bsmnt/scrollytelling, gsap, motion, motion/react
+  files:      11 written under preview/app/src
+  [36mMOTION[0m [0:the-single-bottle] wrapped by motion-primitive pinned-crossfade
+  [36mMOTION[0m [4:tasting-notes] wrapped by motion-primitive parallax-depth
+  [36mMOTION[0m [5:the-maker's-word] wrapped by motion-primitive parallax-depth
+  [36mMOTION[0m [6:one-bottle-again] wrapped by motion-primitive parallax-depth
+  [36mIMAGES[0m upgraded 8 placeholder(s) to on-theme imagery (Unsplash or Flux-generated).
+
+[1m── SERVE  → http://localhost:5199 ──────────────────────────[0m
+
+> dev
+> vite
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m2000[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5199[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m

@@ -100,7 +100,12 @@ const clampSections = (s: unknown): SectionPlan[] => {
   return out.length ? out : [{ name: 'opening', intent: 'introduce the product', composition: 'cinematic', emphasis: 'xl' }]
 }
 
-export async function plan(brief: string): Promise<Plan> {
+/** Constraints an approved concept imposes on the plan. Mood is BOUND, not suggested. */
+export interface PlanLock {
+  mood?: Mood[]
+}
+
+export async function plan(brief: string, lock?: PlanLock): Promise<Plan> {
   const creativeBrief = parseCreativeBrief(brief)
   const evidenceQuery = [
     creativeBrief.product,
@@ -124,7 +129,7 @@ CREATIVE BRIEF CONTRACT (honour these selections; they are not component templat
 - Motion preference: ${creativeBrief.motionPreference ?? 'open'}
 - Explicit avoidances: ${creativeBrief.avoidances.join('; ') || '(none specified)'}
 
-RETRIEVED PATTERN GUIDANCE (choose the narrative and visual patterns first, then build the section sequence from them):
+${lock?.mood?.length ? `LOCKED MOOD: ${lock.mood.join(', ')} — an approved creative concept fixed the mood. Emit exactly this mood; it is DECIDED, not yours to re-decide. Choose patterns and sections that serve it.\n\n` : ''}RETRIEVED PATTERN GUIDANCE (choose the narrative and visual patterns first, then build the section sequence from them):
 ${patternDigest}
 
 RETRIEVED LAYOUT PATTERNS (pick the archetype that fits and build the section sequence from it):
@@ -143,7 +148,10 @@ CRITIQUE METHODS (apply the reasoning, never copy a site):
 ${evidence.critiques.map((x) => `- ${toCritique(x)}`).join('\n') || '(none retrieved)'}${avoidBlock}`
   const raw = await completeReasoning(SYSTEM, user, { temperature: 0.3 })
   const parsed = extractJson<{ brand?: string; mood?: unknown; layoutPatterns?: unknown; sections?: unknown; avoidances?: unknown }>(raw)
-  const mood = clampMood(parsed.mood)
+  // HARD CONSTRAINT: an approved concept's mood BINDS the plan — applied deterministically, so the
+  // model cannot quietly deviate from what the user approved (the prompt line above is a courtesy;
+  // this override is the guarantee). Same discipline as the question-answers fix.
+  const mood = lock?.mood?.length ? clampMood(lock.mood) : clampMood(parsed.mood)
   return {
     brief,
     creativeBrief,

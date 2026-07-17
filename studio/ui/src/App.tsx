@@ -13,7 +13,8 @@ const BUILD_INTRO =
 
 type QOption = { label: string; description: string }
 type Question = { id: string; question: string; options: QOption[] }
-type Phase = 'idle' | 'asking' | 'building'
+type Concept = { name: string; mood: string[]; premise: string; anchor: { source: string; why: string } }
+type Phase = 'idle' | 'asking' | 'choosing' | 'building'
 
 function composeBrief(brief: string, questions: Question[], answers: Record<string, string>): string {
   const qa = questions.filter((q) => answers[q.id]).map((q) => `${q.question} → ${answers[q.id]}`).join('; ')
@@ -37,11 +38,23 @@ export function App() {
   const [projectBrief, setProjectBrief] = useState('')
   const [questions, setQuestions] = useState<Question[]>([])
   const [qLoading, setQLoading] = useState(false)
+  // concept step: the composed brief + answers wait here while the user picks a direction
+  const [concepts, setConcepts] = useState<Concept[]>([])
+  const [cLoading, setCLoading] = useState(false)
+  const [pending, setPending] = useState<{ brief: string; choices: Record<string, string> } | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const esRef = useRef<EventSource | null>(null)
 
   useEffect(() => { void refreshSessions() }, [])
-  useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' }) }, [feed, liveStatus, phase, qLoading])
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    // A question/concept card can be TALLER than the pane — bottom-anchoring it scrolls the actual
+    // question out of view above. Anchor the card's TOP instead; everything else bottom-anchors.
+    const card = el.querySelector('.qcard')
+    if (card) card.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    else el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  }, [feed, liveStatus, phase, qLoading, cLoading, questions, concepts])
 
   async function refreshSessions() {
     try { setSessions(await (await fetch(`${API}/sessions`)).json() as StudioSession[]) } catch { /* API may boot after UI */ }
@@ -56,14 +69,14 @@ export function App() {
     } else if (ev.type === 'error') { setLiveStatus(''); setRunning(false) }
   }
 
-  async function run(sendText: string, isEdit: boolean, choices: Record<string, string>) {
+  async function run(sendText: string, isEdit: boolean, choices: Record<string, string>, concept?: Concept) {
     if (running) return
     setFeed((f) => [...f, { kind: 'assistant', text: BUILD_INTRO, iterate: isEdit }])
     setInput(''); setRunning(true); setLiveStatus('Starting…'); setPhase('building')
     try {
       const r = await fetch(`${API}/${isEdit ? 'iterate' : 'generate'}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brief: sendText, choices, sessionId: activeId ?? undefined })
+        body: JSON.stringify({ brief: sendText, choices, concept, sessionId: activeId ?? undefined })
       })
       const data = await r.json()
       if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`)
@@ -94,20 +107,44 @@ export function App() {
     } finally { setQLoading(false) }
   }
 
-  function finishQuestions(answers: Record<string, string>, skip: boolean) {
+  // After the questions: reason first — propose 2-3 grounded creative directions and let the user
+  // choose one BEFORE anything is planned or built. Never auto-selects; a failed concepts call
+  // skips the gate and builds directly (same failure posture as the questions step).
+  async function finishQuestions(answers: Record<string, string>, skip: boolean) {
     setQuestions([])
-    void run(skip ? projectBrief : composeBrief(projectBrief, questions, answers), false, skip ? {} : answers)
+    const brief = skip ? projectBrief : composeBrief(projectBrief, questions, answers)
+    const choices = skip ? {} : answers
+    setPending({ brief, choices })
+    setPhase('choosing'); setConcepts([]); setCLoading(true)
+    try {
+      const r = await fetch(`${API}/concepts`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ brief, choices }) })
+      const data = await r.json()
+      const cs: Concept[] = Array.isArray(data.concepts) ? data.concepts : []
+      if (cs.length >= 2) {
+        setFeed((f) => [...f, { kind: 'assistant', text: 'Before I build: here are the directions I see for this, each grounded in a real reference. Pick the one that feels right.' }])
+        setConcepts(cs)
+      } else {
+        void run(brief, false, choices)
+      }
+    } catch {
+      void run(brief, false, choices)
+    } finally { setCLoading(false) }
+  }
+  function chooseConcept(concept: Concept | null) {
+    setConcepts([])
+    const p = pending ?? { brief: projectBrief, choices: {} }
+    void run(p.brief, false, p.choices, concept ?? undefined)
   }
   function sendFollowUp() { const t = input.trim(); if (t) void run(t, true, {}) }
 
   function openSession(s: StudioSession) {
     esRef.current?.close()
-    setActiveId(s.id); setTitle(s.brief); setFeed([]); setLastArt(null); setQuestions([]); setPhase('idle')
+    setActiveId(s.id); setTitle(s.brief); setFeed([]); setLastArt(null); setQuestions([]); setConcepts([]); setPending(null); setPhase('idle')
     setPreviewUrl(s.previewUrl ?? null); setPreviewNonce((n) => n + 1); setTab('preview'); setRunning(false); setLiveStatus('')
   }
   function newSession() {
     esRef.current?.close()
-    setActiveId(null); setTitle(''); setFeed([]); setInput(''); setLastArt(null); setPreviewUrl(null); setRunning(false); setLiveStatus(''); setQuestions([]); setPhase('idle')
+    setActiveId(null); setTitle(''); setFeed([]); setInput(''); setLastArt(null); setPreviewUrl(null); setRunning(false); setLiveStatus(''); setQuestions([]); setConcepts([]); setPending(null); setPhase('idle')
   }
 
   const inWorkspace = activeId !== null || phase !== 'idle' || feed.length > 0
@@ -174,17 +211,21 @@ export function App() {
             {phase === 'asking' && !qLoading && questions.length > 0 && (
               <QuestionsCard questions={questions} onDone={finishQuestions} />
             )}
+            {phase === 'choosing' && cLoading && <div className="live"><span className="spinner" /> Thinking through creative directions…</div>}
+            {phase === 'choosing' && !cLoading && concepts.length > 0 && (
+              <ConceptsCard concepts={concepts} onPick={chooseConcept} />
+            )}
             {running && liveStatus && <div className="live"><span className="spinner" /> {liveStatus}</div>}
           </div>
           <div className="composer">
             <div className="composer-card">
               <textarea className="composer-input" value={input} onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendFollowUp() } }}
-                placeholder={phase === 'asking' ? 'Answer the questions above to start building…' : 'Ask for changes, add features, refine the look…'}
-                disabled={running || phase === 'asking'} />
+                placeholder={phase === 'asking' ? 'Answer the questions above to start building…' : phase === 'choosing' ? 'Pick a creative direction above to start building…' : 'Ask for changes, add features, refine the look…'}
+                disabled={running || phase === 'asking' || phase === 'choosing'} />
               <div className="composer-foot">
                 <span className="kbd">⌘/Ctrl + Enter</span>
-                <button className="btn-brown" disabled={running || phase === 'asking' || !input.trim()} onClick={sendFollowUp}>{running ? 'Building…' : 'Send ↑'}</button>
+                <button className="btn-brown" disabled={running || phase === 'asking' || phase === 'choosing' || !input.trim()} onClick={sendFollowUp}>{running ? 'Building…' : 'Send ↑'}</button>
               </div>
             </div>
           </div>
@@ -208,8 +249,8 @@ export function App() {
               <div className="browser-body">
                 {previewUrl ? <iframe key={previewNonce} src={previewUrl} title="live preview" /> : (
                   <div className="preview-empty"><div>
-                    <div className="serif">{phase === 'asking' ? 'Answer a few questions →' : 'Building your first pass…'}</div>
-                    <div>{phase === 'asking' ? 'Then I’ll build it and the live preview appears here.' : 'The live preview appears here once this version finishes building.'}</div>
+                    <div className="serif">{phase === 'asking' ? 'Answer a few questions →' : phase === 'choosing' ? 'Choose a direction →' : 'Building your first pass…'}</div>
+                    <div>{phase === 'asking' ? 'Then I’ll show you the creative directions I see.' : phase === 'choosing' ? 'Your pick locks the mood and premise for the whole build.' : 'The live preview appears here once this version finishes building.'}</div>
                   </div></div>
                 )}
               </div>
@@ -271,6 +312,39 @@ function QuestionsCard({ questions, onDone }: { questions: Question[]; onDone: (
         </div>
         <div className="qdots">{questions.map((_, i) => <span key={i} className={`qdot ${i === step ? 'on' : ''}`} />)}</div>
         <button className="qbtn primary" disabled={!answered} onClick={() => (last ? onDone(resolve(), false) : setStep((s) => s + 1))}>{last ? 'Build ↑' : 'Next'}</button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The concept-approval gate: 2-3 named creative directions, each grounded in a real retrieved
+ * reference. Rides the questions card's visual pattern. NEVER auto-selects — the pick is the point;
+ * "Let it decide" is the explicit opt-out, not a default.
+ */
+function ConceptsCard({ concepts, onPick }: { concepts: Concept[]; onPick: (c: Concept | null) => void }) {
+  const [sel, setSel] = useState<number | null>(null)
+  return (
+    <div className="qcard">
+      <div className="qcard-head">Creative direction</div>
+      <div className="qcard-q">Which of these should I build?</div>
+      <div className="qcard-options">
+        {concepts.map((c, i) => (
+          <button key={c.name} className={`qopt ${sel === i ? 'sel' : ''}`} onClick={() => setSel(i)}>
+            <span className="qradio" />
+            <span className="qopt-text">
+              <span className="qopt-label">{c.name} <span style={{ opacity: 0.55, fontWeight: 400 }}>· {c.mood.join(' / ')}</span></span>
+              <span className="qopt-desc">{c.premise}</span>
+              <span className="qopt-desc" style={{ opacity: 0.7, fontStyle: 'italic' }}>Grounded in {c.anchor.source} — {c.anchor.why}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="qcard-foot">
+        <div className="qcard-left">
+          <button className="qskip" onClick={() => onPick(null)}>Let it decide</button>
+        </div>
+        <button className="qbtn primary" disabled={sel === null} onClick={() => sel !== null && onPick(concepts[sel])}>Build this ↑</button>
       </div>
     </div>
   )

@@ -16,6 +16,7 @@ import { generateSections } from './generate.js'
 import { buildWireframe, renderWireframe, writePlanPreference } from './wireframe.js'
 import { critique } from './critique.js'
 import { writePage, APP } from './writer.js'
+import { visualPass } from './visual-critique.js'
 import { hexToRgb } from './color.js'
 import { LLM_MODEL, REASONING_MODEL, BULK_MODEL } from '../llm/llm.js'
 
@@ -107,6 +108,16 @@ async function main(): Promise<void> {
   // 5. WRITE
   rule('WRITE  → preview/app')
   const w = writePage(p, gen, art)
+
+  // 5b. SEE — render, screenshot, critique, revise (accept-if-better), ship-with-warning.
+  const visual = await visualPass(p, gen.sections, APP, () => writePage(p, gen, art))
+  if (visual.ran && visual.surviving.length) {
+    console.log(`  \x1b[31mVISUAL\x1b[0m shipped WITH ${visual.surviving.length} visible defect(s) after the revise pass:`)
+    for (const d of visual.surviving) console.log(`  \x1b[31m      \x1b[0m [${d.severity}] s${d.sectionIndex} ${d.defectClass}: ${d.evidence.slice(0, 100)}`)
+    console.log(`  \x1b[31m      \x1b[0m screenshots + critiques: ${visual.shotsDir}`)
+  } else if (visual.ran) {
+    console.log(`  \x1b[36mVISUAL\x1b[0m clean after visual pass (${visual.defectsBefore.length} finding(s), ${visual.revisedSections.length} section(s) revised)`)
+  }
   const motionCount = gen.sections.filter((s) => s.strategy === 'motion-primitive').length
   const scratch = gen.sections.length - motionCount
   console.log(`  ${gen.sections.length} sections  (${motionCount} motion-primitive, ${scratch} from scratch)`)
@@ -162,6 +173,11 @@ async function main(): Promise<void> {
   // Image-staging lint: a dynamic src the resolver could not rewrite bypasses the whole shot plan.
   for (const s of gen.sections.filter((x) => x.imageWarnings && x.imageWarnings.length)) {
     console.log(`  \x1b[31mIMAGE-WARN\x1b[0m [${s.index}:${s.name}] ${s.imageWarnings!.join('; ')}`)
+  }
+
+  // Design-system lint: sections that STILL re-decide padding/container after the escalation pass.
+  for (const s of gen.sections.filter((x) => x.designWarnings && x.designWarnings.length)) {
+    console.log(`  \x1b[33mDESIGN\x1b[0m [${s.index}:${s.name}] ${s.designWarnings!.join('; ')}`)
   }
 
   // Report image sourcing: every placeholder upgraded to on-theme imagery (Unsplash photo / Flux generation).

@@ -9,25 +9,25 @@
  * gradient stay valid.
  */
 :root {
-  --background: #F7F2EA;
-  --foreground: #211A12;
-  --card: #FCFAF5;
+  --background: #FBFAF7;
+  --foreground: #211E1A;
+  --card: #F4F1EA;
   --card-foreground: #0a0a0a;
-  --popover: #FCFAF5;
+  --popover: #F4F1EA;
   --popover-foreground: #0a0a0a;
-  --primary: #7A2E1D;
+  --primary: #7A2E1F;
   --primary-foreground: #fafafa;
-  --secondary: #e6e1d9;
-  --secondary-foreground: #211A12;
-  --muted: #e6e1d9;
-  --muted-foreground: #6B5E4E;
-  --accent: #B5601F;
-  --accent-foreground: #ffffff;
+  --secondary: #eae8e5;
+  --secondary-foreground: #211E1A;
+  --muted: #eae8e5;
+  --muted-foreground: #6B655A;
+  --accent: #C2410C;
+  --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #E4DAC8;
-  --input: #E4DAC8;
-  --ring: #B5601F;
+  --border: #E3DDD0;
+  --input: #E3DDD0;
+  --ring: #C2410C;
   --radius: 0.5rem;
   --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -35,25 +35,25 @@
 }
 
 .dark {
-  --background: #F7F2EA;
-  --foreground: #211A12;
-  --card: #FCFAF5;
+  --background: #FBFAF7;
+  --foreground: #211E1A;
+  --card: #F4F1EA;
   --card-foreground: #0a0a0a;
-  --popover: #FCFAF5;
+  --popover: #F4F1EA;
   --popover-foreground: #0a0a0a;
-  --primary: #7A2E1D;
+  --primary: #7A2E1F;
   --primary-foreground: #fafafa;
-  --secondary: #e6e1d9;
-  --secondary-foreground: #211A12;
-  --muted: #e6e1d9;
-  --muted-foreground: #6B5E4E;
-  --accent: #B5601F;
-  --accent-foreground: #ffffff;
+  --secondary: #eae8e5;
+  --secondary-foreground: #211E1A;
+  --muted: #eae8e5;
+  --muted-foreground: #6B655A;
+  --accent: #C2410C;
+  --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #E4DAC8;
-  --input: #E4DAC8;
-  --ring: #B5601F;
+  --border: #E3DDD0;
+  --input: #E3DDD0;
+  --ring: #C2410C;
   --radius: 0.5rem;
   --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -82,7 +82,7 @@ body {
 }
 .mi-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(33, 26, 18, 0.12);
+  box-shadow: 0 6px 20px rgba(33, 30, 26, 0.08);
 }
 .mi-press:active {
   transform: scale(var(--mi-tap));

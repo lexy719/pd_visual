@@ -113,6 +113,7 @@ const ART: ArtDirection = {
     bodyLineHeight: 1.6,
     pairing: 'Editorial serif display at mid weight over a neutral body — restraint and air do the work.'
   },
+  layout: { containerPx: 1152, sectionPadMin: 128, sectionPadMax: 176 },
   shotPlan: {
     world: {
       source: 'generated',

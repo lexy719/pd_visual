@@ -1,5 +1,36 @@
 [
   {
+    "id": "7be11fe0-7de4-46d7-9417-8b99b545ffa5",
+    "brief": "A small bookbindery called Verso, run by two sisters in Porto. They hand-bind editions of\n\nout-of-print Portuguese poetry — books nobody reprints because they don't sell. Each edition\n\nis 40 copies, sewn by hand, in paper they make themselves from cotton rag. Positioning: not\n\na luxury press, not a hobby — an argument that some books deserve to physically outlive their\n\ncommercial life. Mood: quiet, literary, tactile, slightly stubborn.",
+    "choices": {},
+    "createdAt": "2026-07-17T08:44:11.415Z",
+    "updatedAt": "2026-07-17T08:44:11.415Z"
+  },
+  {
+    "id": "8bbab6b1-2583-4c62-abbc-974b61613797",
+    "brief": "Refugio, a third-generation mezcal from a family palenque in Oaxaca — one bottle, one agave, premium and calm",
+    "choices": {},
+    "createdAt": "2026-07-16T21:43:37.878Z",
+    "updatedAt": "2026-07-16T21:45:13.005Z",
+    "previewUrl": "http://localhost:3001/sessions/8bbab6b1-2583-4c62-abbc-974b61613797/site/"
+  },
+  {
+    "id": "89501ed3-99b2-4388-88db-d5f1812a89bc",
+    "brief": "Refugio, a third-generation mezcal from a family palenque in Oaxaca - one bottle, one agave, premium and calm",
+    "choices": {},
+    "createdAt": "2026-07-16T21:36:10.981Z",
+    "updatedAt": "2026-07-16T21:38:06.598Z",
+    "previewUrl": "http://localhost:3001/sessions/89501ed3-99b2-4388-88db-d5f1812a89bc/site/"
+  },
+  {
+    "id": "1ceafb98-6995-4f91-a120-7c7f08d899cd",
+    "brief": "Refugio, a third-generation mezcal from a family palenque in Oaxaca — one bottle, one agave, premium and calm",
+    "choices": {},
+    "createdAt": "2026-07-16T12:40:14.475Z",
+    "updatedAt": "2026-07-16T12:42:39.203Z",
+    "previewUrl": "http://localhost:3001/sessions/1ceafb98-6995-4f91-a120-7c7f08d899cd/site/"
+  },
+  {
     "id": "de7a701d-4d48-40aa-90f8-ba3145e4b4c6",
     "brief": "Website Concept: AETHER\n\nIndustry\nUltra-luxury private aviation.\n\nGoal\nSell a feeling of absolute exclusivity—not jets.\n\nBrand\n\nAETHER\n\n\"Time belongs to you.\"\n\nNo discounts.\nNo pricing.\nNo booking widget above the fold.\n\nEverything should feel impossible to access.\n\nStyle\nApple cinematic quality\nSwiss typography\nAman Resorts elegance\nRolls Royce restraint\nBlack + warm ivory\nGold used only for tiny accents\nHuge whitespace\nAlmost editorial\nHero\n\nFullscreen.\n\nBackground:\n\nA private jet slowly emerging from clouds at sunrise.\n\nVery subtle.\n\nNavigation almost invisible.\n\nCenter:\n\nAETHER\n\nTime belongs to you.\n\nSmall button\n\nRequest Membership\n\nAs you scroll...\n\nThe clouds slowly separate.\n\nThe jet subtly changes perspective using parallax.\n\nSection 2\n\nInstead of features...\n\nLarge editorial text.\n\nLuxury isn't measured in leather seats.\n\nIt's measured in never waiting.\n\nHuge typography.\n\nTiny image.\n\nSection 3\n\nThree gigantic cards.\n\nGlobal Fleet\n\nMinimal jet photography.\n\nPersonal Concierge\n\nNot customer support.\n\nOne dedicated human.\n\nInvisible Logistics\n\nTransportation.\n\nHotels.\n\nSecurity.\n\nHandled before you think about them.\n\nCards animate upward while scrolling.\n\nSection 4\n\nMassive world map.\n\nThin glowing flight paths.\n\nWhen hovering cities:\n\nTokyo\n\nDubai\n\nGeneva\n\nMonaco\n\nSingapore\n\nLos Angeles\n\nEach city gently pulses.\n\nSection 5\n\nNumbers.\n\nBut presented like art.\n\n97%\n\nFlights prepared within 4 hours.\n\n52\n\nCountries served.\n\n18 min\n\nAverage departure preparation.\n\nEach number counts up.\n\nSection 6\n\nAircraft gallery.\n\nVery large horizontal scrolling section.\n\nEach aircraft occupies almost the entire screen.\n\nMinimal labels.\n\nNothing else.\n\nSection 7\n\nEditorial quote.\n\nEvery minute you wait is a minute someone else owns.\n\nHuge serif typography.\n\nSection 8\n\nMembership process.\n\nThree vertical steps.\n\n01\n\nApplication\n\n↓\n\n02\n\nReview\n\n↓\n\n03\n\nInvitation\n\nConnected by animated gold line.\n\nSection 9\n\nTestimonials\n\nNot cards.\n\nMagazine layout.\n\nPortrait.\n\nLarge quote.\n\nTiny metadata.\n\nFade between testimonials automatically.\n\nSection 10\n\nDark cinematic CTA.\n\nAlmost empty.\n\nOnly:\n\nYour next departure isn't scheduled.\n\nIt's decided.\n\nButton:\n\nRequest Membership\n\nMotion Requirements\n\nA2 should demonstrate knowledge of:\n\nlayered parallax\nfade timing\nstagger animations\nscroll-triggered reveals\nimage masking\ntext splitting\ncounters\nhorizontal scroll\ncursor interactions\nhover depth\nblur transitions\nsection-to-section pacing\nviewport choreography\nanimation restraint\nvisual rhythm",
     "choices": {},

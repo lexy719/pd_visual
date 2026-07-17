@@ -14,3 +14,6 @@ preview/app/dist/
 
 # agent LLM config (contains API key)
 .env
+
+# visual-pass evidence (screenshots + critiques) — regenerated every run, too heavy for git
+logs/visual/

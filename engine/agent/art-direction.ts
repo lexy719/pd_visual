@@ -162,14 +162,47 @@ export interface ShotPlan {
   dominantIndex: number
 }
 
+/**
+ * The locked page-level layout system: ONE container width and ONE section-padding rhythm for the
+ * whole page, emitted as enforced CSS utilities (.container-page / .section-pad) exactly like .mi.
+ * Purely deterministic from mood — numbers lifted from knowledge/guidelines/spacing.md — because a
+ * page whose sections each re-decide their padding reads as seven different designers.
+ */
+export interface LayoutSpec {
+  /** single content max-width in px */
+  containerPx: number
+  /** section vertical padding clamp bounds, px */
+  sectionPadMin: number
+  sectionPadMax: number
+}
+
+/** Per-mood committed layout — spacing.md's section-padding and density-by-mood numbers. */
+const LAYOUT_BY_MOOD: Record<string, LayoutSpec> = {
+  premium: { containerPx: 1152, sectionPadMin: 128, sectionPadMax: 176 },
+  calm: { containerPx: 1100, sectionPadMin: 128, sectionPadMax: 176 },
+  minimal: { containerPx: 1152, sectionPadMin: 96, sectionPadMax: 136 },
+  trustworthy: { containerPx: 1152, sectionPadMin: 96, sectionPadMax: 136 },
+  playful: { containerPx: 1152, sectionPadMin: 96, sectionPadMax: 144 },
+  technical: { containerPx: 1216, sectionPadMin: 80, sectionPadMax: 112 },
+  aggressive: { containerPx: 1216, sectionPadMin: 88, sectionPadMax: 128 },
+  brutalist: { containerPx: 1280, sectionPadMin: 64, sectionPadMax: 96 }
+}
+
+export function layoutForMood(mood: Mood[]): LayoutSpec {
+  for (const m of mood) if (LAYOUT_BY_MOOD[m]) return LAYOUT_BY_MOOD[m]
+  return LAYOUT_BY_MOOD.minimal
+}
+
 export interface ArtDirection {
   palette: Palette
   /** the ONE locked motion language for the whole run — gates the motion-primitive tier. */
   motion: MotionLanguage
   /** the ONE locked micro-interaction spec — hover/cursor/transition, applied via globals.css .mi classes. */
   interactions: InteractionSpec
-  /** the ONE locked type pairing — presented on the moodboard; system stacks only. */
+  /** the ONE locked type pairing — emitted into globals.css as the page's real type system. */
   typography: TypographySpec
+  /** the ONE locked container width + section-padding rhythm — emitted as .container-page/.section-pad. */
+  layout: LayoutSpec
   /** the ONE locked visual staging plan — how the page's images relate as a sequence. */
   shotPlan: ShotPlan
   rationale: string
@@ -752,5 +785,8 @@ export async function artDirect(plan: Plan, log: (m: string) => void = () => {})
     accentForeground: ensureContrast(readableOn(accent), accent, TEXT_CONTRAST)
   }
 
-  return { palette, motion, interactions, typography, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
+  // Layout system is a pure per-mood table — deterministic, no model involvement to validate.
+  const layout = layoutForMood(plan.mood)
+
+  return { palette, motion, interactions, typography, layout, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
 }

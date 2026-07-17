@@ -119,7 +119,9 @@ body {
 .eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
 .chat-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--ink); margin-top: 2px; }
 
-.chat-scroll { flex: 1; overflow-y: auto; padding: 22px 26px; display: flex; flex-direction: column; gap: 16px; }
+/* size container so the question card can budget itself against the REAL pane height (cqh) —
+   viewport units can't know how much the header/composer/feed actually left over */
+.chat-scroll { flex: 1; overflow-y: auto; padding: 22px 26px; display: flex; flex-direction: column; gap: 16px; container-type: size; }
 .msg-user {
   align-self: flex-end; max-width: 78%;
   background: var(--brown); color: var(--brown-ink); font-weight: 500;
@@ -245,11 +247,18 @@ body {
 .qcard {
   align-self: stretch; background: var(--card); border: 1px solid var(--line-2); border-radius: 16px;
   overflow: hidden; box-shadow: var(--shadow); animation: pop 0.18s ease-out;
+  display: flex; flex-direction: column;
+  /* overflow:hidden zeroes min-height for a flex child — without this the card collapses to ~0
+     inside the scrolling column (measured: 2px tall at 900x700) */
+  flex: 0 0 auto;
 }
 @keyframes pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .qcard-head { padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--soft); background: rgba(0,0,0,0.14); }
 .qcard-q { padding: 16px 16px 10px; font-size: 15px; font-weight: 600; color: var(--ink); }
-.qcard-options { display: flex; flex-direction: column; padding: 0 12px 8px; gap: 4px; }
+/* the list scrolls INSIDE the card so the question and Build/Skip buttons can never be pushed out
+   of the pane by three long concept cards. 100cqh = the pane's real height; ~190px covers the
+   card's own head + question + footer + padding, so head-to-footer always fits without scrolling. */
+.qcard-options { display: flex; flex-direction: column; padding: 0 12px 8px; gap: 4px; overflow-y: auto; max-height: max(120px, calc(100cqh - 190px)); }
 .qopt {
   display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left;
   background: transparent; border: 1px solid transparent; border-radius: 12px; padding: 11px 12px; cursor: pointer;
@@ -278,3 +287,22 @@ body {
 .qdots { display: flex; gap: 6px; }
 .qdot { width: 6px; height: 6px; border-radius: 50%; background: var(--line-2); }
 .qdot.on { background: var(--brown); width: 18px; border-radius: 3px; }
+
+/* ============ responsive ============ */
+/* Below ~1000px the 45/55 split starves the chat pane (min-width 380px + composer ≈ nothing left
+   for the conversation). Stack vertically: chat on top with its own height, preview below. */
+@media (max-width: 1000px) {
+  .workspace { flex-direction: column; overflow-y: auto; }
+  /* definite heights (flex-basis), not max-height: the pane is a size container and collapses to
+     nothing inside a content-sized parent (measured: 32px) */
+  .chat { flex: 0 0 52vh; min-width: 0; border-right: none; border-bottom: 1px solid var(--line); }
+  /* while a question/concept card is up, the conversation IS the interface — give it the room */
+  .chat:has(.qcard) { flex-basis: 82vh; }
+  .preview { flex: 1 0 40vh; }
+  .composer { padding: 10px 14px 12px; }
+  .chat-scroll { padding: 16px 14px; }
+}
+@media (max-width: 720px) {
+  .sidebar { display: none; }
+  .msg-assistant { max-width: 100%; }
+}

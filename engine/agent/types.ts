@@ -76,6 +76,8 @@ export interface SectionResult {
   themeWarnings?: string[]
   /** image-staging warnings: dynamic srcs the resolver could not rewrite — they bypass the shot plan */
   imageWarnings?: string[]
+  /** design-system warnings: the section re-decided padding/container instead of using the locked utilities */
+  designWarnings?: string[]
   /**
    * Every tier whose output failed to PARSE, with the code it produced. Recorded so a quarantine is
    * never a mystery: the writer dumps these to logs/quarantine/ as evidence. Populated only on
