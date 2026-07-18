@@ -310,6 +310,17 @@ export async function capturePage(url: string, opts?: { maxViewportShots?: numbe
       secs.forEach((s, i) => {
         const sr = s.getBoundingClientRect()
         if (sr.height < 400) return // short sections cannot hold a meaningful void
+        // A PINNED section is tall BY DESIGN: the spacer provides scroll distance while the sticky
+        // child renders across the whole of it, so the reader never sees a gap. Its DOM geometry
+        // says the opposite — the child's box sits at one offset and the rest of the spacer measures
+        // as empty. Measuring bands here flags a correctly pinned hero as catastrophically broken.
+        // Verified on a real pinned hero: DOM bands reported 25% coverage with a 1305px void, while
+        // viewport sampling through the same section showed 55-62% ink at EVERY scroll position.
+        // Nothing is wrong with it, so this heuristic must not judge it.
+        if (s.querySelector('[class*="pin-spacer"], .pin-spacer')) return
+        for (const d of s.querySelectorAll('*')) {
+          if (getComputedStyle(d).position === 'sticky') return
+        }
         const bands = []
         for (const el of s.querySelectorAll('*')) {
           const r = el.getBoundingClientRect()
