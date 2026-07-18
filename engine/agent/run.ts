@@ -12,6 +12,7 @@ import { createInterface } from 'node:readline/promises'
 import { stdin, stdout } from 'node:process'
 import { describeRhythm } from './rhythm.js'
 import { describeKit } from './kit.js'
+import { describeSurface } from './surface.js'
 import { plan } from './plan.js'
 import { artDirect } from './art-direction.js'
 import { generateSections } from './generate.js'
@@ -70,6 +71,8 @@ async function main(): Promise<void> {
   console.log(`  rhythm    \x1b[36m${describeRhythm(art.rhythm)}\x1b[0m  (page pacing: ▁tight ▄normal █open)`)
   console.log(`  kit       \x1b[36m${describeKit(art.kit)}\x1b[0m  (this project's own components, emitted as CSS)`)
   console.log(`  \x1b[2m${art.kit.rationale}\x1b[0m`)
+  console.log(`  surface   \x1b[36m${describeSurface(art.surface)}\x1b[0m`)
+  console.log(`  \x1b[2m${art.surface.rationale}\x1b[0m`)
   const mi = art.interactions
   console.log(`  interact  \x1b[36m${mi.durationMs}ms\x1b[0m ${mi.easing}  hover:\x1b[36m${mi.hoverTransform}\x1b[0m  tap:${mi.tapScale}  cursor:${mi.cursor}  (locked)`)
   console.log(`  \x1b[2m${art.rationale}\x1b[0m`)

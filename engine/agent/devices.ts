@@ -131,7 +131,9 @@ html { overflow-x: clip; }
 /* dev-feature-grid — uniform cards that COMPLETE their rows (auto-fit prevents the ragged trailing
    gap that reads as a broken layout). SaaS/product furniture. */
 .dev-feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: clamp(16px, 2vw, 28px); }
-.dev-feature-grid > * { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: clamp(20px, 2.4vw, 32px); }
+/* Consumes the run's committed SURFACE LANGUAGE rather than hardcoding a bordered card, so changing
+   the surface commitment re-skins every feature cell on the page at once. */
+.dev-feature-grid > * { background: var(--s-surface-bg, var(--card)); border: var(--s-surface-border, 1px solid var(--border)); box-shadow: var(--s-surface-ring, 0 0 0 0 transparent), var(--s-shadow, 0 0 0 0 transparent); border-radius: var(--kit-radius, var(--radius)); padding: clamp(20px, 2.4vw, 32px); }
 
 /* dev-logo-wall — evenly spaced wordmarks; text, never images (a row of mismatched logo files is
    the cheapest-looking element on the web). */
@@ -139,7 +141,7 @@ html { overflow-x: clip; }
 .dev-logo-wall > * { font-weight: 600; letter-spacing: 0.02em; color: var(--muted-foreground); }
 
 /* dev-frame — a matted frame around media. Repeating one frame treatment is a craft signal. */
-.dev-frame { padding: clamp(8px, 1vw, 14px); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+.dev-frame { padding: clamp(8px, 1vw, 14px); background: var(--s-surface-bg, var(--card)); border: var(--s-surface-border, 1px solid var(--border)); box-shadow: var(--s-surface-ring, 0 0 0 0 transparent), var(--s-shadow, 0 0 0 0 transparent); border-radius: var(--kit-radius, var(--radius)); }
 
 /* dev-side-rail — a sticky label/nav column beside long content. The single most effective cure for
    a long scrolling section that loses the reader: the rail holds position while the content moves.
@@ -178,7 +180,7 @@ html { overflow-x: clip; }
    whole point: an undifferentiated row of three prices makes the reader do the work, which is how a
    pricing section fails. Add dev-price-featured to exactly one child. */
 .dev-price-table { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: clamp(16px, 2vw, 24px); align-items: stretch; }
-.dev-price-table > * { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: clamp(24px, 2.6vw, 36px); }
+.dev-price-table > * { display: flex; flex-direction: column; background: var(--s-surface-bg, var(--card)); border: var(--s-surface-border, 1px solid var(--border)); box-shadow: var(--s-surface-ring, 0 0 0 0 transparent), var(--s-shadow, 0 0 0 0 transparent); border-radius: var(--kit-radius, var(--radius)); padding: clamp(24px, 2.6vw, 36px); }
 .dev-price-table > .dev-price-featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .dev-price-table .dev-price-n { font-family: var(--font-display); font-size: clamp(32px, 3.4vw, 48px); line-height: 1; letter-spacing: -0.02em; color: var(--foreground); display: block; }
 .dev-price-table .dev-price-p { font-size: 13px; color: var(--muted-foreground); margin-top: 6px; display: block; }

@@ -17,6 +17,7 @@ import type { MotionLanguage, Register, SearchHit } from '../types.js'
 import type { Mood, Plan } from './types.js'
 import { planRhythm, type RhythmPlan } from './rhythm.js'
 import { clampKit, type KitSpec } from './kit.js'
+import { clampSurface, type SurfaceSpec } from './surface.js'
 import { ensureContrast, hslToHex, isHex, mixHex, readableOn, saturation } from './color.js'
 
 /** The 7 committed values the model synthesizes. The rest are derived deterministically. */
@@ -259,6 +260,8 @@ export interface ArtDirection {
   layout: LayoutSpec
   /** this project's OWN component form, emitted as real CSS before any section (see kit.ts) */
   kit: KitSpec
+  /** how this project makes a surface and where its light falls (see surface.ts) */
+  surface: SurfaceSpec
   /** page-level vertical pacing — decided once, stamped per section (see rhythm.ts) */
   rhythm: RhythmPlan
   /** the ONE locked visual staging plan — how the page's images relate as a sequence. */
@@ -600,6 +603,15 @@ Respond with ONLY JSON in this exact shape (every color a #rrggbb hex):
     "bodyLineHeight": <body leading, 1.5-1.65>,
     "pairing": "one line: why this display+body pairing fits THIS brand"
   },
+  "surface": {
+    "surface": "<one of: inset-ring | hairline | shadow-stack | tint | glass | flat>",
+    "elevation": "<one of: none | hairline | soft | deep>",
+    "light": "<one of: none | radial-glow | gradient-mesh | top-sheen>",
+    "blend": "<one of: none | overlay | multiply | lighten | hard-light>",
+    "edgeFade": "<one of: none | fade-bottom | fade-both | spotlight>",
+    "texture": "<one of: none | noise | scanline>",
+    "rationale": "one line: why this surface language suits THIS brief"
+  },
   "kit": {
     "corner": "<one of: square | soft | pill>",
     "button": "<one of: solid | outline | split-cell | underline>",
@@ -639,6 +651,14 @@ RULES:
   premium/editorial → ratio 1.333-1.414, weight 500-600 (restraint reads as expensive; heaviness reads as
   loud — do NOT go heavy here). minimal → ratio 1.25, tracking -0.03em. technical/trustworthy/calm →
   ratio 1.2. Body weight is never below 400, body leading 1.5-1.65.
+- "surface" is HOW THIS PROJECT MAKES A SURFACE, and where its light comes from. It decides the page's
+  identity far more than button shape does. "inset-ring" (a 1px ring INSIDE the box) reads crisp and
+  screen-native; "hairline" is a classic bordered card; "shadow-stack" floats objects above the page;
+  "tint" and "flat" are the most restrained; "glass" blurs what is behind it. "light" adds a decorative
+  source — a soft off-centre glow, an overlapping colour mesh, or a shallow sheen on the top edge —
+  and "blend" only applies when there IS a light. "edgeFade" masks a section so it dissolves into the
+  next instead of stopping. Choose "none" freely: a page with no glow and no texture is a legitimate
+  and often better decision than one with both.
 - "kit" is THIS PROJECT'S component form, committed once and then built as real CSS before any section
   exists. It is not a preset: choose the combination that suits THIS brief. A hand-forged-knife story and
   an enterprise dashboard should not share a button. Square corners + outline/underline read instrument-like
@@ -869,6 +889,8 @@ export async function artDirect(plan: Plan, log: (m: string) => void = () => {})
   // The project kit: model commits within a closed grammar, we validate and emit it as real code.
   const { kit, adjustments: kitAdj } = clampKit((raw as { kit?: unknown }).kit, plan.mood, plan.register)
   adjustments.push(...kitAdj)
+  const { surface, adjustments: surfAdj } = clampSurface((raw as { surface?: unknown }).surface, plan.mood)
+  adjustments.push(...surfAdj)
 
-  return { palette, motion, interactions, typography, layout, kit, rhythm, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
+  return { palette, motion, interactions, typography, layout, kit, surface, rhythm, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
 }

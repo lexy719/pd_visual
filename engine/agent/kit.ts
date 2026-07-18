@@ -258,8 +258,11 @@ ${hasIcon ? `.c-link::after { content: ${iconGlyph}; display: inline-block; marg
 .c-tile {
   display: grid; place-items: center; padding: ${pad.x};
   border-radius: var(--kit-radius);
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
-  ${kit.edge === 'hairline' ? 'border: 1px solid var(--rule);' : kit.edge === 'rule' ? 'border-top: 1px solid var(--rule);' : ''}
+  /* Uses the run's committed surface language, so a tile is made the same way every other surface
+     on the page is made — that consistency is what a unified logo wall depends on. */
+  background: var(--s-surface-bg, color-mix(in srgb, var(--ink) 6%, transparent));
+  border: var(--s-surface-border, 0);
+  box-shadow: var(--s-surface-ring, 0 0 0 0 transparent), var(--s-shadow, 0 0 0 0 transparent);
 }
 
 /* SURFACE EDGE — how any two areas separate, committed once. */

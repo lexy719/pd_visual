@@ -79,6 +79,7 @@ const WF: Wireframe = {
 
 const ART: ArtDirection = {
   // Static kit: this fixture asserts the wireframe RENDERER, not the kit synthesis (own test).
+  surface: { surface: 'inset-ring', elevation: 'hairline', light: 'radial-glow', blend: 'none', edgeFade: 'none', texture: 'none', rationale: 'fixture' },
   kit: { corner: 'square', button: 'outline', icon: 'arrow', edge: 'hairline', eyebrow: 'mono-tracked', density: 'regular', rationale: 'fixture' },
   // Static rhythm: this fixture asserts the wireframe RENDERER, not the rhythm planner (which
   // has its own test). A literal keeps the two independent.
