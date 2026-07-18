@@ -131,3 +131,93 @@ sections:
        ↳ pre-warm 1/4 ok (1s — generating fresh imagery, ~1min each)
        ↳ pre-warm 2/4 ok (44s — generating fresh imagery, ~1min each)
        ↳ pre-warm 3/4 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 4/4 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm: 4/4 image(s) verified real, 1 dynamic skipped
+       ↳ [33mimage resolution[0m: provider returned 1024px wide for a 1440px request (it caps near 0.59MP). Generated imagery is only sharp inside container-page, never full-bleed.
+
+[1m── SELF-CRITIQUE ───────────────────────────────────────────[0m
+[2m  reviewing [0] masthead…[0m
+[2m  reviewing [1] the-ore…[0m
+[2m  reviewing [2] day-one-fire…[0m
+[2m  reviewing [3] day-two-three-patience…[0m
+[2m  reviewing [4] day-four-the-edge…[0m
+[2m  reviewing [5] why-it-outlives-you…[0m
+[2m  reviewing [6] the-smith…[0m
+[2m  reviewing [7] acquire…[0m
+[2m  reviewing [8] close…[0m
+  [31mFLAG[0m [0:masthead] uses pinned-crossfade, which carries a known caveat: "Two-panel pinned crossfade on the proven @bsmnt/scrollytelling rail (same as kinetic-text-split). Panel one dissolves into panel two while t"
+  [33mwarn[0m [5:why-it-outlives-you] no obvious vertical padding — guideline wants 96-140px section padding.
+  [31mFLAG[0m [7:acquire] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [31mFLAG[0m [8:close] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [33mwarn[0m [1:the-ore] reveal elements have no defined CSS transition/duration shown; if implemented elsewhere, must confirm 260ms + standard-out easing is actually applied, not just a visibility toggle — code shows only a boolean state with no animation class change verified
+  [33mwarn[0m [1:the-ore] 'dev-overlap' class name suggests a dev/debug artifact left in production markup
+  [33mwarn[0m [1:the-ore] quote card uses bg-card/border which may introduce a second surface color beyond monochrome+accent scheme — needs contrast/saturation check
+  [33mwarn[0m [1:the-ore] no visible focus states or interactive affordance for reveal-triggering container despite being interactive via IntersectionObserver
+  [33mwarn[0m [2:day-one-fire] Fire/forge theme (orange glow imagery, 'sparks', dramatic narrative) conflicts with calm/wellness monochrome+desaturated-accent color rule — content pushes high-saturation warm tones over the ~45% saturation cap
+  [33mwarn[0m [2:day-one-fire] 'text-primary' tag color plus card 'mi mi-lift' hover treatment risk exceeding the single desaturated-accent rule if primary is saturated; no evidence primary is desaturated
+  [33mwarn[0m [2:day-one-fire] No visible transition/duration declaration tying reveal or mi-lift hover to the committed 260ms standard-out easing — motion spec not confirmed in code
+  [33mwarn[0m [2:day-one-fire] Section uses mb-14 (56px) and mt-20 (80px) internal spacing, short of the 140–180px generous section rhythm required by the calm/premium spacing rule
+  [33mwarn[0m [3:day-two-three-patience] Transition duration is 600ms, violating the committed 260ms standard-out timing.
+  [33mwarn[0m [3:day-two-three-patience] Inline <style> block re-injected per mapped item, duplicating global CSS rules and risking cascade conflicts.
+  [33mwarn[0m [3:day-two-three-patience] No spacing scale evidence for 140-180px section padding or 32px+ card padding; relies on undefined 'section-pad' and 'dev-offset-grid' classes.
+  [33mwarn[0m [3:day-two-three-patience] keyword field ('quench-tank-steel', etc.) appears to be unused image/alt metadata, suggesting missing image alt text and accessibility gap.
+  [33mwarn[0m [4:day-four-the-edge] Card padding p-8 (32px) meets minimum but on mobile likely below 32px+ generous standard; combined with dev-overlap layout may reduce effective whitespace below the 140–180px section target — section-pad utility not verifiable to meet that range.
+  [33mwarn[0m [4:day-four-the-edge] Last paragraph uses text-primary as a color accent purely for emphasis, adding a second accent color beyond the monochrome/analogous + single desaturated accent rule.
+  [33mwarn[0m [4:day-four-the-edge] No explicit transition/duration/easing classes applied to the reveal animation — cannot confirm 260ms cubic-bezier(0.22,1,...) standard-out is used, only a CSS class toggle 'revealed' with no visible timing definition in this file.
+  [33mwarn[0m [4:day-four-the-edge] Image alt text is overly narrative/descriptive rather than concise, but more importantly no empty alt or aria consideration for decorative overlap framing.
+  [33mwarn[0m [5:why-it-outlives-you] Blockquote uses literal straight quotation marks (") instead of typographic quotes, and attribution isn't marked up semantically (no <cite>), weakening editorial polish.
+  [33mwarn[0m [5:why-it-outlives-you] mt-20 and mt-24 spacing values break the 'generous' spacing scale pattern (140-180px sections) implied by the rules; these are much smaller ad-hoc jumps rather than part of a consistent scale.
+  [33mwarn[0m [5:why-it-outlives-you] max-w-[70ch] wrapper exceeds the specified 65ch measure rule for premium/calm body copy.
+  [33mwarn[0m [5:why-it-outlives-you] No visible focus states or alt text shown for the image; img is missing an alt attribute in the snippet, failing accessibility.
+  [33mwarn[0m [6:the-smith] Card overlaps image via 'dev-overlap' with no defined offset spacing token, risking spacing scale violation against the 32px+ card padding rule if the overlap amount isn't part of the scale.
+  [33mwarn[0m [6:the-smith] Heading 'Elias Corry, forty-one years at one anvil' uses default h2 sizing with no explicit hierarchy confirmation against body text — cannot verify sufficient type scale contrast from code alone.
+  [33mwarn[0m [6:the-smith] text-primary tag label plus bg-card/border introduces a second surface color and accent on top of image, risking more than one accent against the monochrome + single desaturated accent rule.
+  [33mwarn[0m [6:the-smith] No explicit transition/duration/easing classes shown for the reveal state (relies on 'mi'/'reveal' utility classes not defined here) — cannot confirm 260ms standard-out easing is applied.
+  [33mwarn[0m [8:close] No CTA or next action in a closing section — page ends without navigation/conversion path, unusual for a commerce/editorial close.
+  [33mwarn[0m [8:close] White text on parallax image has no scrim/overlay guarantee; contrast against a bright section of the photo could fail WCAG AA depending on image content.
+  [33mwarn[0m [8:close] text-white/50 and text-white/60 on a photographic background risk contrast well below 4.5:1, failing accessibility for body/attribution text.
+  [33mwarn[0m [8:close] Two near-duplicate hero-style images (parallax + boxed shot) in one closing section undercuts the restraint/whitespace-as-signal principle — redundant visual weight instead of generous negative space.
+
+[1m── WRITE  → preview/app ────────────────────────────────────[0m
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+       ↳ visual critique: 5 defect(s) — 4 actionable (1 minor)
+         [blocking] s7 overflow: MEASURED (DOM, not vision): page scrollWidth 1328px > viewport 1280px; widest offender <div> spans x -192..147
+         [major] s8 dead-zone: MEASURED (DOM, not vision): half-empty-grid in <section.section-pad.rhythm-normal.vol-normal.reveal> — content
+         [major] s6 dead-zone: MEASURED (DOM, not vision): half-empty-grid in <section.section-pad.bg-background.rhythm-open.vol-normal> — co
+         [minor] s4 dead-zone: viewport-10225 shows large empty beige space below the two-paragraph text block, with no content until the ima
+         [major] s2 dead-zone: viewport-3408 shows an empty bordered box on the left (roughly x0-850,y580-800+) with no image or caption cont
+       ↳ revised section 7 (1 defect(s))
+       ↳ revised section 8 (1 defect(s))
+       ↳ revised section 6 (1 defect(s))
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+       ↳ section 7 did not improve on re-critique — original restored
+       ↳ section 8 did not improve on re-critique — original restored
+       ↳ section 6 improved: 1 → 0 actionable defect(s)
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+  [31mVISUAL[0m shipped WITH 4 visible defect(s) after the revise pass:
+  [31m      [0m [blocking] s7 overflow: MEASURED (DOM, not vision): page scrollWidth 1328px > viewport 1280px; widest offender <div> spans x
+  [31m      [0m [major] s8 dead-zone: MEASURED (DOM, not vision): half-empty-grid in <section.section-pad.rhythm-normal.vol-normal.reveal>
+  [31m      [0m [major] s3 dead-zone: In viewport-10112, the right column shows a large empty tinted panel (roughly from y=0 to y=115) abo
+  [31m      [0m [major] s5 dead-zone: viewport-13482 shows almost the entire viewport (from top nav to footer) as empty cream background w
+  [31m      [0m screenshots + critiques: logs\visual\2026-07-18T21-22-49-004Z
+  9 sections  (3 motion-primitive, 6 from scratch)
+  primitives: pinned-crossfade, parallax-depth
+  [36mTIERS[0m  plan/art-direction/questions: [35m[reasoning][0m claude-sonnet-5
+         sections: 4 [36m[bulk][0m, 5 [33m[bulk→escalated][0m (repaired on claude-sonnet-5)
+           [0] masthead/cinematic → [36m[bulk][0m
+           [1] the-ore/editorial → [33m[bulk→escalated][0m
+           [2] day-one-fire/narrative → [33m[bulk→escalated][0m
+           [3] day-two-three-patience/timeline → [36m[bulk][0m
+           [4] day-four-the-edge/asymmetric → [33m[bulk→escalated][0m
+           [5] why-it-outlives-you/editorial → [33m[bulk→escalated][0m
+           [6] the-smith/asymmetric → [33m[bulk→escalated][0m
+           [7] acquire/editorial → [36m[bulk][0m
+           [8] close/editorial → [36m[bulk][0m
+  deps:       @bsmnt/scrollytelling, gsap, motion, motion/react
+  files:      15 written under preview/app/src
+  [36mMOTION[0m [0:masthead] wrapped by motion-primitive pinned-crossfade
+  [36mMOTION[0m [7:acquire] wrapped by motion-primitive parallax-depth
+  [36mMOTION[0m [8:close] wrapped by motion-primitive parallax-depth
+  [36mIMAGES[0m upgraded 13 placeholder(s) to on-theme imagery (Unsplash or Flux-generated).
+
+--no-serve: page written. Start it with:  cd preview/app && npm run dev

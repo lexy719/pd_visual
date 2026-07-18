@@ -504,7 +504,10 @@ h3 { font-size: ${css(h.h3)}; }
 /*
  * GENERATED PER RUN — the LOCKED LAYOUT SYSTEM. One container width, one section-padding rhythm
  * for the whole page (spacing.md numbers per mood). Sections apply these instead of inventing
- * py-*/max-w-* per section — a page whose sections each re-decide spacing reads as seven designers.
+ * per-section padding or widths — a page whose sections each re-decide spacing reads as seven
+ * designers. (Do NOT write a Tailwind glob like py-star-slash-max-w here: the slash after a star
+ * closes this comment early, and the text that follows silently swallows the NEXT rule. That exact
+ * typo disabled .container-page on every run ever generated.)
  */
 .container-page { max-width: var(--container); margin-inline: auto; padding-inline: clamp(20px, 4vw, 48px); }
 .section-pad { padding-block: var(--section-pad); }

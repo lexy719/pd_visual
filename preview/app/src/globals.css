@@ -9,68 +9,68 @@
  * gradient stay valid.
  */
 :root {
-  --background: #F7F8F7;
-  --foreground: #12181A;
+  --background: #FAF7F2;
+  --foreground: #1C1811;
   --card: #FFFFFF;
   --card-foreground: #0a0a0a;
   --popover: #FFFFFF;
   --popover-foreground: #0a0a0a;
-  --primary: #0E4D44;
+  --primary: #1C1811;
   --primary-foreground: #fafafa;
-  --secondary: #e5e6e5;
-  --secondary-foreground: #12181A;
-  --muted: #e5e6e5;
-  --muted-foreground: #5B6864;
-  --accent: #E35B2E;
-  --accent-foreground: #0a0a0a;
+  --secondary: #e8e5e0;
+  --secondary-foreground: #1C1811;
+  --muted: #e8e5e0;
+  --muted-foreground: #6B6153;
+  --accent: #6E1E1A;
+  --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #DDE3E0;
-  --input: #DDE3E0;
-  --ring: #E35B2E;
+  --border: #E4DDD0;
+  --input: #E4DDD0;
+  --ring: #6E1E1A;
   --radius: 0.5rem;
-  --mi-dur: 200ms;
+  --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --mi-tap: 0.98;
-  --font-display: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --container: 1280px;
-  --section-pad: clamp(66px, 14vh, 92px);
+  --container: 1088px;
+  --section-pad: clamp(156px, 14vh, 215px);
   /* Base h2 size. The rhythm's .vol-* classes rescale THIS, which cascades to the section's h2. */
-  --h2-base: clamp(26px, 4vw, 30px);
+  --h2-base: clamp(37px, 4vw, 47px);
   --h2: var(--h2-base);
 }
 
 .dark {
-  --background: #F7F8F7;
-  --foreground: #12181A;
+  --background: #FAF7F2;
+  --foreground: #1C1811;
   --card: #FFFFFF;
   --card-foreground: #0a0a0a;
   --popover: #FFFFFF;
   --popover-foreground: #0a0a0a;
-  --primary: #0E4D44;
+  --primary: #1C1811;
   --primary-foreground: #fafafa;
-  --secondary: #e5e6e5;
-  --secondary-foreground: #12181A;
-  --muted: #e5e6e5;
-  --muted-foreground: #5B6864;
-  --accent: #E35B2E;
-  --accent-foreground: #0a0a0a;
+  --secondary: #e8e5e0;
+  --secondary-foreground: #1C1811;
+  --muted: #e8e5e0;
+  --muted-foreground: #6B6153;
+  --accent: #6E1E1A;
+  --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #DDE3E0;
-  --input: #DDE3E0;
-  --ring: #E35B2E;
+  --border: #E4DDD0;
+  --input: #E4DDD0;
+  --ring: #6E1E1A;
   --radius: 0.5rem;
-  --mi-dur: 200ms;
+  --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --mi-tap: 0.98;
-  --font-display: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --container: 1280px;
-  --section-pad: clamp(66px, 14vh, 92px);
+  --container: 1088px;
+  --section-pad: clamp(156px, 14vh, 215px);
   /* Base h2 size. The rhythm's .vol-* classes rescale THIS, which cascades to the section's h2. */
-  --h2-base: clamp(26px, 4vw, 30px);
+  --h2-base: clamp(37px, 4vw, 47px);
   --h2: var(--h2-base);
 }
 
@@ -90,27 +90,27 @@ body {
   color: var(--foreground);
   font-family: var(--font-body);
   font-weight: 400;
-  line-height: 1.55;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 h1, h2, h3 {
   font-family: var(--font-display) !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   letter-spacing: -0.01em !important;
-  line-height: 1.1 !important;
+  line-height: 1.05 !important;
   margin: 0;
 }
-h1 { font-size: clamp(32px, 6.5vw, 44px) !important; }
+h1 { font-size: clamp(50px, 6.5vw, 83px) !important; }
 /* h2 reads its size from a custom property so the page RHYTHM can bend it per section (.vol-*).
    The !important still locks it against per-section utility classes; only the run's own rhythm,
    which sets --h2 on the section root, can move it. */
 h2 { font-size: var(--h2) !important; }
-h3 { font-size: 24px; }
+h3 { font-size: 32px; }
 
 /*
  * GENERATED PER RUN — the LOCKED LAYOUT SYSTEM. One container width, one section-padding rhythm
  * for the whole page (spacing.md numbers per mood). Sections apply these instead of inventing
- * py-*/max-w-* per section — a page whose sections each re-decide spacing reads as seven designers.
+ * per-section padding or widths — a page whose sections each re-decide spacing reads as seven designers.
  */
 .container-page { max-width: var(--container); margin-inline: auto; padding-inline: clamp(20px, 4vw, 48px); }
 .section-pad { padding-block: var(--section-pad); }
@@ -164,6 +164,35 @@ html.lenis, html.lenis body { height: auto; }
 
 
 /*
+ * GENERATED PER RUN — the locked entrance. Scroll-driven and CSS-only: no observer, no rAF, nothing
+ * to hydrate. Sections carry .reveal; nothing else may hand-roll an entrance.
+ *
+ * The hidden state exists ONLY inside @supports, so a browser without scroll-driven animation shows
+ * the content outright rather than hiding it with no way to bring it back.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes reveal-rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      animation: reveal-rise both cubic-bezier(0.22, 1, 0.36, 1);
+      animation-timeline: view();
+      animation-range: entry 10% cover 26%;
+    }
+    /* Staggering children reads as considered rather than mechanical: each child runs on its OWN
+       view timeline, so the offset comes from real position on screen, not an invented delay. */
+    .reveal-children > * {
+      animation: reveal-rise both cubic-bezier(0.22, 1, 0.36, 1);
+      animation-timeline: view();
+      animation-range: entry 10% cover 26%;
+    }
+  }
+}
+
+
+/*
  * ============================ COMPOSITION DEVICES ============================
  * The repertoire. Rules elsewhere say what NOT to do; these are the positive devices that create
  * depth, tension and hierarchy — the difference between a correct page and a designed one. They are
@@ -196,8 +225,12 @@ html { overflow-x: clip; }
 
 /* dev-quote-break — a pull-quote that breaks OUT of the text measure, the classic editorial tension
    device. Large enough to read as intentional (never a 4px near-miss). */
-.dev-quote-break { position: relative; margin-inline: clamp(-64px, -4vw, -16px); padding-inline: clamp(16px, 4vw, 64px); border-left: 2px solid var(--accent); }
-@media (max-width: 820px) { .dev-quote-break { margin-inline: 0; } }
+/* The escape is tied to the container's OWN padding and can never exceed it. Independent clamps
+   were a latent overflow: -4vw can outgrow a 48px-capped padding, so on a wide viewport the quote
+   punched out of the page. Measured live: scrollWidth 1331px against a 1280px viewport, reported as
+   a blocking defect. Using the identical expression makes the two cancel exactly. */
+.dev-quote-break { position: relative; margin-inline: calc(-1 * clamp(20px, 4vw, 48px)); padding-inline: clamp(20px, 4vw, 48px); border-left: 2px solid var(--accent); }
+@media (max-width: 820px) { .dev-quote-break { margin-inline: 0; padding-inline: 16px; } }
 
 /* dev-bleed — escape the container to the full viewport width, safely (html clips the excess).
    One bleed per page: the device works by contrast with everything that respects the container. */
@@ -275,8 +308,8 @@ html { overflow-x: clip; }
   cursor: pointer;
 }
 .mi-lift:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 1px 0 rgba(14,77,68,0.15), 0 4px 12px rgba(18,24,26,0.06);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(28, 24, 17, 0.08);
 }
 .mi-press:active {
   transform: scale(var(--mi-tap));
