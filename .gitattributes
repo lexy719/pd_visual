@@ -1,0 +1,16 @@
+# Force LF in the working tree, overriding core.autocrlf=true.
+#
+# With autocrlf on, git rewrites these files to CRLF on checkout. That breaks exact-match editing
+# (Edit fails against text that Read displays verbatim), makes grep report sources as binary, and
+# fails `npm run check:bytes`. See CLAUDE.md.
+* text=auto eol=lf
+
+# Binary — never touch line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.db binary
+*.sqlite binary
