@@ -15,7 +15,7 @@ import { parseError } from './writer.js'
 import { queryKnowledge, retrieveForSection } from '../retrieval/query.js'
 import type { Composition, ComponentDoc, MotionPrimitiveDoc, SearchHit } from '../types.js'
 import { SCALE_ASPECT } from './art-direction.js'
-import { DEFAULT_DEVICE, DEVICE_NAMES, DEVICE_RE } from './devices.js'
+import { DEFAULT_DEVICE, DEVICE_NAMES, DEVICE_RE, unknownDeviceClasses } from './devices.js'
 import type { ArtDirection, InteractionSpec, ShotBeat, ShotPlan, ShotScale, ShotWorld } from './art-direction.js'
 import type { Plan, SectionPlan, SectionResult } from './types.js'
 
@@ -597,6 +597,15 @@ export function lintDesign(code: string): string[] {
   // The robust tell is the CONTAINER, not the children: a multi-column grid or a wrapping flex row
   // is a section arranging siblings itself. If it does that with no device, it is hand-rolling
   // geometry the page already owns.
+  // A hallucinated device is worse than no device: the class is inert, nothing errors, and the
+  // section looks compliant to every other check while rendering as unstyled blocks.
+  const invented = unknownDeviceClasses(code)
+  if (invented.length) {
+    warns.push(
+      `invented device class${invented.length > 1 ? 'es' : ''} ${invented.join(', ')} — no such class exists, so it does nothing. Use one of: ${DEVICE_NAMES.join(', ')}`
+    )
+  }
+
   const hasDevice = DEVICE_RE.test(code)
   const cardLiterals = (code.match(/className="[^"]*\b(rounded-|border |bg-card)/g) ?? []).length
   const handRolledGrid = /className="[^"]*\bgrid-cols-(?:[2-9]|1[0-2])\b/.test(code) || /className="[^"]*\b(?:sm|md|lg|xl):grid-cols-(?:[2-9]|1[0-2])\b/.test(code)

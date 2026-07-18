@@ -56,6 +56,24 @@ check('a cinematic section leans open', fit.beats[3]!.density === 'open')
 const near = planRhythm([S('gallery', 'lg'), S('editorial', 'xl'), S('gallery', 'lg')])
 check('no second loud section adjacent to the peak', near.beats.filter((b) => b.volume === 'loud').length === 1)
 
+// REGRESSION — the real Kettle v3 plan shipped TWO loud headings. Every earlier fixture used 'md'
+// for non-peak sections, so nothing exercised a page with several high-emphasis sections, which is
+// exactly the shape a planner produces in practice. A page with two scale jumps has none.
+const kettleV3 = [
+  S('cinematic', 'lg'), S('narrative', 'md'), S('timeline', 'xl'), S('modular', 'lg'),
+  S('editorial', 'md'), S('editorial', 'sm'), S('asymmetric', 'md')
+]
+const v3 = planRhythm(kettleV3)
+check('the real v3 plan yields exactly one loud section', v3.beats.filter((b) => b.volume === 'loud').length === 1, `got ${v3.beats.filter((b) => b.volume === 'loud').length}`)
+check('the loud one IS the peak', v3.beats[v3.peakIndex]!.volume === 'loud')
+
+// Stress: many high-emphasis sections must still yield exactly one loud.
+for (const n of [4, 7, 10]) {
+  const loud = planRhythm(Array.from({ length: n }, (_, i) => S(i % 2 ? 'gallery' : 'cinematic', i === 1 ? 'xl' : 'lg')))
+    .beats.filter((b) => b.volume === 'loud').length
+  check(`${n} all-high-emphasis sections -> still exactly one loud`, loud === 1, `got ${loud}`)
+}
+
 // Empty and single-section pages must not throw or produce nonsense.
 check('empty plan is safe', planRhythm([]).beats.length === 0)
 check('single section is its own peak', planRhythm([S('editorial', 'md')]).peakIndex === 0)

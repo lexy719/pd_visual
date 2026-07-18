@@ -1,0 +1,177 @@
+
+brief:      "Kettle — deployment monitoring for small engineering teams. Shows what changed, what broke, and who to ask. Free for up to 3 services. Mood: technical, trustworthy."
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-sonnet-5   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+brand:  Kettle
+mood:   technical, trustworthy
+layout: product-proof, bento-grid, progressive-trust
+sections:
+  0. the-page-that-would-have-mattered [36mcinematic[0m/lg  Open with a concrete deploy-gone-wrong moment: a timeline showing a deploy, then an error spike, then the exact commit and person responsible, rendered as a real product screenshot rather than a claim.
+  1. before-kettle    [36mnarrative[0m/md  Name the actual cost small teams pay today: a Slack thread of 'did anyone deploy?', a war room with no clear owner, minutes lost to guessing.
+  2. what-changed-what-broke-who-to-ask [36mtimeline[0m/xl  Walk through the three-part product promise as a literal before/after workflow transition: commit lands, service health updates, owner is surfaced automatically.
+  3. instrumentation  [36mmodular[0m/lg  Show the unequal-weight feature set: the hero capability is automatic root-cause correlation; secondary cells cover integrations, alerting, and audit history.
+  4. how-a-team-actually-uses-it [36meditorial[0m/md  Give a short, specific engineering-team scenario (3-person startup, a Friday deploy, a broken payment webhook) to earn trust through plausibility rather than testimonial marketing.
+  5. the-quiet-guarantee [36meditorial[0m/sm  Address trust and adoption friction directly: data retention, no-agent-on-prod-code claims, and what happens to your data if you cancel.
+  6. free-for-three   [36masymmetric[0m/md  State the concrete pricing offer plainly: free up to 3 services, flat per-service pricing beyond that, one CTA to start monitoring.
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated, subject="Kettle's dark-mode web dashboard UI showing a depl" · establishing → medium → detail → wide → detail → medium → detail[0m
+  primary   [48;2;14;77;68m   [0m #0E4D44
+  accent    [48;2;227;91;46m   [0m #E35B2E
+  bg / fg   [48;2;247;248;247m   [0m #F7F8F7  /  [48;2;18;24;26m   [0m #12181A
+  card/bord [48;2;255;255;255m   [0m #FFFFFF  /  [48;2;221;227;224m   [0m #DDE3E0
+  motion    [36msubtle[0m  (locked for the whole run)
+  rhythm    [36m█▄█▁▄▁▄  peak@2[0m  (page pacing: ▁tight ▄normal █open)
+  interact  [36m200ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-1px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2mA deep teal-green primary against a near-white paper background reads as instrumented and calm, one saturated amber-orange accent marks the exact moments (errors, owners, CTAs) that deserve attention, and the restrained 200ms/1px interaction contract plus subtle motion says 'nothing here is trying to sell you something' — the core trustworthy-mood principle of measured, un-sudden feedback.[0m
+  [2manchors: Calm / wellness / health, premium / calm micro-interactions, trustworthy / fintech micro-interactions, transition discipline, Type scale ratios by mood, Calm / wellness typography, Trustworthy / fintech typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, PP Neue Montreal — throughline, Bucks Sauce — Reviews section uses a hand-lettered, sketchy outline t…[0m
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Kettle  ·  technical/trustworthy  ·  product-proof
+  motion: subtle   palette: Ember
+┌──────────────────────────────────────────────────┐
+│ the-page-that-would-have-mattered  ·  cinematic  │
+│   ↳ Open with a concrete deploy-gone-wrong momen │
+│     media: Full-width screenshot of Kettle's tim │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ before-kettle  ·  narrative  ·  Container and gr │
+│   ↳ Name the actual cost small teams pay today:  │
+│     media: Side-by-side: a chaotic Slack scroll  │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ what-changed-what-broke-who-to-ask  ·  timeline  │
+│   ↳ Walk through the three-part product promise  │
+│     media: Vertical sequence of three real produ │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ instrumentation  ·  modular  ·  bento-grid       │
+│   ↳ Show the unequal-weight feature set: the her │
+│     media: Bento grid: one large cell with a liv │
+│   [--] [--] [--]                                 │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ how-a-team-actually-uses-it  ·  editorial  ·  sp │
+│   ↳ Give a short, specific engineering-team scen │
+│     media: Single annotated screenshot with call │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-quiet-guarantee  ·  editorial  ·  Premium /  │
+│   ↳ Address trust and adoption friction directly │
+│   [--] [--]                                      │
+├──────────────────────────────────────────────────┤
+│ free-for-three  ·  asymmetric  ·  asymmetric-gri │
+│   ↳ State the concrete pricing offer plainly: fr │
+│     media: Small pricing table pinned to one sid │
+│   [--] [--]                                      │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] the-page-that-would-have-mattered/cinematic → motion-primitive pinned-crossfade (wraps:section-block, motion:subtle)
+       ↳ [bulk]
+  [1] before-kettle/narrative → scratch  [structure: Container and grid, Premium / calm spacing, Section padding]
+       ↳ [bulk]
+  [2] what-changed-what-broke-who-to-ask/timeline → scratch  [structure: sticky-scroll-narrative]
+       ↳ [bulk]
+  [3] instrumentation/modular → scratch  [structure: bento-grid, split-hero, card-gallery]
+       ↳ [bulk]
+  [4] how-a-team-actually-uses-it/editorial → scratch  [structure: split-hero, Premium / calm spacing, When to break the grid on purpose]
+       ↳ [bulk]
+  [5] the-quiet-guarantee/editorial → scratch  [structure: Premium / calm spacing, split-hero, Technical / developer spacing]
+       ↳ parse error on bulk output (Expected "}" but found "s"); escalating one retry to reasoning tier…
+       ↳ reasoning retry parses; accepted
+       ↳ [bulk→escalated]
+  [6] free-for-three/asymmetric → scratch  [structure: asymmetric-grid, split-hero, When to break the grid on purpose]
+       ↳ [bulk]
+       ↳ shot plan [generated, subject-locked]: upgraded 3 image(s) → 3 Flux (staged)
+       ↳ hardened 4 <img> tag(s): explicit width/height + lazy below the fold
+       ↳ pre-warm: rate-limited — waiting 4s (attempt 1/4)
+       ↳ pre-warm: rate-limited — waiting 8s (attempt 2/4)
+       ↳ pre-warm: rate-limited — waiting 12s (attempt 3/4)
+       ↳ pre-warm: rate-limited — waiting 16s (attempt 4/4)
+       ↳ pre-warm: rate-limited — waiting 4s (attempt 1/4)
+       ↳ pre-warm: rate-limited — waiting 8s (attempt 2/4)
+       ↳ pre-warm: rate-limited — waiting 12s (attempt 3/4)
+       ↳ pre-warm: rate-limited — waiting 16s (attempt 4/4)
+       ↳ pre-warm 1/3 ok on a retried seed
+       ↳ pre-warm 2/3 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 3/3 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm: 3/3 image(s) verified real (1 on retried seeds)
+
+[1m── SELF-CRITIQUE ───────────────────────────────────────────[0m
+[2m  reviewing [0] the-page-that-would-have-mattered…[0m
+[2m  reviewing [1] before-kettle…[0m
+[2m  reviewing [2] what-changed-what-broke-who-to-ask…[0m
+[2m  reviewing [3] instrumentation…[0m
+[2m  reviewing [4] how-a-team-actually-uses-it…[0m
+[2m  reviewing [5] the-quiet-guarantee…[0m
+[2m  reviewing [6] free-for-three…[0m
+  [31mFLAG[0m [0:the-page-that-would-have-mattered] uses pinned-crossfade, which carries a known caveat: "Two-panel pinned crossfade on the proven @bsmnt/scrollytelling rail (same as kinetic-text-split). Panel one dissolves into panel two while t"
+  [33mwarn[0m [0:the-page-that-would-have-mattered] Cinematic pinned-crossfade scroll interaction with animate-ping pulse contradicts 'measured and reassuring, nothing sudden' micro-interaction rule and the committed 200ms standard-out easing value
+  [33mwarn[0m [0:the-page-that-would-have-mattered] Hero copy 'A deploy went out at 2:14pm. Nobody noticed for six minutes.' plus dramatized 'page that would have mattered' framing is narrative/emotional, not the quiet institutional tone required
+  [33mwarn[0m [0:the-page-that-would-have-mattered] Progressive-trust rule calls for staged trust-building, but this section opens with a high-drama incident narrative rather than easing the user in gradually
+  [33mwarn[0m [0:the-page-that-would-have-mattered] animate-ping red-alert badge introduces an urgent/alarming accent inconsistent with trustworthy fintech's restrained, non-sudden interaction requirement
+  [33mwarn[0m [3:instrumentation] Duration 700ms for entrance animation violates committed micro-interaction value of 200ms.
+  [33mwarn[0m [3:instrumentation] Easing 'ease-out' used instead of specified cubic-bezier(0.22, 1, 0.36, 1) standard-out.
+  [33mwarn[0m [3:instrumentation] translate-y-6 (24px) is a sudden/large motion displacement, not 'measured and reassuring' per fintech micro-interaction mood.
+  [33mwarn[0m [3:instrumentation] h3 uses font-semibold (600) with text-lg while h2 has no explicit weight/size class shown — hierarchy/step-ratio not verifiable as 1.2, risk of inconsistent scale.
+  [33mwarn[0m [5:the-quiet-guarantee] Reveal transition duration is 700ms, exceeding the committed 200ms measured timing for this mood.
+  [33mwarn[0m [5:the-quiet-guarantee] translate-y-6 entrance motion is a sudden directional slide, not the 'measured and reassuring' micro-interaction spec calls for.
+  [33mwarn[0m [5:the-quiet-guarantee] Staggered transitionDelay (0/90/180ms) plus 700ms duration compounds into a much longer, less quiet reveal than the committed 200ms standard-out easing.
+  [33mwarn[0m [5:the-quiet-guarantee] No easing function (cubic-bezier(0.22,1,0.36,1)) specified in the transition class — relies on generic ease-out instead of the committed standard-out curve.
+
+[1m── WRITE  → preview/app ────────────────────────────────────[0m
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+       ↳ visual critique: 5 defect(s) — 5 actionable (0 minor)
+         [blocking] s4 overflow: MEASURED (DOM, not vision): page scrollWidth 1331px > viewport 1280px; widest offender <div.dev-quote-break.mb
+         [major] s2 collision: In viewport-2280, two floating cards ('01 — Before: The did anyone deploy thread' and '02 — Before: A war room
+         [major] s3 dead-zone: In viewport-4560, roughly the right half of the viewport (from the latency chart down through the Owner card s
+         [major] s6 dead-zone: In viewport-9119, the left two-thirds of the viewport is entirely empty gray space, with only a small code-sni
+         [major] s4 dead-zone: In the overview screenshot, the section around 'Every deploy, fully instrumented' and the customer quote block
+       ↳ revised section 4 (2 defect(s))
+       ↳ revised section 2 (1 defect(s))
+       ↳ revised section 3 (1 defect(s))
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+       ↳ section 4 improved: 2 → 0 actionable defect(s)
+       ↳ section 2 did not improve on re-critique — original restored
+       ↳ section 3 improved: 1 → 0 actionable defect(s)
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+  [31mVISUAL[0m shipped WITH 3 visible defect(s) after the revise pass:
+  [31m      [0m [blocking] s5 overflow: MEASURED (DOM, not vision): page scrollWidth 1331px > viewport 1280px; widest offender <div.dev-quot
+  [31m      [0m [major] s2 collision: In viewport-2358, faded overlapping text elements are visible at the top of the screenshot (around y
+  [31m      [0m [major] s6 dead-zone: In viewport-9432, the left two-thirds of the viewport (roughly x=0-900, y=60-520) is completely empt
+  [31m      [0m screenshots + critiques: logs\visual\2026-07-18T20-42-40-048Z
+  7 sections  (1 motion-primitive, 6 from scratch)
+  primitives: pinned-crossfade
+  [36mTIERS[0m  plan/art-direction/questions: [35m[reasoning][0m claude-sonnet-5
+         sections: 6 [36m[bulk][0m, 1 [33m[bulk→escalated][0m (repaired on claude-sonnet-5)
+           [0] the-page-that-would-have-mattered/cinematic → [36m[bulk][0m
+           [1] before-kettle/narrative → [36m[bulk][0m
+           [2] what-changed-what-broke-who-to-ask/timeline → [36m[bulk][0m
+           [3] instrumentation/modular → [36m[bulk][0m
+           [4] how-a-team-actually-uses-it/editorial → [36m[bulk][0m
+           [5] the-quiet-guarantee/editorial → [33m[bulk→escalated][0m
+           [6] free-for-three/asymmetric → [36m[bulk][0m
+  deps:       @bsmnt/scrollytelling, gsap
+  files:      12 written under preview/app/src
+  [36mMOTION[0m [0:the-page-that-would-have-mattered] wrapped by motion-primitive pinned-crossfade
+  [33mLAYOUT[0m [2:what-changed-what-broke-who-to-ask] flex row without gap: "flex items-center justify-between mb-3"
+  [33mLAYOUT[0m [3:instrumentation] flex row without gap: "flex items-center justify-between mb-3"
+  [33mLAYOUT[0m [3:instrumentation] flex row without gap: "mt-3 flex items-center justify-between text-xs text-muted-foregr"
+  [33mLAYOUT[0m [6:free-for-three] flex row without gap: "flex items-center justify-between mb-6"
+  [36mIMAGES[0m upgraded 3 placeholder(s) to on-theme imagery (Unsplash or Flux-generated).
+
+--no-serve: page written. Start it with:  cd preview/app && npm run dev

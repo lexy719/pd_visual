@@ -111,11 +111,13 @@ export function planRhythm(sections: SectionPlan[]): RhythmPlan {
       density = density === 'tight' ? 'normal' : density === 'open' ? 'normal' : 'open'
     }
 
-    // Volume follows density at a distance — never a second shout next to the peak.
-    const adjacentToPeak = Math.abs(i - peakIndex) === 1
-    let volume: Volume = 'normal'
-    if (density === 'tight') volume = 'quiet'
-    else if (density === 'open' && EMPHASIS_RANK[s.emphasis] >= 2 && !adjacentToPeak) volume = 'loud'
+    // Volume follows density, but 'loud' belongs to the PEAK ALONE.
+    //
+    // This previously also promoted any non-adjacent open section with lg/xl emphasis, and a real
+    // run duly shipped two loud headings — which is the same failure as two dominant images: a page
+    // with two scale jumps has none, because each one destroys the other's contrast. The peak is the
+    // page's one moment of scale, so everything else tops out at normal.
+    const volume: Volume = density === 'tight' ? 'quiet' : 'normal'
 
     beats.push({ density, volume })
   }

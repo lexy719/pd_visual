@@ -1,94 +1,7 @@
-/**
- * The composition device library — ONE source of truth.
- *
- * A device is verified geometry the page already owns. A section chooses WHICH device fits its
- * content and applies the class; it never rebuilds the layout by hand. This is what separates a
- * correct page from a designed one: depth, tension and hierarchy arrive as a decision, not as a
- * hopeful pile of Tailwind utilities.
- *
- * Everything about a device lives here — its CSS, its default composition, and its name. Before
- * this module the names were duplicated across writer.ts (CSS), generate.ts (the flatness lint and
- * DEFAULT_DEVICE) and knowledge/guidelines/devices.md, so a device could exist in CSS while staying
- * invisible to the lint that is supposed to demand it. devices.test.ts asserts the three stay in
- * sync, which is the only reason adding a device is now a one-file change.
- */
-import type { Composition } from '../types.js'
-
-/** Every device name. The flatness lint and the section prompt derive from this list. */
-export const DEVICE_NAMES = [
-  'dev-overlap',
-  'dev-offset-grid',
-  'dev-quote-break',
-  'dev-bleed',
-  'dev-stat-row',
-  'dev-feature-grid',
-  'dev-logo-wall',
-  'dev-frame',
-  'dev-side-rail',
-  'dev-compare',
-  'dev-faq',
-  'dev-price-table'
-] as const
-
-export type DeviceName = (typeof DEVICE_NAMES)[number]
-
-/** Matches any device class in generated code. Built from DEVICE_NAMES so it can never drift. */
-export const DEVICE_RE = new RegExp(`\\b(${DEVICE_NAMES.join('|')})\\b`)
-
-/**
- * Valid `dev-*` classes that are NOT devices themselves — modifiers and inner parts a device styles.
- * Listed here so the hallucination lint can tell "a real part of a device" from "a class the model
- * made up".
- */
-export const DEVICE_MODIFIERS = [
-  'dev-overlap-left',
-  'dev-stat-n',
-  'dev-stat-l',
-  'dev-price-n',
-  'dev-price-p',
-  'dev-price-featured',
-  'dev-compare-yes',
-  'dev-compare-no'
-] as const
-
-/** Every legitimate `dev-*` class: devices plus their modifiers. */
-export const ALL_DEVICE_CLASSES: ReadonlySet<string> = new Set([...DEVICE_NAMES, ...DEVICE_MODIFIERS])
-
-/**
- * Find `dev-*` classes in generated code that DO NOT EXIST.
- *
- * A model that invents `dev-feature-min` produces a class with no CSS behind it: completely inert,
- * no error, no warning, and the section silently falls back to unstyled stacked blocks while looking
- * — to every other check — as though it applied a device. Observed live on a real run. The flatness
- * lint cannot catch it either, because the section genuinely "has a dev- class".
- */
-export function unknownDeviceClasses(code: string): string[] {
-  const found = code.match(/\bdev-[a-z0-9-]+/g) ?? []
-  return [...new Set(found.filter((c) => !ALL_DEVICE_CLASSES.has(c)))]
-}
-
-/**
- * The device a composition reaches for when the model picks none. Not a ceiling — a floor, so a
- * section is never *just* stacked rectangles. Chosen to match what each composition is already
- * trying to do, so the default rarely fights the content.
- */
-export const DEFAULT_DEVICE: Record<Composition, DeviceName> = {
-  cinematic: 'dev-bleed',
-  editorial: 'dev-quote-break',
-  gallery: 'dev-offset-grid',
-  narrative: 'dev-overlap',
-  asymmetric: 'dev-overlap',
-  modular: 'dev-feature-grid',
-  immersive: 'dev-bleed',
-  timeline: 'dev-offset-grid'
-}
-
-/**
- * The device CSS, emitted verbatim into the page theme. Every device is responsive and
- * container-safe by construction, so none of them can produce the overflow or void defects the
- * visual pass measures.
- */
-export const DEVICE_CSS = `
+<!doctype html><meta charset=utf-8><title>overflow</title><style>:root{--container:1280px;--accent:#2f6df6;--card:#fff;--border:#e3e7ec;--radius:12px;--font-display:Georgia,serif;--foreground:#111;--muted-foreground:#777;--section-pad:96px}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui;background:#fff;color:#111}
+.container-page{max-width:var(--container);margin-inline:auto;padding-inline:clamp(20px,4vw,48px)}
+.section-pad{padding-block:var(--section-pad)}
 /* html-level clip makes edge bleeds safe: a full-bleed child can never create a horizontal
    scrollbar, which is what normally makes designers avoid the device entirely. */
 html { overflow-x: clip; }
@@ -171,7 +84,7 @@ html { overflow-x: clip; }
 .dev-faq > details > summary { cursor: pointer; list-style: none; font-weight: 600; font-size: clamp(16px, 1.4vw, 19px); display: flex; justify-content: space-between; gap: 24px; align-items: baseline; }
 .dev-faq > details > summary::-webkit-details-marker { display: none; }
 .dev-faq > details > summary::after { content: '+'; color: var(--muted-foreground); font-weight: 400; }
-.dev-faq > details[open] > summary::after { content: '\\2212'; }
+.dev-faq > details[open] > summary::after { content: '\2212'; }
 .dev-faq > details > :not(summary) { margin-top: 12px; max-width: 68ch; color: var(--muted-foreground); line-height: 1.65; }
 
 /* dev-price-table — pricing tiers that stay aligned, with ONE emphasised plan. The emphasis is the
@@ -183,4 +96,9 @@ html { overflow-x: clip; }
 .dev-price-table .dev-price-n { font-family: var(--font-display); font-size: clamp(32px, 3.4vw, 48px); line-height: 1; letter-spacing: -0.02em; color: var(--foreground); display: block; }
 .dev-price-table .dev-price-p { font-size: 13px; color: var(--muted-foreground); margin-top: 6px; display: block; }
 .dev-price-table > * > :last-child { margin-top: auto; padding-top: clamp(16px, 2vw, 24px); }
-`
+</style>
+<section class="section-pad"><div class="container-page">
+  <p>Body copy before the quote.</p>
+  <blockquote class="dev-quote-break" id="q"><p>A pull quote that deliberately breaks the measure to create tension against the grid.</p></blockquote>
+  <p>Body copy after the quote.</p>
+</div></section>
