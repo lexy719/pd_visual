@@ -25,7 +25,8 @@
     "test": "npm run typecheck && npm run check:bytes && npm run test:theme && npm run test:devices && npm run test:plan && npm run test:rhythm && npm run test:scroll && npm run test:reveal && npm run test:voice && npm run test:wireframe",
     "test:reveal": "tsx engine/agent/reveal.test.ts",
     "test:voice": "tsx engine/agent/voice.test.ts",
-    "test:theme": "tsx engine/agent/theme.test.ts"
+    "test:theme": "tsx engine/agent/theme.test.ts",
+    "film": "tsx engine/tools/film.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.5.0",
