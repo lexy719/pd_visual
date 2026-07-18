@@ -78,6 +78,9 @@ const WF: Wireframe = {
 }
 
 const ART: ArtDirection = {
+  // Static rhythm: this fixture asserts the wireframe RENDERER, not the rhythm planner (which
+  // has its own test). A literal keeps the two independent.
+  rhythm: { peakIndex: 1, beats: Array.from({ length: 10 }, (_, i) => ({ density: (['open','normal','tight'] as const)[i % 3]!, volume: i === 1 ? 'loud' as const : 'normal' as const })) },
   palette: {
     background: '#0F0D0B',
     foreground: '#F5F1EA',

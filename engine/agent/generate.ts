@@ -582,13 +582,37 @@ export function lintDesign(code: string): string[] {
   if (!/\bcontainer-page\b/.test(code) && /max-w-(?:xl|2xl|3xl|4xl|5xl|6xl|7xl)[^"]*"?[^>]*mx-auto|mx-auto[^>]*max-w-/.test(code)) {
     warns.push('hand-rolled max-w container instead of the locked container-page')
   }
-  // FLATNESS — a section with several sibling blocks and no composition device is the stacked-
-  // rectangles failure. Narrow on purpose: only fires when there is real repeating structure to
-  // arrange (3+ sibling cards/items), so a single-statement section is never flagged.
+  // FLATNESS — repeating structure arranged by hand instead of with a device is the stacked-
+  // rectangles failure. There are two ways a section reveals it, and counting card literals only
+  // catches the first:
+  //
+  //   1. blocks written out one by one  -> several card classNames in the source
+  //   2. blocks rendered from an array  -> ONE className literal inside a .map(), however many
+  //      items render
+  //
+  // Only (1) was detected, so every mapped feature grid — the most common shape on a product page,
+  // and the one that most needs a device — sailed through. Observed live: a "modular" section built
+  // a hand-rolled md:grid-cols-4 from a .map() and the lint stayed silent.
+  //
+  // The robust tell is the CONTAINER, not the children: a multi-column grid or a wrapping flex row
+  // is a section arranging siblings itself. If it does that with no device, it is hand-rolling
+  // geometry the page already owns.
   const hasDevice = DEVICE_RE.test(code)
-  const siblingBlocks = (code.match(/className="[^"]*\b(rounded-|border |bg-card)/g) ?? []).length
-  if (!hasDevice && siblingBlocks >= 3) {
-    warns.push(`${siblingBlocks} sibling blocks arranged with no composition device (stacked rectangles)`)
+  const cardLiterals = (code.match(/className="[^"]*\b(rounded-|border |bg-card)/g) ?? []).length
+  const handRolledGrid = /className="[^"]*\bgrid-cols-(?:[2-9]|1[0-2])\b/.test(code) || /className="[^"]*\b(?:sm|md|lg|xl):grid-cols-(?:[2-9]|1[0-2])\b/.test(code)
+  const wrappingRow = /className="[^"]*\bflex\b[^"]*\bflex-wrap\b/.test(code)
+  const rendersList = /\.map\(/.test(code)
+
+  if (!hasDevice) {
+    if (handRolledGrid) {
+      warns.push(
+        `multi-column grid built by hand (grid-cols-*) with no composition device — apply a dev-* class instead of arranging the columns yourself${rendersList ? ' (the items come from a .map, so a device applies to the container once)' : ''}`
+      )
+    } else if (wrappingRow) {
+      warns.push('wrapping flex row of siblings with no composition device — the page already owns this geometry')
+    } else if (cardLiterals >= 3) {
+      warns.push(`${cardLiterals} sibling blocks arranged with no composition device (stacked rectangles)`)
+    }
   }
 
   // Interior escapes — content that breaks OUT of the locked container (observed live: text flush

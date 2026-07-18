@@ -1,0 +1,165 @@
+
+brief:      "Kettle — deployment monitoring for small engineering teams. Shows what changed, what broke, and who to ask. Free for up to 3 services. Mood: technical, trustworthy."
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-sonnet-5   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+brand:  Kettle
+mood:   technical, trustworthy
+layout: Product proof: show the change before the claim, bento-grid, progressive-trust
+sections:
+  0. the-3am-question [36mcinematic[0m/lg  Open on the exact moment a deploy breaks something: a red status line and the unspoken question 'what changed and who do I ask' — naming the problem before any product claim
+  1. diff-of-record   [36masymmetric[0m/xl  Show the concrete before/after: a deploy diff view mapped directly to a service health change, proving Kettle answers 'what changed' with evidence not a dashboard mockup
+  2. who-broke-it-who-to-ask [36mnarrative[0m/md  Demonstrate the ownership resolution feature: Kettle surfaces the responsible service owner and last-touch author automatically, removing the Slack-thread guessing game
+  3. capability-atlas [36mmodular[0m/lg  Lay out the core feature set — change tracking, breakage detection, ownership routing, alert history — as unequal cells so the deploy-diff mapping (the hero feature) visually outweighs secondary ones
+  4. how-it-plugs-in  [36mtimeline[0m/md  Walk through the integration sequence — connect repo, connect deploy hook, get first alert — as a linear technical proof that setup is minutes not days
+  5. trusted-by-teams-who-ship [36meditorial[0m/sm  Earn trust progressively with a specific, checkable claim: quote from an engineering lead about diagnosing an incident faster, paired with a real (anonymized) resolution-time stat
+  6. free-for-three   [36meditorial[0m/md  State the free-for-up-to-3-services offer plainly as the final trust step, removing pricing ambiguity before the ask, followed by a single clear CTA to connect a repo
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated, subject="a dark-mode deployment dashboard UI showing a serv" · establishing → detail → medium → wide → detail → medium → detail[0m
+  primary   [48;2;61;220;151m   [0m #3DDC97
+  accent    [48;2;61;220;151m   [0m #3DDC97
+  bg / fg   [48;2;11;14;18m   [0m #0B0E12  /  [48;2;231;235;238m   [0m #E7EBEE
+  card/bord [48;2;18;22;27m   [0m #12161B  /  [48;2;35;42;49m   [0m #232A31
+  motion    [36msubtle[0m  (locked for the whole run)
+  interact  [36m200ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-1px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2mA near-black terminal background with a single saturated mint-green signal color mirrors how the product itself flags exactly one thing that matters, while measured 200ms translateY(-1px) interactions and a tight 1.2 type scale keep every surface reading as quiet, tabular, and trustworthy rather than salesy.[0m
+  [2manchors: Calm / wellness / health, premium / calm micro-interactions, trustworthy / fintech micro-interactions, transition discipline, Type scale ratios by mood, Calm / wellness typography, Trustworthy / fintech typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, PP Neue Montreal — throughline, Bucks Sauce — Reviews section uses a hand-lettered, sketchy outline t…[0m
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Kettle  ·  technical/trustworthy  ·  Product proof: show the change before the claim
+  motion: subtle   palette: Tide
+┌──────────────────────────────────────────────────┐
+│ the-3am-question  ·  cinematic  ·  pinned-crossf │
+│   ↳ Open on the exact moment a deploy breaks som │
+│     media: full-bleed dark terminal/dashboard sc │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ diff-of-record  ·  asymmetric  ·  When to break  │
+│   ↳ Show the concrete before/after: a deploy dif │
+│     media: split screen: left a real commit/diff │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ who-broke-it-who-to-ask  ·  narrative  ·  Premiu │
+│   ↳ Demonstrate the ownership resolution feature │
+│     media: annotated screenshot of an incident c │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ capability-atlas  ·  modular  ·  bento-grid      │
+│   ↳ Lay out the core feature set — change tracki │
+│     media: one large cell with live-looking diff │
+│   [--] [--] [--]                                 │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ how-it-plugs-in  ·  timeline  ·  sticky-scroll-n │
+│   ↳ Walk through the integration sequence — conn │
+│     media: three small terminal/config snippets  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ trusted-by-teams-who-ship  ·  editorial  ·  Prem │
+│   ↳ Earn trust progressively with a specific, ch │
+│     media: dev-quote-break style pull-quote brea │
+│   [--] [--]                                      │
+├──────────────────────────────────────────────────┤
+│ free-for-three  ·  editorial  ·  Premium / calm  │
+│   ↳ State the free-for-up-to-3-services offer pl │
+│     media: small static pricing table: Free (3 s │
+│   [--] [--]                                      │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] the-3am-question/cinematic → motion-primitive pinned-crossfade (wraps:section-block, motion:subtle)
+       ↳ [bulk]
+  [1] diff-of-record/asymmetric → scratch  [structure: When to break the grid on purpose, asymmetric-grid, split-hero]
+       ↳ [bulk]
+  [2] who-broke-it-who-to-ask/narrative → scratch  [structure: Premium / calm spacing, Container and grid, Section padding]
+       ↳ [bulk]
+  [3] capability-atlas/modular → scratch  [structure: bento-grid, split-hero, card-gallery]
+       ↳ [bulk]
+  [4] how-it-plugs-in/timeline → scratch  [structure: sticky-scroll-narrative, Section padding, split-hero]
+       ↳ [bulk]
+  [5] trusted-by-teams-who-ship/editorial → scratch  [structure: Premium / calm spacing, Section padding, Container and grid]
+       ↳ [bulk]
+  [6] free-for-three/editorial → scratch  [structure: Premium / calm spacing, split-hero, Container and grid]
+       ↳ [bulk]
+       ↳ page had NO <h1> — promoted the dominant section's first <h2> (a page needs exactly one anchor)
+       ↳ shot plan [generated, subject-locked]: upgraded 1 image(s) → 1 Flux (staged)
+       ↳ hardened 1 <img> tag(s): explicit width/height + lazy below the fold
+       ↳ pre-warm 1/1 ok (1s — generating fresh imagery, ~1min each)
+       ↳ pre-warm: 1/1 image(s) verified real
+
+[1m── SELF-CRITIQUE ───────────────────────────────────────────[0m
+[2m  reviewing [0] the-3am-question…[0m
+[2m  reviewing [1] diff-of-record…[0m
+[2m  reviewing [2] who-broke-it-who-to-ask…[0m
+[2m  reviewing [3] capability-atlas…[0m
+[2m  reviewing [4] how-it-plugs-in…[0m
+[2m  reviewing [5] trusted-by-teams-who-ship…[0m
+[2m  reviewing [6] free-for-three…[0m
+  [31mFLAG[0m [0:the-3am-question] uses pinned-crossfade, which carries a known caveat: "Two-panel pinned crossfade on the proven @bsmnt/scrollytelling rail (same as kinetic-text-split). Panel one dissolves into panel two while t"
+  [33mwarn[0m [0:the-3am-question] Headline uses font-bold (700) — exceeds the 400/600 weight ceiling for trustworthy/fintech typography.
+  [33mwarn[0m [0:the-3am-question] Two font families implied (sans headline + mono labels/timestamp) instead of one neutral sans as specified.
+  [33mwarn[0m [0:the-3am-question] Hero-to-body ratio exceeds 2.5–3×: 5xl/3xl headline vs xs mono labels is a much larger jump than the specified smallest-of-any-mood scale.
+  [33mwarn[0m [0:the-3am-question] Red accent (incident badge, live dot, headline mono text) combined with primary color token creates two competing accent colors, against 'quiet' single-accent trustworthy palette.
+  [33mwarn[0m [1:diff-of-record] h1 uses default text size with no explicit type scale applied, risking hero-to-body jump outside the required 2.5–3x / 1.2 step ratio
+  [33mwarn[0m [1:diff-of-record] Both add and del diff lines use text-primary, relying only on background tint/ring to distinguish additions from deletions — insufficient contrast and a colorblind/accessibility risk for a status-difference signal
+  [33mwarn[0m [1:diff-of-record] Deletion line uses ring-1 ring-primary/40 as an extra accent on top of bg-primary/15 and text-primary, stacking three primary-color treatments — more emphasis than the 'quiet, single accent' fintech mood allows
+  [33mwarn[0m [1:diff-of-record] duration-700 transition on the panel reveal exceeds the committed 200ms micro-interaction spec for trustworthy/fintech motion
+  [33mwarn[0m [4:how-it-plugs-in] Transition duration 700ms with translate-y-6 slide contradicts committed micro-interaction spec of 200ms, standard-out easing, no sudden/large movement.
+  [33mwarn[0m [4:how-it-plugs-in] Staggered delay (i * 80ms) plus 700ms duration creates a cascading reveal not specified by the measured/reassuring micro-interaction rule.
+  [33mwarn[0m [4:how-it-plugs-in] Terminal-style command/output blocks (monospace, colored ✓/⚠ symbols) introduce a second typeface and multiple accent colors, violating 'one neutral sans, nothing above 700' and low-accent trustworthy typography rule.
+  [33mwarn[0m [4:how-it-plugs-in] ⚠ warning line and success ✓ lines imply green/red/amber semantic colors not accounted for in a quiet, single-accent fintech palette.
+  [33mwarn[0m [6:free-for-three] Transition duration is 700ms, violating the committed 200ms standard-out micro-interaction value.
+  [33mwarn[0m [6:free-for-three] h2 has no explicit type scale check — if heading weight exceeds 600, violates 400/600-only rule (svg icon strokes and blockquote styling not shown to confirm compliance).
+  [33mwarn[0m [6:free-for-three] Uppercase tracking-wide eyebrow label plus bold blockquote plus heading creates three distinct type treatments, risking more hierarchy jumps than the smallest-of-any-mood 1.2 step ratio allows.
+  [33mwarn[0m [6:free-for-three] Truncated pricing table markup cuts off mid-render, leaving incomplete/inaccessible DOM (unclosed div), risking broken accessibility tree.
+
+[1m── WRITE  → preview/app ────────────────────────────────────[0m
+       ↳ visual critique: 6 defect(s) — 6 actionable (0 minor)
+         [blocking] s5 overflow: MEASURED (DOM, not vision): page scrollWidth 1331px > viewport 1280px; widest offender <div.dev-quote-break.mt
+         [major] s6 dead-zone: MEASURED (DOM, not vision): half-empty-grid in <section.section-pad> — content uses only 55% of the section wi
+         [major] s0 dead-zone: In viewport-0, the bottom half of the section (from below the kettle image, roughly y=620 to y=780) is solid b
+         [major] s2 dead-zone: In the overview screenshot, the section labeled 'Who broke it. Who to ask.' (around y 2603-3787) shows only a 
+         [major] s4 dead-zone: In the overview screenshot, the 'Three commands. Minutes, not days.' section (~y 4903-5807) shows a heading an
+         [major] s5 dead-zone: In the overview screenshot, the 'trusted-by-teams-who-ship' section (~y 5806-6884) appears almost entirely emp
+       ↳ revised section 5 (2 defect(s))
+       ↳ revised section 6 (1 defect(s))
+       ↳ revised section 0 (1 defect(s))
+       ↳ section 5 improved: 2 → 0 actionable defect(s)
+       ↳ section 6 did not improve on re-critique — original restored
+       ↳ section 0 did not improve on re-critique — original restored
+  [31mVISUAL[0m shipped WITH 3 visible defect(s) after the revise pass:
+  [31m      [0m [major] s6 dead-zone: MEASURED (DOM, not vision): half-empty-grid in <section.section-pad> — content uses only 55% of the 
+  [31m      [0m [major] s0 dead-zone: In viewport-0, below the hero image there is a large solid black empty area from roughly y=620 to y=
+  [31m      [0m [major] s1 dead-zone: In viewport-1951, most of the section from y=350 to y=730 is empty black space between the code/heal
+  [31m      [0m screenshots + critiques: logs\visual\2026-07-18T19-58-47-620Z
+  7 sections  (1 motion-primitive, 6 from scratch)
+  primitives: pinned-crossfade
+  [36mTIERS[0m  plan/art-direction/questions: [35m[reasoning][0m claude-sonnet-5
+         sections: 7 [36m[bulk][0m (none needed escalation)
+           [0] the-3am-question/cinematic → [36m[bulk][0m
+           [1] diff-of-record/asymmetric → [36m[bulk][0m
+           [2] who-broke-it-who-to-ask/narrative → [36m[bulk][0m
+           [3] capability-atlas/modular → [36m[bulk][0m
+           [4] how-it-plugs-in/timeline → [36m[bulk][0m
+           [5] trusted-by-teams-who-ship/editorial → [36m[bulk][0m
+           [6] free-for-three/editorial → [36m[bulk][0m
+  deps:       @bsmnt/scrollytelling, gsap
+  files:      11 written under preview/app/src
+  [36mMOTION[0m [0:the-3am-question] wrapped by motion-primitive pinned-crossfade
+  [33mLAYOUT[0m [3:capability-atlas] flex row without gap: "flex items-center justify-between mb-3"
+  [36mIMAGES[0m upgraded 1 placeholder(s) to on-theme imagery (Unsplash or Flux-generated).
+
+--no-serve: page written. Start it with:  cd preview/app && npm run dev

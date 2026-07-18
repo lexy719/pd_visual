@@ -9,63 +9,63 @@
  * gradient stay valid.
  */
 :root {
-  --background: #0B0F14;
-  --foreground: #E6EDF3;
-  --card: #111823;
+  --background: #0B0E12;
+  --foreground: #E7EBEE;
+  --card: #12161B;
   --card-foreground: #fafafa;
-  --popover: #111823;
+  --popover: #12161B;
   --popover-foreground: #fafafa;
-  --primary: #2F81F7;
+  --primary: #3DDC97;
   --primary-foreground: #0a0a0a;
-  --secondary: #1d2126;
-  --secondary-foreground: #E6EDF3;
-  --muted: #1d2126;
-  --muted-foreground: #8B9AAB;
-  --accent: #2FE0A8;
+  --secondary: #1d2024;
+  --secondary-foreground: #E7EBEE;
+  --muted: #1d2024;
+  --muted-foreground: #8B96A1;
+  --accent: #3DDC97;
   --accent-foreground: #0a0a0a;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #1E2A38;
-  --input: #1E2A38;
-  --ring: #2FE0A8;
+  --border: #232A31;
+  --input: #232A31;
+  --ring: #3DDC97;
   --radius: 0.5rem;
   --mi-dur: 200ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --mi-tap: 0.98;
   --font-display: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --container: 1216px;
-  --section-pad: clamp(80px, 14vh, 112px);
+  --container: 1280px;
+  --section-pad: clamp(66px, 14vh, 92px);
 }
 
 .dark {
-  --background: #0B0F14;
-  --foreground: #E6EDF3;
-  --card: #111823;
+  --background: #0B0E12;
+  --foreground: #E7EBEE;
+  --card: #12161B;
   --card-foreground: #fafafa;
-  --popover: #111823;
+  --popover: #12161B;
   --popover-foreground: #fafafa;
-  --primary: #2F81F7;
+  --primary: #3DDC97;
   --primary-foreground: #0a0a0a;
-  --secondary: #1d2126;
-  --secondary-foreground: #E6EDF3;
-  --muted: #1d2126;
-  --muted-foreground: #8B9AAB;
-  --accent: #2FE0A8;
+  --secondary: #1d2024;
+  --secondary-foreground: #E7EBEE;
+  --muted: #1d2024;
+  --muted-foreground: #8B96A1;
+  --accent: #3DDC97;
   --accent-foreground: #0a0a0a;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #1E2A38;
-  --input: #1E2A38;
-  --ring: #2FE0A8;
+  --border: #232A31;
+  --input: #232A31;
+  --ring: #3DDC97;
   --radius: 0.5rem;
   --mi-dur: 200ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --mi-tap: 0.98;
   --font-display: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --container: 1216px;
-  --section-pad: clamp(80px, 14vh, 112px);
+  --container: 1280px;
+  --section-pad: clamp(66px, 14vh, 92px);
 }
 
 * {
@@ -143,6 +143,7 @@ h3 { font-size: 24px; }
  * construction, so none of them can produce the overflow/void defects the measurements catch.
  */
 
+
 /* html-level clip makes edge bleeds safe: a full-bleed child can never create a horizontal
    scrollbar, which is what normally makes designers avoid the device entirely. */
 html { overflow-x: clip; }
@@ -191,6 +192,50 @@ html { overflow-x: clip; }
 /* dev-frame — a matted frame around media. Repeating one frame treatment is a craft signal. */
 .dev-frame { padding: clamp(8px, 1vw, 14px); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
 
+/* dev-side-rail — a sticky label/nav column beside long content. The single most effective cure for
+   a long scrolling section that loses the reader: the rail holds position while the content moves.
+   First child is the rail, second is the content. Collapses to a normal stack on narrow screens,
+   where sticky positioning in a short viewport would trap the reader instead of orienting them. */
+.dev-side-rail { display: grid; grid-template-columns: minmax(180px, 22%) minmax(0, 1fr); gap: clamp(24px, 5vw, 72px); align-items: start; }
+.dev-side-rail > :first-child { position: sticky; top: clamp(24px, 8vh, 96px); align-self: start; }
+@media (max-width: 900px) {
+  .dev-side-rail { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .dev-side-rail > :first-child { position: static; }
+}
+
+/* dev-compare — an aligned comparison table. Deliberately NOT offset or staggered: when items are
+   being compared, alignment IS the meaning, and any rhythm device would read as an error. Scrolls
+   inside itself on narrow screens so it can never widen the page. */
+.dev-compare { width: 100%; overflow-x: auto; }
+.dev-compare table { width: 100%; border-collapse: collapse; min-width: 520px; }
+.dev-compare th, .dev-compare td { text-align: left; padding: clamp(12px, 1.6vw, 20px); border-bottom: 1px solid var(--border); vertical-align: top; }
+.dev-compare thead th { font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-foreground); font-weight: 600; }
+.dev-compare tbody tr:last-child td { border-bottom: 0; }
+.dev-compare .dev-compare-yes { color: var(--accent); font-weight: 600; }
+.dev-compare .dev-compare-no { color: var(--muted-foreground); }
+
+/* dev-faq — questions as a typographic list, not as a row of cards. Carding an FAQ is the classic
+   tell of a generated page: the answers are prose and prose does not want a border. Uses <details>
+   so it works with zero JS and stays keyboard-accessible. */
+.dev-faq { border-top: 1px solid var(--border); }
+.dev-faq > details { border-bottom: 1px solid var(--border); padding: clamp(16px, 2vw, 24px) 0; }
+.dev-faq > details > summary { cursor: pointer; list-style: none; font-weight: 600; font-size: clamp(16px, 1.4vw, 19px); display: flex; justify-content: space-between; gap: 24px; align-items: baseline; }
+.dev-faq > details > summary::-webkit-details-marker { display: none; }
+.dev-faq > details > summary::after { content: '+'; color: var(--muted-foreground); font-weight: 400; }
+.dev-faq > details[open] > summary::after { content: '\2212'; }
+.dev-faq > details > :not(summary) { margin-top: 12px; max-width: 68ch; color: var(--muted-foreground); line-height: 1.65; }
+
+/* dev-price-table — pricing tiers that stay aligned, with ONE emphasised plan. The emphasis is the
+   whole point: an undifferentiated row of three prices makes the reader do the work, which is how a
+   pricing section fails. Add dev-price-featured to exactly one child. */
+.dev-price-table { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: clamp(16px, 2vw, 24px); align-items: stretch; }
+.dev-price-table > * { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: clamp(24px, 2.6vw, 36px); }
+.dev-price-table > .dev-price-featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.dev-price-table .dev-price-n { font-family: var(--font-display); font-size: clamp(32px, 3.4vw, 48px); line-height: 1; letter-spacing: -0.02em; color: var(--foreground); display: block; }
+.dev-price-table .dev-price-p { font-size: 13px; color: var(--muted-foreground); margin-top: 6px; display: block; }
+.dev-price-table > * > :last-child { margin-top: auto; padding-top: clamp(16px, 2vw, 24px); }
+
+
 /*
  * GENERATED PER RUN by the art-direction step — the committed micro-interaction contract. Sections
  * apply these classes to interactive elements instead of inventing their own durations/easings, so
@@ -202,7 +247,7 @@ html { overflow-x: clip; }
 }
 .mi-lift:hover {
   transform: translateY(-1px);
-  box-shadow: 0 0 0 1px rgba(47,129,247,0.35), 0 4px 12px rgba(0,0,0,0.4);
+  box-shadow: 0 0 0 1px rgba(61,220,151,0.25);
 }
 .mi-press:active {
   transform: scale(var(--mi-tap));

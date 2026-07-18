@@ -15,6 +15,7 @@ import { completeReasoning, extractJson } from '../llm/llm.js'
 import { queryKnowledge } from '../retrieval/query.js'
 import type { MotionLanguage, Register, SearchHit } from '../types.js'
 import type { Mood, Plan } from './types.js'
+import { planRhythm, type RhythmPlan } from './rhythm.js'
 import { ensureContrast, hslToHex, isHex, mixHex, readableOn, saturation } from './color.js'
 
 /** The 7 committed values the model synthesizes. The rest are derived deterministically. */
@@ -255,6 +256,8 @@ export interface ArtDirection {
   typography: TypographySpec
   /** the ONE locked container width + section-padding rhythm — emitted as .container-page/.section-pad. */
   layout: LayoutSpec
+  /** page-level vertical pacing — decided once, stamped per section (see rhythm.ts) */
+  rhythm: RhythmPlan
   /** the ONE locked visual staging plan — how the page's images relate as a sequence. */
   shotPlan: ShotPlan
   rationale: string
@@ -841,5 +844,9 @@ export async function artDirect(plan: Plan, log: (m: string) => void = () => {})
   // sets the rhythm; register bends its density (a dev tool is dense, an essay is not).
   const layout = layoutForMood(plan.mood, plan.register)
 
-  return { palette, motion, interactions, typography, layout, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
+  // Page rhythm: pure function of the plan, like the layout table. Sections are generated
+  // independently and so cannot create contrast between neighbours; this is decided for them.
+  const rhythm = planRhythm(plan.sections)
+
+  return { palette, motion, interactions, typography, layout, rhythm, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
 }

@@ -1,0 +1,23 @@
+<!doctype html><meta charset=utf-8><title>rhythm</title><style>:root{--section-pad:clamp(96px,14vh,136px);--h2-base:clamp(38px,4vw,51px);--h2:var(--h2-base)}
+*{box-sizing:border-box}body{margin:0;font:16px system-ui}
+h2{font-size:var(--h2) !important;margin:0}
+.section-pad{padding-block:var(--section-pad)}
+.container-page{max-width:1152px;margin-inline:auto;padding-inline:24px}
+/*
+ * PAGE RHYTHM — per-section pacing decided once for the whole page (see rhythm.ts). Padding is a
+ * multiplier on the committed --section-pad so the register's density still leads; this only sets
+ * the CONTRAST between neighbours, which is the part no section could decide for itself.
+ */
+.rhythm-tight { padding-block: calc(var(--section-pad) * 0.6); }
+.rhythm-normal { padding-block: calc(var(--section-pad) * 1); }
+.rhythm-open { padding-block: calc(var(--section-pad) * 1.5); }
+.vol-quiet { --h2: calc(var(--h2-base) * 0.82); }
+.vol-normal { --h2: calc(var(--h2-base) * 1); }
+.vol-loud { --h2: calc(var(--h2-base) * 1.32); }
+</style><section id="s0" class="section-pad rhythm-open vol-normal"><div class="container-page"><h2 id="h0">Section 0 — open/normal</h2></div></section>
+<section id="s1" class="section-pad rhythm-open vol-loud"><div class="container-page"><h2 id="h1">Section 1 — open/loud</h2></div></section>
+<section id="s2" class="section-pad rhythm-normal vol-normal"><div class="container-page"><h2 id="h2">Section 2 — normal/normal</h2></div></section>
+<section id="s3" class="section-pad rhythm-tight vol-quiet"><div class="container-page"><h2 id="h3">Section 3 — tight/quiet</h2></div></section>
+<section id="s4" class="section-pad rhythm-tight vol-quiet"><div class="container-page"><h2 id="h4">Section 4 — tight/quiet</h2></div></section>
+<section id="s5" class="section-pad rhythm-normal vol-normal"><div class="container-page"><h2 id="h5">Section 5 — normal/normal</h2></div></section>
+<section id="s6" class="section-pad rhythm-normal vol-normal"><div class="container-page"><h2 id="h6">Section 6 — normal/normal</h2></div></section>

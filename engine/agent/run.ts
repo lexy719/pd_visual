@@ -10,6 +10,7 @@
 import { spawn } from 'node:child_process'
 import { createInterface } from 'node:readline/promises'
 import { stdin, stdout } from 'node:process'
+import { describeRhythm } from './rhythm.js'
 import { plan } from './plan.js'
 import { artDirect } from './art-direction.js'
 import { generateSections } from './generate.js'
@@ -65,6 +66,7 @@ async function main(): Promise<void> {
   console.log(`  bg / fg   ${swatch(pal.background)}  /  ${swatch(pal.foreground)}`)
   console.log(`  card/bord ${swatch(pal.card)}  /  ${swatch(pal.border)}`)
   console.log(`  motion    \x1b[36m${art.motion}\x1b[0m  (locked for the whole run)`)
+  console.log(`  rhythm    \x1b[36m${describeRhythm(art.rhythm)}\x1b[0m  (page pacing: ▁tight ▄normal █open)`)
   const mi = art.interactions
   console.log(`  interact  \x1b[36m${mi.durationMs}ms\x1b[0m ${mi.easing}  hover:\x1b[36m${mi.hoverTransform}\x1b[0m  tap:${mi.tapScale}  cursor:${mi.cursor}  (locked)`)
   console.log(`  \x1b[2m${art.rationale}\x1b[0m`)

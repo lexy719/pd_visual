@@ -20,6 +20,7 @@ import type { ComponentDoc } from '../types.js'
 import type { GenerateResult } from './generate.js'
 import { SCALE_ASPECT } from './art-direction.js'
 import { DEVICE_CSS } from './devices.js'
+import { rhythmCss } from './rhythm.js'
 import { buildChrome } from './chrome.js'
 import type { ArtDirection, InteractionSpec, LayoutSpec, Palette, TypographySpec } from './art-direction.js'
 import type { Plan, SectionResult } from './types.js'
@@ -234,6 +235,30 @@ export function decodeUnicodeEscapes(code: string, log?: (m: string) => void): s
  * Deliberately narrow: only removes a nav/header that is STICKY or FIXED (site chrome), never an
  * in-content <nav> such as tabs, breadcrumbs, or a table of contents.
  */
+/**
+ * Stamp the page rhythm onto a section's root element.
+ *
+ * Applied by the writer rather than asked of the model, for the same reason the shot scale is: a
+ * section cannot know what the page needs from it, and a rhythm the model may ignore is not a
+ * rhythm. Adds the density class beside the section's existing `section-pad` (the rhythm class wins
+ * on padding because it is emitted later in the stylesheet) and the volume class, which rescales
+ * --h2 for that section only.
+ *
+ * Handles both `className="…"` and `className={`…`}`; leaves a section alone if it somehow has no
+ * root className rather than corrupting the JSX.
+ */
+export function stampRhythm(code: string, beat: { density: string; volume: string } | undefined): string {
+  if (!beat) return code
+  const add = `rhythm-${beat.density} vol-${beat.volume}`
+  if (new RegExp(`\\brhythm-`).test(code)) return code // already stamped — never double-stamp
+  let done = false
+  return code.replace(/(<section\b[^>]*?className=)(?:"([^"]*)"|\{`([^`]*)`\})/s, (full, head, dq, tq) => {
+    if (done) return full
+    done = true
+    return dq !== undefined ? `${head}"${dq} ${add}"` : `${head}{\`${tq} ${add}\`}`
+  })
+}
+
 export function stripSectionChrome(code: string, log?: (m: string) => void): string {
   let out = code
   for (const tag of ['nav', 'header'] as const) {
@@ -417,7 +442,10 @@ export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, 
   --font-display: ${type.displayFamily};
   --font-body: ${type.bodyFamily};
   --container: ${layout.containerPx}px;
-  --section-pad: clamp(${layout.sectionPadMin}px, 14vh, ${layout.sectionPadMax}px);`
+  --section-pad: clamp(${layout.sectionPadMin}px, 14vh, ${layout.sectionPadMax}px);
+  /* Base h2 size. The rhythm's .vol-* classes rescale THIS, which cascades to the section's h2. */
+  --h2-base: ${css(h.h2)};
+  --h2: var(--h2-base);`
   return `@tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -463,7 +491,10 @@ h1, h2, h3 {
   margin: 0;
 }
 h1 { font-size: ${css(h.h1)} !important; }
-h2 { font-size: ${css(h.h2)} !important; }
+/* h2 reads its size from a custom property so the page RHYTHM can bend it per section (.vol-*).
+   The !important still locks it against per-section utility classes; only the run's own rhythm,
+   which sets --h2 on the section root, can move it. */
+h2 { font-size: var(--h2) !important; }
 h3 { font-size: ${css(h.h3)}; }
 
 /*
@@ -497,6 +528,7 @@ h3 { font-size: ${css(h.h3)}; }
  * be stretched into an improvised container. Classes are stamped deterministically at write time.
  */
 ${SCALE_ASPECT_CSS}
+${rhythmCss()}
 
 /*
  * ============================ COMPOSITION DEVICES ============================
@@ -631,6 +663,7 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
     sanitized = decodeUnicodeEscapes(sanitized, console.warn)
     // chrome is composed once by the writer — a section must not render a second site nav
     if (hasChromeForRun) sanitized = stripSectionChrome(sanitized, console.warn)
+    sanitized = stampRhythm(sanitized, art.rhythm?.beats[s.index])
     sanitized = ensureReactImport(sanitized)
     let { code, repaired } = ensureDefaultExport(sanitized, label)
     if (repaired) console.warn(`  \x1b[33mfixup\x1b[0m [${label}] had no default export — injected one.`)
