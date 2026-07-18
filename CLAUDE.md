@@ -57,6 +57,32 @@ environmental. **Never conclude a scroll primitive is broken until you have rule
   for this and is safe (progress pins to 1 at `scrollY 0`).
 - **The reduced-motion / coarse-pointer fallback**, which is a plain render path and needs no rAF.
 
+## Never write source files through a Python heredoc (INVISIBLE CORRUPTION)
+
+Writing repo files with `python - <<'PY' ... open(p,'w').write(s)` corrupts them in two ways that are
+**invisible in Read, Edit, and grep output**:
+
+- **Escape interpretation.** In a non-raw Python string, `\b` is one 0x08 byte, not the two
+  characters a JS regex needs. `/\bdev-x\b/` becomes a regex requiring a literal *backspace*, so it
+  can never match — while the file still displays as `/\bdev-x\b/` on screen. Same for `\a \v \f`.
+- **Newline translation.** Python text mode rewrites `\n` to `\r\n` on Windows, so every subsequent
+  `Edit` fails with "String to replace not found" against text that Read displays verbatim, and
+  `grep` starts calling the file binary.
+
+This cost a long session. `lintDesign` returned `[]` on input it should have flagged, and all eight
+`REGISTER_HINTS` fallbacks in `clampRegister` were dead from the day they were written — every
+off-vocabulary register silently collapsed to `saas-product`/`editorial-story`. NUL bytes in
+`writer.ts` came from the same source.
+
+**Use the Write/Edit tools.** If a script must write source, open in binary (`'wb'`) and use raw
+strings. `npm run check:bytes` asserts this at the byte level across `engine/`, `studio/`,
+`knowledge/`, and root markdown — run it before committing.
+
+**Debugging rule:** when code that reads correctly does not behave correctly, compare the *loaded*
+function against the file: `console.log(JSON.stringify(fn.toString()))`. `JSON.stringify` renders a
+real 0x08 as `\b` and an intended backslash-b as `\\b` — that one-character difference is the only
+visible tell.
+
 ## Knowledge base
 
 `npm run ingest` calls `resetSchema(db)` — a **full wipe and rebuild**. A directory missing from

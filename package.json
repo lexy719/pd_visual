@@ -16,7 +16,8 @@
     "test:wireframe": "tsx engine/agent/wireframe-svg.test.ts",
     "typecheck": "tsc --noEmit",
     "ui": "concurrently -k -n api,web -c cyan,magenta \"tsx studio/server.ts\" \"vite --config studio/ui/vite.config.ts\"",
-    "studio:server": "tsx studio/server.ts"
+    "studio:server": "tsx studio/server.ts",
+    "check:bytes": "tsx engine/tools/check-bytes.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.5.0",

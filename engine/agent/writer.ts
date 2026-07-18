@@ -210,7 +210,7 @@ export function decodeUnicodeEscapes(code: string, log?: (m: string) => void): s
   // Protect genuine escaped backslashes first (a literal "\\u2019" in string content is a backslash
   // followed by text, NOT an escape) — then every remaining \uXXXX is a real escape and decodes
   // unconditionally, which also fixes adjacent escapes the preceding-char approach missed.
-  const DBS = '  DBS  '
+  const DBS = 'DBS'
   let out = code.split('\\\\').join(DBS)
   out = out.replace(/\\u([0-9a-fA-F]{4})|\\x([0-9a-fA-F]{2})/g, (m, u, x) => {
     const cp = parseInt(u ?? x, 16)

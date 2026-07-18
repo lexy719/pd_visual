@@ -96,17 +96,17 @@ const clampMood = (m: unknown): Mood[] => {
  * outside the vocabulary. Ordered most-specific first — a "shop" that is also a "studio" is a shop.
  */
 const REGISTER_HINTS: Array<[Register, RegExp]> = [
-  ['developer-tool', /(api|sdk|cli|open.?source|library|framework|developer|package|npm)/i],
-  ['ecommerce-product', /(shop|store|buy|cart|checkout|product page|for sale|ecommerce|e-commerce)/i],
-  ['saas-product', /(saas|platform|dashboard|app for|software|subscription|b2b|tool for teams|pricing)/i],
-  ['event-launch', /(conference|festival|event|summit|launch day|tickets|programme|lineup)/i],
-  ['portfolio-showcase', /(portfolio|my work|selected works|photographer|designer's own)/i],
-  ['agency-studio', /(agency|studio for|consultancy|we help brands|creative studio)/i],
-  ['local-service-business', /(clinic|practice|salon|shop in|bakery|vet|dentist|lawyer|law firm|barber|garage|local)/i],
-  ['editorial-story', /(story|manifesto|brand story|editorial|magazine|essay)/i]
+  ['developer-tool', /\b(api|sdk|cli|open.?source|library|framework|developer|package|npm)\b/i],
+  ['ecommerce-product', /\b(shop|store|buy|cart|checkout|product page|for sale|ecommerce|e-commerce)\b/i],
+  ['saas-product', /\b(saas|platform|dashboard|app for|software|subscription|b2b|tool for teams|pricing)\b/i],
+  ['event-launch', /\b(conference|festival|event|summit|launch day|tickets|programme|lineup)\b/i],
+  ['portfolio-showcase', /\b(portfolio|my work|selected works|photographer|designer's own)\b/i],
+  ['agency-studio', /\b(agency|studio for|consultancy|we help brands|creative studio)\b/i],
+  ['local-service-business', /\b(clinic|practice|salon|shop in|bakery|vet|dentist|lawyer|law firm|barber|garage|local)\b/i],
+  ['editorial-story', /\b(story|manifesto|brand story|editorial|magazine|essay)\b/i]
 ]
 
-function clampRegister(raw: unknown, brief: string, mood: Mood[]): Register {
+export function clampRegister(raw: unknown, brief: string, mood: Mood[]): Register {
   const r = String(raw ?? '').toLowerCase().trim()
   if ((REGISTERS as readonly string[]).includes(r)) return r as Register
   for (const [reg, re] of REGISTER_HINTS) if (re.test(brief)) return reg

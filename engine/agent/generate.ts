@@ -133,6 +133,25 @@ const CRAFT_FILE = 'knowledge/guidelines/composition-craft.md'
 const DEVICE_FILE = 'knowledge/guidelines/devices.md'
 
 /**
+ * The DEFAULT device for each composition. Devices were retrieved correctly but adopted in only 1 of
+ * 8 sections on the first benchmark, because the prompt offered them as optional. A composition
+ * carries an expectation — a "modular" section without a card grid, or a "cinematic" one without a
+ * bleed, is the stacked-rectangles failure the whole device library exists to prevent — so each
+ * composition now names its default, which the model may override with a better-fitting device but
+ * may not silently ignore.
+ */
+const DEFAULT_DEVICE: Record<Composition, string> = {
+  cinematic: 'dev-bleed',
+  editorial: 'dev-quote-break',
+  gallery: 'dev-offset-grid',
+  narrative: 'dev-overlap',
+  asymmetric: 'dev-overlap',
+  modular: 'dev-feature-grid',
+  immersive: 'dev-bleed',
+  timeline: 'dev-offset-grid'
+}
+
+/**
  * Retrieve 2 compositional DEVICES for this section. Rules tell a section what not to do; these tell
  * it how to build depth, hierarchy and tension — the difference between correct and designed.
  */
@@ -578,6 +597,15 @@ export function lintDesign(code: string): string[] {
   if (!/\bcontainer-page\b/.test(code) && /max-w-(?:xl|2xl|3xl|4xl|5xl|6xl|7xl)[^"]*"?[^>]*mx-auto|mx-auto[^>]*max-w-/.test(code)) {
     warns.push('hand-rolled max-w container instead of the locked container-page')
   }
+  // FLATNESS — a section with several sibling blocks and no composition device is the stacked-
+  // rectangles failure. Narrow on purpose: only fires when there is real repeating structure to
+  // arrange (3+ sibling cards/items), so a single-statement section is never flagged.
+  const hasDevice = /\bdev-(overlap|offset-grid|quote-break|bleed|stat-row|feature-grid|logo-wall|frame)\b/.test(code)
+  const siblingBlocks = (code.match(/className="[^"]*\b(rounded-|border |bg-card)/g) ?? []).length
+  if (!hasDevice && siblingBlocks >= 3) {
+    warns.push(`${siblingBlocks} sibling blocks arranged with no composition device (stacked rectangles)`)
+  }
+
   // Interior escapes — content that breaks OUT of the locked container (observed live: text flush
   // against the viewport edge, a numeral clipped in half at the right edge).
   if (/\bw-screen\b/.test(code)) warns.push('w-screen escapes the locked container (content touches/clips at viewport edges)')
@@ -609,8 +637,12 @@ export function enforceDensity(sections: SectionResult[], dominantIndex: number)
 }
 
 /** The corrective block for a design-system retry — names the exact utilities, same as themeCorrection. */
-function designCorrection(violations: string[]): string {
-  return `CRITICAL — your previous attempt IGNORED the page's locked layout system. Violations: ${violations.join('; ')}.
+function designCorrection(violations: string[], composition?: Composition): string {
+  const deviceHint = composition
+    ? `
+- If the violation mentions "stacked rectangles": apply the composition device "${DEFAULT_DEVICE[composition]}" (defined in globals.css) to the repeating blocks, or another dev-* device that fits better. Do not hand-roll the arrangement.`
+    : ''
+  return `CRITICAL — your previous attempt IGNORED the page's locked layout system. Violations: ${violations.join('; ')}.${deviceHint}
 globals.css already defines the system; use it exactly:
 - root <section> className includes "section-pad" (hero: "section-pad-hero") — remove any py-*/pt-*/pb-* from the root section
 - the outermost content wrapper is className "container-page" — remove hand-rolled max-w-*/mx-auto from it
@@ -1162,8 +1194,9 @@ ${guidelineDigest(structural, 600) || '- (none retrieved; use a centered max-w c
 COMPOSITION CRAFT (the principle to apply — how this section earns depth and hierarchy instead of stacked rectangles):
 ${guidelineDigest(craft, 520) || '- (none retrieved; at minimum give the section one clear focal element and one scale contrast)'}
 
-READY-MADE DEVICES (globals.css already defines these and their geometry is correct + responsive — apply the CLASS, never rebuild the layout by hand. Pick ONE that genuinely fits this section's content; skip them if none does):
+READY-MADE DEVICES (globals.css already defines these; their geometry is correct and responsive — apply the CLASS, never rebuild the layout by hand):
 ${guidelineDigest(devices, 460) || '- (none retrieved)'}
+DEFAULT for a "${section.composition}" section: ${DEFAULT_DEVICE[section.composition]}. Apply it, or another device above that genuinely fits this content better. Only skip devices entirely if this section is a single short statement with no repeating items, no media, and no quotation — a section of stacked text blocks and plain rectangles is a FAILURE this library exists to prevent.
 
 DESIGN JUDGEMENT (from critiques of real sites — apply the underlying principle, don't copy):
 ${critiqueDigest(critiques) || '- (none retrieved)'}
@@ -1348,7 +1381,7 @@ export async function generateSections(
           if (design.length >= 1) {
             log(`       ↳ design-system violation(s): ${design.join('; ')} — escalating one retry to reasoning tier…`)
             tier = 'bulk→escalated'
-            const fixed = await retry(designCorrection(design))
+            const fixed = await retry(designCorrection(design, section.composition))
             const after = lintDesign(fixed)
             if (!parseError(fixed) && after.length < design.length) {
               log(`       ↳ design violations ${design.length} → ${after.length} after escalation`)
