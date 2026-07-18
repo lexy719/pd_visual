@@ -22,8 +22,9 @@
     "test:rhythm": "tsx engine/agent/rhythm.test.ts",
     "test:scroll": "tsx engine/agent/scroll.test.ts",
     "test:wireframe": "tsx engine/agent/wireframe-svg.test.ts",
-    "test": "npm run typecheck && npm run check:bytes && npm run test:devices && npm run test:plan && npm run test:rhythm && npm run test:scroll && npm run test:reveal && npm run test:wireframe",
-    "test:reveal": "tsx engine/agent/reveal.test.ts"
+    "test": "npm run typecheck && npm run check:bytes && npm run test:devices && npm run test:plan && npm run test:rhythm && npm run test:scroll && npm run test:reveal && npm run test:voice && npm run test:wireframe",
+    "test:reveal": "tsx engine/agent/reveal.test.ts",
+    "test:voice": "tsx engine/agent/voice.test.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.5.0",

@@ -17,6 +17,7 @@ import type { Composition, ComponentDoc, MotionPrimitiveDoc, SearchHit } from '.
 import { SCALE_ASPECT } from './art-direction.js'
 import { DEFAULT_DEVICE, DEVICE_NAMES, DEVICE_RE, unknownDeviceClasses } from './devices.js'
 import { lintReveal } from './reveal.js'
+import { lintVoice, voiceFor, voicePromptBlock } from './voice.js'
 import type { ArtDirection, InteractionSpec, ShotBeat, ShotPlan, ShotScale, ShotWorld } from './art-direction.js'
 import type { Plan, SectionPlan, SectionResult } from './types.js'
 
@@ -1295,6 +1296,8 @@ ${guidelineDigest(devices, 460) || '- (none retrieved)'}
 The full set of classes available to you: ${DEVICE_NAMES.join(', ')}. Retrieval showed the two most relevant above, but any of these is defined and safe to use.
 DEFAULT for a "${section.composition}" section: ${DEFAULT_DEVICE[section.composition]}. Apply it, or another device above that genuinely fits this content better. Only skip devices entirely if this section is a single short statement with no repeating items, no media, and no quotation — a section of stacked text blocks and plain rectangles is a FAILURE this library exists to prevent.
 
+${voicePromptBlock(voiceFor(plan.register, plan.mood), plan.brand)}
+
 DESIGN JUDGEMENT (from critiques of real sites — apply the underlying principle, don't copy):
 ${critiqueDigest(critiques) || '- (none retrieved)'}
 
@@ -1474,7 +1477,10 @@ export async function generateSections(
         } else {
           // Design-system conformance — same warn→fix loop as off-theme (the warnings used to fire
           // and get ignored). Only when the run hasn't already spent its ONE escalation retry.
-          const design = lintDesign(code)
+          // Voice violations join the same escalation queue as layout ones. Copy is judged by the
+          // same standard as CSS: a page that drifts between three ways of speaking is as broken as
+          // one that drifts between three spacing systems, and neither is visible without a check.
+          const design = [...lintDesign(code), ...lintVoice(code, voiceFor(plan.register, plan.mood))]
           if (design.length >= 1) {
             log(`       ↳ design-system violation(s): ${design.join('; ')} — escalating one retry to reasoning tier…`)
             tier = 'bulk→escalated'

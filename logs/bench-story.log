@@ -1,0 +1,103 @@
+
+brief:      "Sable & Stone — a hand-forged carbon steel kitchen knife made by one smith in Sheffield. The story of how a single knife is made over four days, and why it outlives the person who buys it. Mood: premium, calm."
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-sonnet-5   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+  register floor (editorial-story): added missing beat(s) — close
+brand:  Sable & Stone
+mood:   premium, calm
+layout: origin-to-proof, escalation
+sections:
+  0. masthead         [36mcinematic[0m/lg  A quiet title card: the knife's name, the smith's name, and the claim that it is made to outlive its owner — nothing else.
+  1. the-ore          [36meditorial[0m/md  Origin: where the carbon steel billet comes from and why this smith chose it — establishing credibility before any claim is made.
+  2. day-one-fire     [36mnarrative[0m/lg  Forging: the billet heated and hammered into rough shape — the first of four days, establishing the timeline's pace.
+  3. day-two-three-patience [36mtimeline[0m/xl  Grinding, quenching, tempering — the unglamorous middle days where most of the time and risk lives, told as a vertical sequence to earn the four-day claim.
+  4. day-four-the-edge [36masymmetric[0m/xl  Final sharpening and the smith's signature stamp — the single moment isolated as the emotional anchor of the whole page.
+  5. why-it-outlives-you [36meditorial[0m/md  The thesis: carbon steel patinas and can be reforged, resharpened, passed down — this is not a consumable object, it is inherited.
+  6. the-smith        [36masymmetric[0m/md  Proof through person: one paragraph on the maker in Sheffield, grounding the whole story in a named individual rather than a brand.
+  7. acquire          [36meditorial[0m/sm  The single, quiet call to action: reserve a knife from the current batch, with the wait understood as part of the value.
+  8. close            [36meditorial[0m/md  land the ending; a story that stops is not a story that closes
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated, subject="a hand-forged carbon steel chef's knife with a dar" · establishing → macro → wide → detail → macro → medium → wide → detail → medium[0m
+  primary   [48;2;28;24;17m   [0m #1C1811
+  accent    [48;2;110;30;26m   [0m #6E1E1A
+  bg / fg   [48;2;250;247;242m   [0m #FAF7F2  /  [48;2;28;24;17m   [0m #1C1811
+  card/bord [48;2;255;255;255m   [0m #FFFFFF  /  [48;2;228;221;208m   [0m #E4DDD0
+  motion    [36msubtle[0m  (locked for the whole run)
+  rhythm    [36m█▄██▄▄█▁▄  peak@3[0m  (page pacing: ▁tight ▄normal █open)
+  interact  [36m260ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-2px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2mA warm near-black on warm cream with a single oxblood accent applies the premium/monochrome+deep-accent rule, restrained 260ms translateY(-2px) interactions and scroll-fade motion make quietness itself the interaction, and the serif-display/grotesque-body pairing at a 1.375 ratio lets the four-day forging story carry the drama instead of the type.[0m
+  [2manchors: Calm / wellness / health, Premium / luxury / editorial, scroll-reveal-fade-up, marquee-ticker, premium / calm micro-interactions, duration scale, Micro-interactions, Type scale ratios by mood, Calm / wellness typography, Premium / editorial typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, PP Neue Montreal — throughline, Bucks Sauce — throughline[0m
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Sable & Stone  ·  premium/calm  ·  origin-to-proof
+  motion: subtle   palette: Ember
+┌──────────────────────────────────────────────────┐
+│ masthead  ·  cinematic  ·  pinned-crossfade (mot │
+│   ↳ A quiet title card: the knife's name, the sm │
+│     media: full-bleed close-up of the finished b │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-ore  ·  editorial  ·  Premium / calm spacing │
+│   ↳ Origin: where the carbon steel billet comes  │
+│     media: macro shot of raw steel billet, ungla │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ day-one-fire  ·  narrative  ·  Container and gri │
+│   ↳ Forging: the billet heated and hammered into │
+│     media: forge glow, hammer mid-strike, sparks │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ day-two-three-patience  ·  timeline  ·  sticky-s │
+│   ↳ Grinding, quenching, tempering — the unglamo │
+│     media: sequence of four quiet stills: quench │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ day-four-the-edge  ·  asymmetric  ·  asymmetric- │
+│   ↳ Final sharpening and the smith's signature s │
+│     media: extreme macro of the stamped maker's  │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ why-it-outlives-you  ·  editorial  ·  split-hero │
+│   ↳ The thesis: carbon steel patinas and can be  │
+│     media: same knife, now shown aged with patin │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-smith  ·  asymmetric  ·  asymmetric-grid     │
+│   ↳ Proof through person: one paragraph on the m │
+│     media: portrait of the smith at the bench, u │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ acquire  ·  editorial  ·  parallax-depth (motion │
+│   ↳ The single, quiet call to action: reserve a  │
+│     media: the finished knife alone on cream gro │
+│   [--] [--]                                      │
+├──────────────────────────────────────────────────┤
+│ close  ·  editorial  ·  parallax-depth (motion)  │
+│   ↳ land the ending; a story that stops is not a │
+│   [--] [--]                                      │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] masthead/cinematic     → motion-primitive pinned-crossfade (wraps:section-block, motion:subtle)
+       ↳ [bulk]
+  [1] the-ore/editorial      → scratch  [structure: Premium / calm spacing, Base scale — 4px and 8px systems, stacked-void]
+       ↳ design-system violation(s): transition-all animates every property including layout, which is the usual source of jank — transition only the properties that change (opacity/transform), or use the locked .reveal; duration-700 is a hand-rolled entrance timing — the page's motion is locked; apply "reveal" to the block instead of choosing your own duration; hand-rolled scroll reveal (opacity-0 toggled from JS) — content is invisible if the effect never runs. Use the locked "reveal" class, which is CSS-only and cannot strand content; this page speaks about its subject, not to the reader, but the section uses "you/your" 3 times — rewrite in third person — escalating one retry to reasoning tier…
