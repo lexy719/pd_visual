@@ -126,10 +126,33 @@ export interface HorizontalVoid {
   detail: string
 }
 
+/**
+ * A section that is mostly empty DOWN the page.
+ *
+ * The void measurement was horizontal only, so a section could be 2268px tall, 25% covered, and
+ * carry a 1305px unbroken band of nothing — and the only thing watching was the vision model, whose
+ * dead-zone findings are capped at `major` and therefore ship. Observed exactly that: a hero whose
+ * pinned-scroll runway rendered as ~900px of blank space above the content.
+ *
+ * Measured from the DOM, so it outranks vision and can block.
+ */
+export interface VerticalVoid {
+  sectionIndex: number
+  sectionClass: string
+  heightPx: number
+  /** percentage of the section's height covered by real text/images */
+  inkPct: number
+  /** the largest unbroken vertical band with nothing in it */
+  biggestGapPx: number
+  detail: string
+}
+
 export interface CaptureResult {
   shots: PageShot[]
   pageHeight: number
   consoleErrors: string[]
+  /** measured vertical voids — sections that are mostly empty down the page, worst first */
+  verticalVoids: VerticalVoid[]
   /** top-level section geometry, so a critic can map a shot's scroll range to section indexes */
   sectionRects: SectionRect[]
   /** set when the page is wider than the viewport — an automatic blocking defect, no vision needed */
@@ -277,6 +300,48 @@ export async function capturePage(url: string, opts?: { maxViewportShots?: numbe
       // worst first (largest empty fraction), dedup by section+kind, cap
       return out.sort((a, b) => b.emptyFraction - a.emptyFraction).slice(0, 5)
     })()`)) as HorizontalVoid[]
+    // MEASURED VERTICAL VOIDS — how much of each section is actually covered, down the page.
+    // Ink = text leaves and images, merged into bands; the gaps between bands are real emptiness.
+    // Deliberately generous thresholds: normal editorial sections measure 53-64% ink, so only a
+    // genuinely broken section trips this.
+    const verticalVoids = (await page.evaluate(`(() => {
+      const out = []
+      const secs = Array.from(document.querySelectorAll('section')).filter((s) => !s.parentElement.closest('section'))
+      secs.forEach((s, i) => {
+        const sr = s.getBoundingClientRect()
+        if (sr.height < 400) return // short sections cannot hold a meaningful void
+        const bands = []
+        for (const el of s.querySelectorAll('*')) {
+          const r = el.getBoundingClientRect()
+          if (r.height < 6 || r.width < 6) continue
+          const isTextLeaf = el.children.length === 0 && (el.textContent || '').trim().length > 0
+          if (!isTextLeaf && el.tagName !== 'IMG' && el.tagName !== 'SVG' && el.tagName !== 'VIDEO') continue
+          bands.push([r.top - sr.top, r.bottom - sr.top])
+        }
+        if (!bands.length) {
+          out.push({ sectionIndex: i, sectionClass: (s.className || '').slice(0, 60), heightPx: Math.round(sr.height), inkPct: 0, biggestGapPx: Math.round(sr.height), detail: 'section renders no text or imagery at all' })
+          return
+        }
+        bands.sort((a, b) => a[0] - b[0])
+        const merged = []
+        for (const b of bands) {
+          const last = merged[merged.length - 1]
+          if (last && b[0] <= last[1] + 4) last[1] = Math.max(last[1], b[1])
+          else merged.push([b[0], b[1]])
+        }
+        const ink = merged.reduce((n, m) => n + (m[1] - m[0]), 0)
+        let gap = merged[0][0]
+        for (let j = 1; j < merged.length; j++) gap = Math.max(gap, merged[j][0] - merged[j - 1][1])
+        gap = Math.max(gap, sr.height - merged[merged.length - 1][1])
+        const inkPct = Math.round((ink / sr.height) * 100)
+        const gapPx = Math.round(gap)
+        // Trip on EITHER a huge unbroken band or an overall coverage collapse.
+        if (gapPx >= 600 || inkPct < 30) {
+          out.push({ sectionIndex: i, sectionClass: (s.className || '').slice(0, 60), heightPx: Math.round(sr.height), inkPct: inkPct, biggestGapPx: gapPx, detail: 'section is ' + Math.round(sr.height) + 'px tall but only ' + inkPct + '% of that height carries text or imagery, with an unbroken empty band of ' + gapPx + 'px' })
+        }
+      })
+      return out.sort((a, b) => b.biggestGapPx - a.biggestGapPx).slice(0, 5)
+    })()`)) as VerticalVoid[]
     // top-level sections only (a nested <section> belongs to its parent's index)
     const sectionRects = (await page.evaluate(`
       Array.from(document.querySelectorAll('section'))
@@ -308,7 +373,7 @@ export async function capturePage(url: string, opts?: { maxViewportShots?: numbe
     shots.push({ label: 'overview', png: await overviewPage.screenshot({ type: 'png', fullPage: true }), scrollY: -1 })
     await overviewPage.close()
 
-    return { shots, pageHeight, consoleErrors, sectionRects, horizontalOverflow, horizontalVoids, containerBleeds }
+    return { shots, pageHeight, consoleErrors, sectionRects, horizontalOverflow, horizontalVoids, verticalVoids, containerBleeds }
   } finally {
     await browser.close()
   }

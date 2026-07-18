@@ -167,6 +167,21 @@ List the visible defects now (empty array if clean).`
         fix
       })
     }
+    // MEASURED VERTICAL voids. Blocking when the band is enormous, because a reader scrolling
+    // through a screen and a half of nothing has left. Vision-reported dead zones are capped at
+    // `major` and therefore ship; this is DOM fact, so it is allowed to stop the page.
+    for (const v of capture.verticalVoids ?? []) {
+      const runway = /sticky|pinned/i.test(v.sectionClass)
+      defects.push({
+        sectionIndex: Math.max(0, v.sectionIndex),
+        defectClass: 'dead-zone',
+        severity: v.biggestGapPx >= 900 || v.inkPct < 15 ? 'blocking' : 'major',
+        evidence: `MEASURED (DOM, not vision): ${v.detail}.`,
+        fix: runway
+          ? `CAUSE: this section reserves scroll distance for a sticky/pinned effect, and that runway renders as an empty band. FIX: shorten the runway so the pinned element is visible for almost all of it — the tall parent should be at most ~1.6x the sticky child's height, and the sticky child must start at the TOP of that parent, never below it. If the effect does not earn that scroll cost, drop the pin and render the content normally.`
+          : `CAUSE: the section is far taller than its content needs, so the reader scrolls through ${v.biggestGapPx}px of nothing. FIX by REMOVING HEIGHT, not by adding filler: delete any min-h-screen/h-[..vh] on this section, drop fixed heights on wrappers, and let the locked section-pad provide the air. Never insert decorative boxes or invented copy to fill it — an empty band and a filler band are the same defect.`
+      })
+    }
     for (const d of parsed.defects ?? []) {
       const x = d as Partial<VisualDefect>
       const idx = Number(x.sectionIndex)
