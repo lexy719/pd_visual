@@ -22,13 +22,14 @@
     "test:rhythm": "tsx engine/agent/rhythm.test.ts",
     "test:scroll": "tsx engine/agent/scroll.test.ts",
     "test:wireframe": "tsx engine/agent/wireframe-svg.test.ts",
-    "test": "npm run typecheck && npm run check:bytes && npm run test:theme && npm run test:surface && npm run test:kit && npm run test:devices && npm run test:plan && npm run test:rhythm && npm run test:scroll && npm run test:reveal && npm run test:voice && npm run test:wireframe",
+    "test": "npm run typecheck && npm run check:bytes && npm run test:theme && npm run test:sketch && npm run test:surface && npm run test:kit && npm run test:devices && npm run test:plan && npm run test:rhythm && npm run test:scroll && npm run test:reveal && npm run test:voice && npm run test:wireframe",
     "test:reveal": "tsx engine/agent/reveal.test.ts",
     "test:voice": "tsx engine/agent/voice.test.ts",
     "test:theme": "tsx engine/agent/theme.test.ts",
     "film": "tsx engine/tools/film.ts",
     "test:kit": "tsx engine/agent/kit.test.ts",
-    "test:surface": "tsx engine/agent/surface.test.ts"
+    "test:surface": "tsx engine/agent/surface.test.ts",
+    "test:sketch": "tsx engine/agent/sketch.test.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.5.0",

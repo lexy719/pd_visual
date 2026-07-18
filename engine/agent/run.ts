@@ -13,6 +13,7 @@ import { stdin, stdout } from 'node:process'
 import { describeRhythm } from './rhythm.js'
 import { describeKit } from './kit.js'
 import { describeSurface } from './surface.js'
+import { sketch } from './sketch.js'
 import { plan } from './plan.js'
 import { artDirect } from './art-direction.js'
 import { generateSections } from './generate.js'
@@ -98,9 +99,22 @@ async function main(): Promise<void> {
     rl.close()
   }
 
+  // 1d. SKETCH — the page's composition, decided ONCE with reasons, before anything is built.
+  // Without this each section invents its own arrangement in isolation, which is how a page ends up
+  // as seven individually-reasonable blocks with no argument between them.
+  rule('SKETCH  (compose the whole page before building any of it)')
+  const { sketch: sk, adjustments: skAdj } = await sketch(p, (m) => console.log(`\x1b[2m${m}\x1b[0m`))
+  sk.beats.forEach((b, i) => {
+    const focal = sk.focalIndex === i ? ' \x1b[35m◀ page focal\x1b[0m' : ''
+    console.log(`  ${i}. \x1b[36m${b.arrangement.padEnd(18)}\x1b[0m ${b.anchor.padEnd(13)} ${p.sections[i]?.name ?? ''}${focal}`)
+    console.log(`     \x1b[2meye: ${b.focal}\x1b[0m`)
+    console.log(`     \x1b[2mwhy: ${b.why}\x1b[0m`)
+  })
+  for (const a of skAdj) console.log(`  \x1b[33mADJUSTED\x1b[0m ${a}`)
+
   // 2 + 3. RETRIEVE + GENERATE
   rule('GENERATE  (retrieve → motion-primitive-or-scratch → code)')
-  const gen = await generateSections(p, art, (m) => console.log(m))
+  const gen = await generateSections(p, art, sk, (m) => console.log(m))
 
   // 4. SELF-CRITIQUE
   rule('SELF-CRITIQUE')

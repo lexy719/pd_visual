@@ -20,6 +20,7 @@ import { lintReveal } from './reveal.js'
 import { lintVoice, voiceFor, voicePromptBlock } from './voice.js'
 import { kitPromptBlock, lintKit, type KitSpec } from './kit.js'
 import { surfacePromptBlock, lintSurface, type SurfaceSpec } from './surface.js'
+import { sketchPromptBlock, ARRANGEMENT_DEVICE, type SketchPlan, type SketchBeat } from './sketch.js'
 import type { ArtDirection, InteractionSpec, ShotBeat, ShotPlan, ShotScale, ShotWorld } from './art-direction.js'
 import type { Plan, SectionPlan, SectionResult } from './types.js'
 
@@ -1283,6 +1284,10 @@ async function genScratch(
   kit: KitSpec,
   /** how this project makes a surface and where its light falls — also already emitted */
   surface: SurfaceSpec,
+  /** this section's place in the page composition, decided before anything was built */
+  beat: SketchBeat,
+  /** true when this section owns the page's strongest composition */
+  isFocal: boolean,
   tier: GenTier,
   /** this section's beat in the locked shot plan (omitted for non-photo moods) */
   shot?: { beat?: ShotBeat; dominant: boolean; subjectHead?: string },
@@ -1306,7 +1311,9 @@ ${guidelineDigest(craft, 520) || '- (none retrieved; at minimum give the section
 READY-MADE DEVICES (globals.css already defines these; their geometry is correct and responsive — apply the CLASS, never rebuild the layout by hand):
 ${guidelineDigest(devices, 460) || '- (none retrieved)'}
 The full set of classes available to you: ${DEVICE_NAMES.join(', ')}. Retrieval showed the two most relevant above, but any of these is defined and safe to use.
-DEFAULT for a "${section.composition}" section: ${DEFAULT_DEVICE[section.composition]}. Apply it, or another device above that genuinely fits this content better. Only skip devices entirely if this section is a single short statement with no repeating items, no media, and no quotation — a section of stacked text blocks and plain rectangles is a FAILURE this library exists to prevent.
+DECIDED for this section by the page composition above: ${ARRANGEMENT_DEVICE[beat.arrangement] ?? 'no device — this section is type-led'}. (Composition fallback for a "${section.composition}" section would be ${DEFAULT_DEVICE[section.composition]}.) Apply it, or another device above that genuinely fits this content better. Only skip devices entirely if this section is a single short statement with no repeating items, no media, and no quotation — a section of stacked text blocks and plain rectangles is a FAILURE this library exists to prevent.
+
+${sketchPromptBlock(beat, isFocal)}
 
 ${surfacePromptBlock(surface)}
 
@@ -1364,6 +1371,8 @@ function slugify(name: string): string {
 export async function generateSections(
   plan: Plan,
   art: ArtDirection,
+  /** the page's committed composition — where each section's mass sits and why (see sketch.ts) */
+  sketchPlan: SketchPlan,
   log: (msg: string) => void = () => {}
 ): Promise<GenerateResult> {
   const sections: SectionResult[] = []
@@ -1444,11 +1453,11 @@ export async function generateSections(
       // First pass on BULK, then AT MOST ONE escalation to REASONING — either because the section
       // won't parse (it would be quarantined at write time), or because it ignored the committed
       // palette. Capped at one retry so a section never costs three LLM calls.
-      let code = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, art.kit, art.surface, 'bulk', sectionShot)
+      let code = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, art.kit, art.surface, sketchPlan.beats[i] ?? sketchPlan.beats[0]!, sketchPlan.focalIndex === i, 'bulk', sectionShot)
       if (FORCE_PARSE_FAIL === 'bulk' || FORCE_PARSE_FAIL === 'both') code = corruptSyntax(code)
       let tier: SectionResult['tier'] = 'bulk'
       const retry = async (push?: string) => {
-        const out = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, art.kit, art.surface, 'reasoning', sectionShot, push)
+        const out = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, art.kit, art.surface, sketchPlan.beats[i] ?? sketchPlan.beats[0]!, sketchPlan.focalIndex === i, 'reasoning', sectionShot, push)
         return FORCE_PARSE_FAIL === 'both' ? corruptSyntax(out) : out
       }
 
