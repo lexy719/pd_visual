@@ -5,11 +5,17 @@ tags: motion, scroll-reveal, fade-up, entrance, subtle, universal, minimal, saas
 
 Content fades in and rises slightly as it enters the viewport. The default; almost never wrong.
 
-**Spec** — `opacity: 0 → 1`, `translateY: 16–24px → 0`, 500–700ms, `cubic-bezier(0.16, 1, 0.3, 1)`.
-Fire **once**, at ~15% visibility.
-**Library** — GSAP `ScrollTrigger` (`{ once: true }`) · Framer Motion `whileInView={{ opacity:1, y:0 }} viewport={{ once:true }}` · or plain `IntersectionObserver` + a CSS class. Don't pull in a library for only this.
-**Suits** — every mood. Calm/premium take the slow end (700ms, 16px); aggressive takes the fast end (400ms, 24px).
-**Pitfalls** — re-animating on every scroll pass is the most irritating thing on the web. `once: true`, always.
+**This one is already built and applied for you.** Every section on the page receives the locked
+`reveal` class, which is CSS scroll-driven (`animation-timeline: view()`), carries the run's committed
+easing, and is reduced-motion safe. Do NOT hand-roll it. Writing your own costs more than it gains:
+an `IntersectionObserver` that fails to run leaves the content invisible with no fallback, per-section
+timings drift so the page ends up with several unrelated entrance speeds, and `transition-all`
+animates layout properties, which is the usual source of scroll jank.
+
+**If a single block inside a section should arrive separately**, add `reveal` to that block. That is
+the whole API.
+**Pitfalls** — re-animating on every scroll pass is the most irritating thing on the web; the locked
+reveal is tied to scroll position, so it cannot do that.
 
 ## stagger-children
 tags: motion, stagger, children, entrance, cards, grid, universal, saas, playful, premium

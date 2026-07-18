@@ -29,7 +29,12 @@ function interactionDirective(mi: InteractionSpec): string {
   easing ${mi.easing}, hover transform ${mi.hoverTransform}, reduced-motion fallback baked in). Apply them:
   add "mi" to any element that reacts, "mi-lift" to cards/links/buttons that lift on hover, "mi-press" to
   clickable controls. You do NOT re-declare their duration/easing/transform — the class carries them.
-- Any additional HOVER / PRESS / STATE-CHANGE transition you write MUST use duration ${mi.durationMs}ms and easing ${mi.easing}. (Scroll-reveal / entrance animations are a SEPARATE category — those keep the reveal timing, typically 500–700ms; do not clamp them to ${mi.durationMs}ms.)
+- Any additional HOVER / PRESS / STATE-CHANGE transition you write MUST use duration ${mi.durationMs}ms and easing ${mi.easing}.
+- ENTRANCE / SCROLL-REVEAL: do not write one. The page already has a locked reveal, applied to every
+  section automatically. Do NOT add opacity-0 with a JS/IntersectionObserver toggle, and do NOT use
+  transition-all — it animates layout properties and is the usual source of jank. If one specific
+  block inside the section should arrive on its own, add the class "reveal" to it; the timing,
+  easing and reduced-motion fallback are already committed.
 - Cursor: ${mi.cursor} (pointer only on genuinely actionable elements).
 - Do NOT add hover scales/bounces/glows that contradict the committed transform "${mi.hoverTransform}".`
 }
@@ -1153,9 +1158,10 @@ There is no pre-made component for this section, so build it from scratch. Rules
 - This runs in the BROWSER: never use Node.js globals — no process / process.env, require, module, __dirname, __filename.
 - MOTION is allowed but CSS-ONLY (no libraries). For HOVER/PRESS feedback, apply the committed "mi" / "mi-lift" /
   "mi-press" utility classes (see the MICRO-INTERACTIONS block) rather than hand-rolling durations — they carry the
-  run's locked timing + reduced-motion fallback. For scroll reveals / @keyframes (fade-up, subtle marquee, gradient
-  shimmer), use a SMALL inline IntersectionObserver in a useEffect that toggles a className — never import an animation
-  library. Animate ONLY transform and opacity, keep it subtle, and gate every effect behind
+  run's locked timing + reduced-motion fallback. SCROLL REVEALS ARE ALREADY DONE FOR YOU: every section receives the
+  locked "reveal" (CSS scroll-driven, reduced-motion safe). Do NOT write an IntersectionObserver, do NOT toggle
+  opacity from state, and do NOT use transition-all. Add the class "reveal" to an inner block only if it genuinely
+  needs to arrive separately. Animate ONLY transform and opacity, and gate any other effect behind
   @media (prefers-reduced-motion: reduce). Motion is optional polish, never required to read the content.
 - LAYOUT (hard rules — a broken grid is worse than a plain one): every flex row or grid MUST set an explicit gap (gap-4/gap-8)
   so children never collide, and multi-item flex rows MUST include flex-wrap. Wrap content in a centered container

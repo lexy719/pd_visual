@@ -101,3 +101,33 @@ sections:
        ↳ [bulk]
   [1] the-ore/editorial      → scratch  [structure: Premium / calm spacing, Base scale — 4px and 8px systems, stacked-void]
        ↳ design-system violation(s): transition-all animates every property including layout, which is the usual source of jank — transition only the properties that change (opacity/transform), or use the locked .reveal; duration-700 is a hand-rolled entrance timing — the page's motion is locked; apply "reveal" to the block instead of choosing your own duration; hand-rolled scroll reveal (opacity-0 toggled from JS) — content is invisible if the effect never runs. Use the locked "reveal" class, which is CSS-only and cannot strand content; this page speaks about its subject, not to the reader, but the section uses "you/your" 3 times — rewrite in third person — escalating one retry to reasoning tier…
+       ↳ design violations 4 → 0 after escalation
+       ↳ [bulk→escalated]
+  [2] day-one-fire/narrative → scratch  [structure: Container and grid, When to break the grid on purpose, Premium / calm spacing]
+       ↳ design-system violation(s): transition-all animates every property including layout, which is the usual source of jank — transition only the properties that change (opacity/transform), or use the locked .reveal; duration-700 is a hand-rolled entrance timing — the page's motion is locked; apply "reveal" to the block instead of choosing your own duration; hand-rolled scroll reveal (opacity-0 toggled from JS) — content is invisible if the effect never runs. Use the locked "reveal" class, which is CSS-only and cannot strand content — escalating one retry to reasoning tier…
+       ↳ design violations 3 → 0 after escalation
+       ↳ [bulk→escalated]
+  [3] day-two-three-patience/timeline → scratch  [structure: sticky-scroll-narrative, horizontal-scroll-gallery, full-bleed-video]
+       ↳ [bulk]
+  [4] day-four-the-edge/asymmetric → scratch  [structure: asymmetric-grid, When to break the grid on purpose, Premium / calm spacing]
+       ↳ design-system violation(s): transition-all animates every property including layout, which is the usual source of jank — transition only the properties that change (opacity/transform), or use the locked .reveal; duration-700 is a hand-rolled entrance timing — the page's motion is locked; apply "reveal" to the block instead of choosing your own duration; hand-rolled scroll reveal (opacity-0 toggled from JS) — content is invisible if the effect never runs. Use the locked "reveal" class, which is CSS-only and cannot strand content — escalating one retry to reasoning tier…
+       ↳ design violations 3 → 0 after escalation
+       ↳ [bulk→escalated]
+  [5] why-it-outlives-you/editorial → scratch  [structure: split-hero, magazine-editorial, Premium / calm spacing]
+       ↳ design-system violation(s): transition-all animates every property including layout, which is the usual source of jank — transition only the properties that change (opacity/transform), or use the locked .reveal; duration-700 is a hand-rolled entrance timing — the page's motion is locked; apply "reveal" to the block instead of choosing your own duration; hand-rolled scroll reveal (opacity-0 toggled from JS) — content is invisible if the effect never runs. Use the locked "reveal" class, which is CSS-only and cannot strand content — escalating one retry to reasoning tier…
+       ↳ design violations 3 → 0 after escalation
+       ↳ [bulk→escalated]
+  [6] the-smith/asymmetric   → scratch  [structure: asymmetric-grid, When to break the grid on purpose, split-hero]
+       ↳ design-system violation(s): transition-all animates every property including layout, which is the usual source of jank — transition only the properties that change (opacity/transform), or use the locked .reveal; duration-700 is a hand-rolled entrance timing — the page's motion is locked; apply "reveal" to the block instead of choosing your own duration; hand-rolled scroll reveal (opacity-0 toggled from JS) — content is invisible if the effect never runs. Use the locked "reveal" class, which is CSS-only and cannot strand content — escalating one retry to reasoning tier…
+       ↳ design violations 3 → 0 after escalation
+       ↳ [bulk→escalated]
+  [7] acquire/editorial      → motion-primitive parallax-depth (wraps:section-block, motion:subtle)
+       ↳ [bulk]
+  [8] close/editorial        → motion-primitive parallax-depth (wraps:section-block, motion:subtle)
+       ↳ [bulk]
+       ↳ page had NO <h1> — promoted the dominant section's first <h2> (a page needs exactly one anchor)
+       ↳ shot plan [generated, subject-locked]: upgraded 13 image(s) → 3 Unsplash + 9 Flux (staged) + 1 dynamic src(s) rewritten to staged templates
+       ↳ hardened 11 <img> tag(s): explicit width/height + lazy below the fold
+       ↳ pre-warm 1/4 ok (1s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 2/4 ok (44s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 3/4 ok (45s — generating fresh imagery, ~1min each)
