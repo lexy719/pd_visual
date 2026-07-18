@@ -13,14 +13,16 @@
     "eval": "tsx engine/retrieval/eval.ts",
     "preview": "tsx engine/preview/preview.ts",
     "generate": "tsx engine/agent/run.ts",
-    "test:wireframe": "tsx engine/agent/wireframe-svg.test.ts",
-    "typecheck": "tsc --noEmit",
     "ui": "concurrently -k -n api,web -c cyan,magenta \"tsx studio/server.ts\" \"vite --config studio/ui/vite.config.ts\"",
     "studio:server": "tsx studio/server.ts",
+    "typecheck": "tsc --noEmit",
     "check:bytes": "tsx engine/tools/check-bytes.ts",
     "test:devices": "tsx engine/agent/devices.test.ts",
-    "test": "npm run typecheck && npm run check:bytes && npm run test:devices && npm run test:plan && npm run test:wireframe",
-    "test:plan": "tsx engine/agent/plan.test.ts"
+    "test:plan": "tsx engine/agent/plan.test.ts",
+    "test:rhythm": "tsx engine/agent/rhythm.test.ts",
+    "test:scroll": "tsx engine/agent/scroll.test.ts",
+    "test:wireframe": "tsx engine/agent/wireframe-svg.test.ts",
+    "test": "npm run typecheck && npm run check:bytes && npm run test:devices && npm run test:plan && npm run test:rhythm && npm run test:scroll && npm run test:wireframe"
   },
   "dependencies": {
     "better-sqlite3": "^11.5.0",

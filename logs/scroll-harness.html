@@ -1,0 +1,55 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>scroll guard harness</title>
+<style>
+  :root { color-scheme: light }
+  * { box-sizing: border-box }
+  body { margin: 0; font: 16px/1.6 system-ui; background: #fff; color: #12151a }
+  section { padding: 90px 24px; border-top: 1px solid #e3e7ec }
+  h2 { margin: 0; font-size: 30px }
+  /* Lenis support CSS, matching what scrollCss() emits */
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-stopped { overflow: hidden; }
+</style>
+<body>
+<script type="module">
+  import Lenis from './lenis.mjs'
+
+  const q = new URLSearchParams(location.search)
+  // `force` deliberately BYPASSES the hidden-document guard so the harness can demonstrate the
+  // hazard the guard exists to prevent.
+  const force = q.has('force')
+  const escaped = q.has('nosmooth')
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const coarse = matchMedia('(pointer: coarse)').matches
+
+  const blocked = reduced || escaped || coarse || document.hidden
+  const shouldInit = force || !blocked
+
+  window.__report = {
+    documentHidden: document.hidden,
+    reduced, escaped, coarse, force,
+    guardTripped: blocked && !force,
+    lenisInitialised: false
+  }
+
+  if (shouldInit) {
+    const lenis = new Lenis({ lerp: 0.08, autoRaf: false })
+    window.__lenis = lenis
+    window.__report.lenisInitialised = true
+    let frame = 0
+    const raf = (t) => { lenis.raf(t); frame = requestAnimationFrame(raf) }
+    frame = requestAnimationFrame(raf)
+    window.__rafFired = 0
+    const count = (t) => { window.__rafFired++; requestAnimationFrame(count) }
+    requestAnimationFrame(count)
+  }
+
+  for (let i = 0; i < 12; i++) {
+    const s = document.createElement('section')
+    s.innerHTML = `<h2>Section ${i}</h2>`
+    document.body.appendChild(s)
+  }
+</script>
+</body>

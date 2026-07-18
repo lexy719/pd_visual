@@ -21,6 +21,7 @@ import type { GenerateResult } from './generate.js'
 import { SCALE_ASPECT } from './art-direction.js'
 import { DEVICE_CSS } from './devices.js'
 import { rhythmCss } from './rhythm.js'
+import { feelForMotion, scrollCss, smoothScrollModule, type ScrollFeel } from './scroll.js'
 import { buildChrome } from './chrome.js'
 import type { ArtDirection, InteractionSpec, LayoutSpec, Palette, TypographySpec } from './art-direction.js'
 import type { Plan, SectionResult } from './types.js'
@@ -414,7 +415,7 @@ const SCALE_ASPECT_CSS = Object.entries(SCALE_ASPECT)
   .map(([scale, a]) => `.shot-${scale} { aspect-ratio: ${a.css}; object-fit: cover; width: 100%; height: auto; }`)
   .join('\n')
 
-export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec): string {
+export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec, feel: ScrollFeel = 'native'): string {
   const h = headingSizes(type.scaleRatio)
   const vars = `  --background: ${p.background};
   --foreground: ${p.foreground};
@@ -529,6 +530,7 @@ h3 { font-size: ${css(h.h3)}; }
  */
 ${SCALE_ASPECT_CSS}
 ${rhythmCss()}
+${scrollCss(feel)}
 
 /*
  * ============================ COMPOSITION DEVICES ============================
@@ -573,7 +575,7 @@ function css(v: string): string {
   return /^[-0-9a-z.,()#%/ ]+$/i.test(v) ? v : 'none'
 }
 
-function composeApp(gen: GenerateResult, hasChrome: boolean): string {
+function composeApp(gen: GenerateResult, hasChrome: boolean, smooth: boolean): string {
   const imports = gen.sections
     .map((s) => `import Section${s.index} from '${s.moduleName}'`)
     .join('\n')
@@ -582,8 +584,10 @@ function composeApp(gen: GenerateResult, hasChrome: boolean): string {
     .map((s) => `      <div id="${s.index}-${s.name}"><Boundary name="${s.index}-${s.name}"><Section${s.index} /></Boundary></div>`)
     .join('\n')
   const chromeImport = hasChrome ? `\nimport { SiteNav, SiteFooter } from './generated/chrome'` : ''
+  // The locked scroll feel. Absent entirely when the run committed to native scrolling.
+  const smoothImport = smooth ? `\nimport { useSmoothScroll } from './generated/smooth-scroll'` : ''
   return `import React from 'react'
-${imports}${chromeImport}
+${imports}${chromeImport}${smoothImport}
 
 class Boundary extends React.Component<{ name: string; children: React.ReactNode }, { err?: Error }> {
   state: { err?: Error } = {}
@@ -601,7 +605,7 @@ class Boundary extends React.Component<{ name: string; children: React.ReactNode
 }
 
 export default function App() {
-  return (
+${smooth ? '  useSmoothScroll()\n' : ''}  return (
     <>
 ${hasChrome ? '      <SiteNav />\n' : ''}      <main id="top">
 ${body}
@@ -625,7 +629,8 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
   rmSync(join(SRC, 'active-component.tsx'), { force: true })
 
   // Deterministic art-direction: re-skin the whole page by rewriting the theme variables.
-  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions, art.typography, art.layout), 'utf8')
+  const scrollFeel = feelForMotion(art.motion)
+  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions, art.typography, art.layout, scrollFeel), 'utf8')
 
   const files: string[] = []
   const depSet = new Set<string>()
@@ -693,7 +698,16 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
     writeFileSync(join(GENERATED, 'chrome.tsx'), chromeSrc, 'utf8')
     files.push('generated/chrome.tsx')
   }
-  writeFileSync(join(SRC, 'App.tsx'), composeApp(gen, !!chromeSrc), 'utf8')
+  // Locked page scroll feel — derived from the run's motion language, emitted as code. Native feels
+  // write no module at all rather than shipping a disabled library.
+  const feel = scrollFeel
+  const smoothSrc = smoothScrollModule(feel)
+  if (smoothSrc) {
+    writeFileSync(join(GENERATED, 'smooth-scroll.tsx'), smoothSrc, 'utf8')
+    files.push('src/generated/smooth-scroll.tsx')
+  }
+  console.log(`  scroll    \x1b[36m${feel}\x1b[0m  (locked from motion language "${art.motion}")`)
+  writeFileSync(join(SRC, 'App.tsx'), composeApp(gen, !!chromeSrc, !!smoothSrc), 'utf8')
   files.push('App.tsx', 'globals.css')
   writeRegistry([...regSet])
   ensureDeps([...depSet])
