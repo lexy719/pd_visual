@@ -10,6 +10,32 @@ import App from './App'
  * Any failed generated image retries itself with growing backoff; error events don't bubble, so
  * this listens in the capture phase.
  */
+/**
+ * Scroll-reveal safety net (app shell infra, NOT generated code).
+ *
+ * Generated sections reveal with IntersectionObserver + `opacity-0 translate-y-*`. An observer only
+ * reports the CURRENT intersection state, so a fast or jumped scroll can skip an element entirely —
+ * it never intersects, never gets its visible class, and once it is above the viewport it never
+ * will. Diagnosed live: one numbered step stayed invisible forever while its neighbours revealed.
+ *
+ * After the reveals have had their chance, force anything still hidden to show. Targeting is
+ * deliberately narrow — opacity-0 AND a translate (the canonical reveal shape), never `hover:`/
+ * `group-hover:` elements — so genuine hover overlays and tooltips are left alone.
+ */
+function revealStragglers(): void {
+  for (const el of Array.from(document.querySelectorAll<HTMLElement>('[class*="opacity-0"]'))) {
+    const cls = el.className
+    if (typeof cls !== 'string') continue
+    if (!/translate-[xy]/.test(cls)) continue // not a scroll-reveal shape
+    if (/hover:|group-hover:|peer-/.test(cls)) continue // a hover effect — must stay hidden
+    if (getComputedStyle(el).opacity !== '0') continue // already revealed
+    el.style.opacity = '1'
+    el.style.transform = 'none'
+  }
+}
+for (const delay of [4000, 9000]) setTimeout(revealStragglers, delay)
+window.addEventListener('load', () => setTimeout(revealStragglers, 2500))
+
 window.addEventListener(
   'error',
   (e) => {

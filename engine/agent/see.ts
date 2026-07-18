@@ -92,6 +92,40 @@ export interface HorizontalOverflow {
   sectionIndex: number
 }
 
+/**
+ * A MEASURED element-vs-container overflow — an image bleeding past its own card. Distinct from
+ * HorizontalOverflow, which is page-vs-viewport: a card-level bleed never widens the page, so the
+ * viewport check cannot see it (observed live on the Fenwick "Where to find us" card).
+ */
+export interface ContainerBleed {
+  sectionIndex: number
+  /** tag.class of the bleeding element and of the container it escapes */
+  element: string
+  container: string
+  /** how far past the container it extends, px, worst side */
+  overflowPx: number
+  side: 'left' | 'right' | 'both'
+}
+
+/**
+ * A MEASURED horizontal void — DOM facts, not vision. Two shapes, one symptom (a big empty band):
+ *  - 'unequal-columns': an asymmetric two-column row where one column is a fraction of the other's
+ *    height under align-items:start (a 4-line text column beside a tall card).
+ *  - 'half-empty-grid': content pinned to one side of a full-width container (max-w-* + left/right
+ *    alignment) leaving the other 35%+ of the width empty for most of the section's height. This is
+ *    the MORE COMMON void (observed on Fenwick: max-w-3xl copy left-pinned in a full-width grid).
+ * The measurement names the MECHANISM so the revise gets a structural handle, not "empty space".
+ */
+export interface HorizontalVoid {
+  kind: 'unequal-columns' | 'half-empty-grid'
+  sectionIndex: number
+  /** the offending row/container's own class, for locating it in the source */
+  rowClass: string
+  /** the empty band as a fraction of the container width (half-empty-grid) or the height gap in vh (unequal-columns) */
+  emptyFraction: number
+  detail: string
+}
+
 export interface CaptureResult {
   shots: PageShot[]
   pageHeight: number
@@ -100,6 +134,10 @@ export interface CaptureResult {
   sectionRects: SectionRect[]
   /** set when the page is wider than the viewport — an automatic blocking defect, no vision needed */
   horizontalOverflow: HorizontalOverflow | null
+  /** measured horizontal voids (unequal columns OR half-empty grids) — worst first */
+  horizontalVoids: HorizontalVoid[]
+  /** measured images bleeding past their own container — worst first */
+  containerBleeds: ContainerBleed[]
 }
 
 /**
@@ -148,6 +186,97 @@ export async function capturePage(url: string, opts?: { maxViewportShots?: numbe
       }
       return worst ? { scrollWidth: sw, viewport: vw, offender: worst.offender, offenderLeft: worst.offenderLeft, offenderRight: worst.offenderRight, sectionIndex: worst.sectionIndex } : null
     })()`)) as HorizontalOverflow | null
+
+    // MEASURED container-bleed check — an image escaping its OWN card. The page-vs-viewport check
+    // above cannot see this: a card-level bleed does not widen the document.
+    const containerBleeds = (await page.evaluate(`(() => {
+      const tops = Array.from(document.querySelectorAll('section')).filter((s) => !s.parentElement.closest('section'))
+      const clsOf = (el) => { const c = typeof el.className === 'string' ? el.className.split(/\\s+/).slice(0, 3).join('.') : ''; return el.tagName.toLowerCase() + (c ? '.' + c : '') }
+      const out = []
+      for (const img of document.querySelectorAll('img, figure, picture, video')) {
+        const parent = img.parentElement
+        if (!parent) continue
+        if (parent.tagName === 'BODY' || parent.tagName === 'HTML') continue
+        const pcs = getComputedStyle(parent), ics = getComputedStyle(img)
+        const r = img.getBoundingClientRect(), p = parent.getBoundingClientRect()
+        if (r.width < 40 || p.width < 40) continue
+
+        // Shape A — a CLIPPING parent whose aspect fights the image's own aspect: the picture is
+        // forced past its frame and cropped. Invisible to a pure bounds check because the clip hides
+        // the excess (observed live: a shot-wide card holding a shot-detail image).
+        if (pcs.overflow !== 'visible') {
+          const ia = ics.aspectRatio, pa = pcs.aspectRatio
+          const parsed = (v) => { const m = /^(\\d+(?:\\.\\d+)?)\\s*\\/\\s*(\\d+(?:\\.\\d+)?)$/.exec(v || ''); return m ? Number(m[1]) / Number(m[2]) : null }
+          const ir = parsed(ia), pr = parsed(pa)
+          if (ir && pr && Math.abs(ir - pr) / pr > 0.15) {
+            const sec0 = img.closest('section')
+            out.push({ sectionIndex: sec0 ? tops.indexOf(sec0.parentElement.closest('section') || sec0) : -1, element: clsOf(img), container: clsOf(parent), overflowPx: Math.round(Math.abs(r.height - p.height)), side: 'both' })
+          }
+          continue
+        }
+
+        // Shape B — a plain bleed past a non-clipping container.
+        const overL = Math.max(0, p.left - r.left), overR = Math.max(0, r.right - p.right)
+        const worst = Math.max(overL, overR)
+        if (worst <= 4) continue // sub-pixel / rounding
+        const sec = img.closest('section')
+        const idx = sec ? tops.indexOf(sec.parentElement.closest('section') || sec) : -1
+        out.push({ sectionIndex: idx, element: clsOf(img), container: clsOf(parent), overflowPx: Math.round(worst), side: overL > 4 && overR > 4 ? 'both' : (overL > overR ? 'left' : 'right') })
+      }
+      return out.sort((a, b) => b.overflowPx - a.overflowPx).slice(0, 4)
+    })()`)) as ContainerBleed[]
+
+    // MEASURED horizontal-void check — two shapes, one output list. DOM facts so the revise gets an
+    // exact structural handle instead of vision's "empty space".
+    const horizontalVoids = (await page.evaluate(`(() => {
+      const vh = document.documentElement.clientHeight
+      const tops = Array.from(document.querySelectorAll('section')).filter((s) => !s.parentElement.closest('section'))
+      const secIdx = (el) => { const s = el.closest('section'); return s ? tops.indexOf(s.parentElement.closest('section') || s) : -1 }
+      const clsOf = (el) => { const c = typeof el.className === 'string' ? el.className.split(/\\s+/).slice(0, 4).join('.') : ''; return el.tagName.toLowerCase() + (c ? '.' + c : '') }
+      const out = []
+
+      // Shape 1 — unequal columns: a side-by-side row whose short child is a fraction of the tall one.
+      for (const row of document.querySelectorAll('body *')) {
+        const cs = getComputedStyle(row)
+        const isRow = cs.display === 'grid' || (cs.display === 'flex' && cs.flexDirection.startsWith('row'))
+        if (!isRow) continue
+        const kids = Array.from(row.children).filter((c) => c.getBoundingClientRect().width >= 120)
+        if (kids.length < 2) continue
+        const rects = kids.map((c) => c.getBoundingClientRect())
+        const minTop = Math.min(...rects.map((r) => r.top))
+        if (rects.some((r) => r.top - minTop > 40)) continue
+        const heights = rects.map((r) => r.height)
+        const tall = Math.max(...heights), short = Math.min(...heights)
+        if (tall < vh * 0.5) continue
+        const gapVh = (tall - short) / vh
+        if (short / tall > 0.55 || gapVh < 0.4) continue
+        const items = cs.alignItems
+        out.push({ kind: 'unequal-columns', sectionIndex: secIdx(row), rowClass: clsOf(row), emptyFraction: Math.round(gapVh * 100) / 100, detail: 'short column ' + Math.round(short) + 'px vs tall ' + Math.round(tall) + 'px' + ((items === 'start' || items === 'flex-start' || items === 'baseline') ? ' under align-items:start' : '') + ', ~' + (Math.round(gapVh * 10) / 10) + ' viewport-height(s) of void beside the short column' })
+      }
+
+      // Shape 2 — half-empty grid: content occupies one side of a wide container, leaving a tall empty
+      // band on the other side. Measure each top-level section's content bounding-box vs its width.
+      for (let i = 0; i < tops.length; i++) {
+        const sec = tops[i]
+        const secR = sec.getBoundingClientRect()
+        if (secR.width < 700 || secR.height < vh * 0.6) continue // needs to be a wide, tall section
+        // union of the horizontal extent of the section's TEXT/MEDIA leaves (ignore full-width bg wrappers)
+        let minL = Infinity, maxR = -Infinity, contentH = 0
+        for (const el of sec.querySelectorAll('p, h1, h2, h3, li, img, figure, ul, ol, blockquote, a, button')) {
+          const r = el.getBoundingClientRect()
+          if (r.width < 24 || r.height < 12) continue
+          minL = Math.min(minL, r.left); maxR = Math.max(maxR, r.right); contentH += r.height
+        }
+        if (!isFinite(minL) || contentH < vh * 0.5) continue // little content = a spacer, not a void
+        const contentW = maxR - minL
+        const usedFrac = contentW / secR.width
+        if (usedFrac >= 0.68) continue // fills enough of the width
+        const emptySide = (minL - secR.left) > (secR.right - maxR) ? 'left' : 'right'
+        out.push({ kind: 'half-empty-grid', sectionIndex: i, rowClass: clsOf(sec), emptyFraction: Math.round((1 - usedFrac) * 100) / 100, detail: 'content uses only ' + Math.round(usedFrac * 100) + '% of the section width, pinned to the ' + (emptySide === 'left' ? 'right' : 'left') + ' — the ' + emptySide + ' ~' + Math.round((1 - usedFrac) * 100) + '% is an empty vertical band' })
+      }
+      // worst first (largest empty fraction), dedup by section+kind, cap
+      return out.sort((a, b) => b.emptyFraction - a.emptyFraction).slice(0, 5)
+    })()`)) as HorizontalVoid[]
     // top-level sections only (a nested <section> belongs to its parent's index)
     const sectionRects = (await page.evaluate(`
       Array.from(document.querySelectorAll('section'))
@@ -179,7 +308,7 @@ export async function capturePage(url: string, opts?: { maxViewportShots?: numbe
     shots.push({ label: 'overview', png: await overviewPage.screenshot({ type: 'png', fullPage: true }), scrollY: -1 })
     await overviewPage.close()
 
-    return { shots, pageHeight, consoleErrors, sectionRects, horizontalOverflow }
+    return { shots, pageHeight, consoleErrors, sectionRects, horizontalOverflow, horizontalVoids, containerBleeds }
   } finally {
     await browser.close()
   }

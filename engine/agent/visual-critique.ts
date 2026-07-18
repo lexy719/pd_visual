@@ -129,7 +129,7 @@ List the visible defects now (empty array if clean).`
     const raw = await completeVision(CRITIC_SYSTEM, user, capture.shots.map((s) => ({ label: s.label, png: s.png })), { maxTokens: 2000 })
     const parsed = extractJson<{ defects?: unknown[] }>(raw)
     const defects: VisualDefect[] = []
-    // MEASURED defect first — DOM facts outrank vision. A page wider than its viewport shifts and
+    // MEASURED defects first — DOM facts outrank vision. A page wider than its viewport shifts and
     // clips everything; the offender is identified by measurement, so the revise prompt is exact.
     if (capture.horizontalOverflow) {
       const o = capture.horizontalOverflow
@@ -139,6 +139,32 @@ List the visible defects now (empty array if clean).`
         severity: 'blocking',
         evidence: `MEASURED (DOM, not vision): page scrollWidth ${o.scrollWidth}px > viewport ${o.viewport}px; widest offender <${o.offender}> spans x ${o.offenderLeft}..${o.offenderRight}`,
         fix: `constrain <${o.offender}> inside the container — remove fixed widths / column overflow so nothing exceeds the viewport`
+      })
+    }
+    // MEASURED container bleed — an image escaping its own card (invisible to the viewport check).
+    for (const b of capture.containerBleeds ?? []) {
+      defects.push({
+        sectionIndex: Math.max(0, b.sectionIndex),
+        defectClass: 'overflow',
+        severity: 'major',
+        evidence: `MEASURED (DOM, not vision): <${b.element}> extends ${b.overflowPx}px past its container <${b.container}> on the ${b.side}.`,
+        fix: `The image is wider than the card holding it. Make it fit its container: give the image w-full (and the locked shot-* aspect class) so it scales to the card, or let the card clip it with overflow-hidden plus rounded corners matching the card. Do NOT widen the card or use a fixed pixel width larger than its column.`
+      })
+    }
+
+    // MEASURED horizontal voids — names the MECHANISM per shape so the revise gets a real structural
+    // handle (the earlier "fix this empty space" instruction had none).
+    for (const v of capture.horizontalVoids ?? []) {
+      const fix =
+        v.kind === 'unequal-columns'
+          ? `CAUSE: ${v.detail}. Because the short column is genuinely sparse, STOP putting them side by side: make this block a SINGLE full-width column (stack the short content above/below the tall element, each full width). Do NOT switch to items-stretch (stretching a near-empty column just makes a taller void) and do NOT invent filler. Two columns → one.`
+          : `CAUSE: ${v.detail}. The content is pinned to one side of a full-width container. FIX by making the content actually USE its container: either (1) CENTER the content block (mx-auto on a max-w-* wrapper so the empty band becomes balanced margins, not one big void), or (2) genuinely fill the width with a real two-part layout (text one side, an on-brief image / pull-quote / stat the other — never an empty box). A content column must center or expand to its container by DEFAULT; it must never sit pinned to one edge with a tall empty band beside it.`
+      defects.push({
+        sectionIndex: Math.max(0, v.sectionIndex),
+        defectClass: 'dead-zone',
+        severity: 'major',
+        evidence: `MEASURED (DOM, not vision): ${v.kind} in <${v.rowClass}> — ${v.detail}.`,
+        fix
       })
     }
     for (const d of parsed.defects ?? []) {

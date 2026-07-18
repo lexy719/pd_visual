@@ -1,5 +1,26 @@
 [
   {
+    "id": "be26b615-9b13-4ba1-b859-128c6a746e91",
+    "brief": "A veterinary clinic called Fenwick & Cole, in a small English market town, run by two vets\nwho left corporate veterinary chains specifically because those chains push unnecessary\nprocedures for profit. Positioning: they tell you when your pet doesn't need the expensive\noption, even if it costs them the sale. They've turned away corporate buyout offers three\ntimes. Mood: warm but no-nonsense, trustworthy, small-town, the opposite of a slick corporate\nvet-chain website with stock photos of golden retrievers.",
+    "choices": {},
+    "createdAt": "2026-07-17T19:03:59.887Z",
+    "updatedAt": "2026-07-17T19:13:44.365Z",
+    "previewUrl": "http://localhost:3001/sessions/be26b615-9b13-4ba1-b859-128c6a746e91/site/"
+  },
+  {
+    "id": "779c52af-73be-4dcb-9229-d92e3063c41d",
+    "brief": "A tiny two-person law firm called Rell & Osei, in Manchester, that only does one thing:\nfighting wrongful dismissal cases for people who got fired for whistleblowing. No corporate\nclients, ever — they turned down retainers from three of the companies they've since sued.\nPositioning: not a big firm's employment department, not an ambulance chaser — two lawyers\nwho take on cases most firms won't touch because the defendant has better lawyers. Mood:\nserious, plain-spoken, unglamorous, quietly confident. The opposite of glass-tower law firm\nwebsites with stock photos of handshakes.\n\nClarifications: How should the homepage be structured to make the 'we only do this one case type' positioning land immediately? → Vertical timeline; What's the strongest objection a visitor will have, and what should the site answer first? → Can two lawyers actually win?; Who is the primary visitor, and what should the main action be? → Another lawyer referring a client; How far should the 'anti-glossy-law-firm' aesthetic go? → Plain and document-like. Use these as creative constraints; you still decide the sections and layout — the structure is not a fixed template.",
+    "choices": {
+      "q0": "Vertical timeline",
+      "q1": "Can two lawyers actually win?",
+      "q2": "Another lawyer referring a client",
+      "q3": "Plain and document-like"
+    },
+    "createdAt": "2026-07-17T14:04:04.481Z",
+    "updatedAt": "2026-07-17T14:08:43.777Z",
+    "previewUrl": "http://localhost:3001/sessions/779c52af-73be-4dcb-9229-d92e3063c41d/site/"
+  },
+  {
     "id": "c4c059b7-cfe6-4dac-aad4-4a909e98499f",
     "brief": "A small bookbindery called Verso, run by two sisters in Porto. They hand-bind editions of out-of-print Portuguese poetry — books nobody reprints because they don't sell. Each edition is 40 copies, sewn by hand, in paper they make themselves from cotton rag. Positioning: not a luxury press, not a hobby — an argument that some books deserve to physically outlive their commercial life. Mood: quiet, literary, tactile, slightly stubborn.\n\nClarifications: How should the site feel to move through — what's the core composition? → Editorial columns + whitespace; The single persistent CTA the critique insight highlights — what should it actually invite people to do? → Reserve a copy; Who is this site really speaking to first? → Poetry collectors; What tone of voice should carry the writing throughout? → Plainly stubborn. Use these as creative constraints; you still decide the sections and layout — the structure is not a fixed template.",
     "choices": {

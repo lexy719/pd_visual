@@ -71,10 +71,18 @@ const LAYOUT_SYSTEM =
   'viewport width — no fixed pixel widths wider than a column, no percentage soup), and body-copy blocks ' +
   'get className "measure" (readable line length). Item grids inside a column (cards, thumbnails) are free.\n' +
   '- IMAGES: every image is shaped by a locked aspect class (shot-establishing 21:9 / shot-wide 16:9 / ' +
-  'shot-medium 4:3 / shot-detail 4:5 / shot-macro 1:1, object-fit cover — stamped automatically). Do NOT ' +
-  'set your own h-*/aspect-* on images; size them by COLUMN width and let the locked aspect set the height.\n' +
+  'shot-medium 4:3 / shot-detail 4:5 / shot-macro 1:1, object-fit cover — STAMPED AUTOMATICALLY on the ' +
+  '<img>). Do NOT write a shot-* class yourself, and never put one on a wrapper around an image — a ' +
+  'wrapper aspect fighting the image aspect clips the picture. Do NOT set your own h-*/aspect-* on ' +
+  'images either; size them by COLUMN width and let the locked aspect set the height.\n' +
   '- DENSITY: never min-h-screen/h-screen outside the hero — the locked section-pad provides the air. ' +
-  'A section is as tall as its content.'
+  'A section is as tall as its content.\n' +
+  '- FILL THE WIDTH (this is the #1 quality failure): a content block must CENTER or EXPAND to its ' +
+  'container — never pin a max-w-* column to one edge and leave a tall empty band on the other side. ' +
+  'If a section is one column, center it (max-w-* with mx-auto). If it is two columns, BOTH must carry ' +
+  'real content of comparable height (text + an on-brief image / pull-quote / stat / list) — a column ' +
+  'that would be empty or near-empty means you should use a single centered column instead. Every ' +
+  'section should read as deliberately composed to fill its space, not as a narrow strip floating in a wide void.'
 
 /** Moods for which stock photos read as random/cheap — steer scratch to non-photo imagery instead. */
 const NON_PHOTO_MOODS = ['technical', 'minimal', 'brutalist']
@@ -320,8 +328,31 @@ function worldSuffix(world: ShotWorld, beat: ShotBeat | undefined): string {
  * silently fights per-section media direction — every stylistic term now comes from the lock.
  * Subject shots carry the identity phrase VERBATIM — continuity lives in that repetition.
  */
+/**
+ * Disambiguate the two subjects free Flux renders worst. A terse keyword like "vet helen portrait"
+ * makes Flux fill a clinic context with a golden retriever; "grandmother founder" gives a vague
+ * blob. Detecting a person or animal keyword and prepending an explicit, framed noun phrase is the
+ * single biggest quality lever for those categories (diagnosed on the Fenwick vet run).
+ */
+const PERSON_HINTS = /\b(portrait|founder|owner|team|staff|vet|doctor|nurse|lawyer|barista|maker|artisan|baker|chef|sister|brother|grandmother|grandfather|woman|man|people|headshot|person|host|guide|worker)\b/i
+const ANIMAL_HINTS = /\b(dog|cat|puppy|kitten|pet|horse|animal|retriever|spaniel|terrier|bird|rabbit)\b/i
+
+function disambiguateSubject(content: string): string {
+  if (ANIMAL_HINTS.test(content)) {
+    // keep the animal but demand a real photograph of it, not a stylised/cartoon render
+    return `a real photograph of ${content}, natural fur detail, candid, documentary`
+  }
+  if (PERSON_HINTS.test(content)) {
+    // force a HUMAN with explicit framing; strip the ambiguous role-name so Flux doesn't free-associate
+    const framed = content.replace(/\bportrait\b/i, '').replace(/\s+/g, ' ').trim()
+    return `a real candid photograph of a person — ${framed} — a real human, natural skin and features, environmental portrait, absolutely not an animal`
+  }
+  return content
+}
+
 function shotPrompt(world: ShotWorld, beat: ShotBeat | undefined, kw: string, subjectShot: boolean): string {
-  const content = kw.replace(/-\d+$/, '').replace(/[-_]+/g, ' ').trim() || 'abstract composition'
+  const raw = kw.replace(/-\d+$/, '').replace(/[-_]+/g, ' ').trim() || 'abstract composition'
+  const content = disambiguateSubject(raw)
   return `${subjectShot && world.subject ? `${world.subject}, ${content}` : content}, ${worldSuffix(world, beat)}`
 }
 
@@ -626,7 +657,15 @@ export function hardenImages(sections: SectionResult[], beats?: ShotBeat[]): num
       // the LOCKED shape class — aspect-ratio + object-fit: cover from globals.css; stamped
       // deterministically so an image can never be stretched into an improvised box
       const beat = beats?.[s.index]
-      const shotClass = beat && /pollinations|picsum|unsplash|data:image/.test(attrs) ? `shot-${beat.scale}` : null
+      // NEVER stamp a shape class when a WRAPPER already carries one: the model sometimes puts
+      // shot-* on the image's frame, and a second, different aspect on the <img> inside it fights
+      // the frame — the image is forced past its box and clipped (observed live: a shot-wide card
+      // holding a shot-detail image). One aspect per image, wherever it is declared.
+      const wrapperHasShot = /\bshot-(establishing|wide|medium|detail|macro)\b/.test(
+        s.code.slice(Math.max(0, starts[k] - 400), starts[k])
+      )
+      const shotClass =
+        beat && !wrapperHasShot && /pollinations|picsum|unsplash|data:image/.test(attrs) ? `shot-${beat.scale}` : null
       let classInsert: { at: number; text: string } | null = null
       if (shotClass && !attrs.includes('shot-')) {
         const cm = /className="/.exec(attrs)

@@ -30,7 +30,17 @@ export interface Concept {
   /** one concrete line: the visual idea, not marketing copy */
   premise: string
   anchor: ConceptAnchor
+  /**
+   * TRUE when the premise implies a structurally SPARSE layout — floating/pinned/scattered items,
+   * lots of negative space, noticeboard/gallery-of-fragments framing. Such concepts reliably produce
+   * void-heavy pages (diagnosed on the Fenwick "noticeboard" run), so the downstream fill-the-width
+   * rule gets extra weight when this is set. Detected from the premise text, not model-declared.
+   */
+  sparseRisk: boolean
 }
+
+/** Premise language that predicts a void-prone layout — pinned/floating/scattered/sparse framing. */
+const SPARSE_PREMISE = /\b(noticeboard|notice board|pinned|pin(?:ned|s)? up|sticky note|scattered|floating|fragments?|clippings?|postcards?|index cards?|scraps?|constellation|archipelago|sparse|minimal white space|lots of (?:negative|white) space|breathing room|pockets? of)\b/i
 
 export interface ConceptResult {
   concepts: Concept[]
@@ -132,7 +142,9 @@ export function lockConcepts(
     }
     usedPrimaries.add(mood[0])
 
-    out.push({ name, mood, premise, anchor: { source, why: why || 'grounds this direction' } })
+    const sparseRisk = SPARSE_PREMISE.test(premise) || SPARSE_PREMISE.test(name)
+    if (sparseRisk) adjustments.push(`concept "${name}" flagged sparse-risk (void-prone premise) — fill-the-width rule weighted up if chosen`)
+    out.push({ name, mood, premise, anchor: { source, why: why || 'grounds this direction' }, sparseRisk })
     if (out.length === 3) break
   }
   return out
@@ -197,5 +209,9 @@ CREATIVE CONCEPT (chosen by the user — this is the LOCKED direction; build THI
 - Name: ${c.name}
 - Mood (locked): ${c.mood.join(', ')}
 - Visual premise: ${c.premise}
-- Grounded in: ${c.anchor.source} — ${c.anchor.why}`
+- Grounded in: ${c.anchor.source} — ${c.anchor.why}${
+    c.sparseRisk
+      ? `\n\nCRITICAL for THIS concept: its premise leans sparse/pinned/floating, which reliably produces void-heavy pages. Honour the FEELING of the concept, but every section must still FILL or CENTER its width — a "pinned note" or "scattered" motif is a treatment applied to content that fills its container, NEVER a licence to leave tall empty bands. If a section would be a small element floating in a wide void, center it or give it a real companion element. Do not repeat the same pinned-note motif on more than one section.`
+      : ''
+  }`
 }

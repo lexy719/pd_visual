@@ -423,7 +423,7 @@ app.post('/concepts', async (req, res) => {
 
 /** Clamp a client-supplied concept to a safe shape — the mood it binds must be from the vocabulary. */
 function parseConcept(raw: unknown): Concept | undefined {
-  const c = raw as { name?: unknown; mood?: unknown; premise?: unknown; anchor?: { source?: unknown; why?: unknown } } | undefined
+  const c = raw as { name?: unknown; mood?: unknown; premise?: unknown; sparseRisk?: unknown; anchor?: { source?: unknown; why?: unknown } } | undefined
   if (!c || typeof c !== 'object') return undefined
   const name = String(c.name ?? '').trim().slice(0, 60)
   const premise = String(c.premise ?? '').trim().slice(0, 220)
@@ -436,7 +436,8 @@ function parseConcept(raw: unknown): Concept | undefined {
     name,
     mood,
     premise,
-    anchor: { source: String(c.anchor?.source ?? '').slice(0, 120), why: String(c.anchor?.why ?? '').slice(0, 200) }
+    anchor: { source: String(c.anchor?.source ?? '').slice(0, 120), why: String(c.anchor?.why ?? '').slice(0, 200) },
+    sparseRisk: c.sparseRisk === true
   }
 }
 

@@ -53,3 +53,28 @@ underneath reads as a loading failure, not as restraint, because readers have le
 broken pages. If a panel exists to hold imagery, it holds imagery; if the design calls for quiet, use
 whitespace without a frame. Never ship a bordered or tinted box whose only content is its own label —
 the caption promises a subject, and an absent subject breaks the promise in the most literal way.
+
+## Two-column rows: unequal columns leave a hole
+
+tags: layout, grid, column, spacing, avoid, universal, dead-zone
+
+An asymmetric two-column row only works when both columns carry comparable height. A short text column
+(a few lines) beside a tall element (an image, a bordered card, a long list) under the default
+align-items:start ends where its content ends and leaves the whole height of the tall column empty
+beside it — a viewport-sized dead zone that reads as a broken layout, not as whitespace. Before
+committing to side-by-side columns, check that the shorter one has enough to say; if it does not,
+either let both columns stretch to a shared height, give the short column real supporting content
+(a caption, a pull-quote, a small stat), or make the block a single full-width column instead.
+
+## Pinned columns: content must fill or center, not float in a void
+
+tags: layout, grid, width, composition, avoid, universal, dead-zone
+
+A narrow content block pinned to one edge of a wide container — a max-width column left-aligned inside
+a full-width grid — leaves the rest of the width as a tall empty band that reads as a broken or
+half-loaded layout, not as intentional whitespace. The default for any single content column is to
+CENTER it so its spare width becomes balanced margins on both sides. If a section genuinely wants the
+full width, it must carry real content across that width: text on one side and an on-brief image,
+pull-quote, stat, or list on the other, each of comparable height. The failure to avoid is the most
+common one in generated pages: a strip of text hugging the left edge with 40% of the section empty
+beside it. Fill the width or center the column — never pin and abandon.

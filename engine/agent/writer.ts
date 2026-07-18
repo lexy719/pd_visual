@@ -195,6 +195,34 @@ const editDistance = (a: string, b: string): number => {
  * name it obviously meant (an import/local declaration), rename it; otherwise leave it for the
  * boundary. Returns the repaired code.
  */
+/**
+ * Decode literal `\uXXXX` (and `\xXX`) escapes to their actual characters across the whole file.
+ *
+ * The model emits these inside JSX TEXT content ("we’re", "no — because"), where a
+ * backslash-u is NOT a JS escape — it is six literal characters that render to the user verbatim.
+ * Decoding is SAFE everywhere: inside a real JS string literal, `'’'` and the actual glyph are
+ * identical, so nothing breaks; inside JSX text, it fixes the leak. A `\\uXXXX` (already-escaped
+ * backslash) is left alone so genuine escape sequences in string content survive.
+ */
+export function decodeUnicodeEscapes(code: string, log?: (m: string) => void): string {
+  let count = 0
+  // Protect genuine escaped backslashes first (a literal "\\u2019" in string content is a backslash
+  // followed by text, NOT an escape) — then every remaining \uXXXX is a real escape and decodes
+  // unconditionally, which also fixes adjacent escapes the preceding-char approach missed.
+  const DBS = '  DBS  '
+  let out = code.split('\\\\').join(DBS)
+  out = out.replace(/\\u([0-9a-fA-F]{4})|\\x([0-9a-fA-F]{2})/g, (m, u, x) => {
+    const cp = parseInt(u ?? x, 16)
+    // never decode into a JSX-hostile or control char — those belong as escapes if present
+    if (cp < 0x20 || cp === 0x3c /*<*/ || cp === 0x3e /*>*/ || cp === 0x7b /*{*/ || cp === 0x7d /*}*/) return m
+    count++
+    return String.fromCodePoint(cp)
+  })
+  out = out.split(DBS).join('\\\\')
+  if (count) log?.(`  \x1b[33mfixup\x1b[0m decoded ${count} literal \\uXXXX escape(s) to real characters (JSX text leak)`)
+  return out
+}
+
 export function repairUndefinedJsxTags(code: string, log?: (m: string) => void): string {
   const defined = new Set<string>()
   for (const m of code.matchAll(/import\s+(?:([A-Z][\w$]*)|\{([^}]*)\}|\*\s+as\s+([A-Z][\w$]*))/g)) {
@@ -535,6 +563,7 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
     let sanitized = deNextify(sanitizeImports(s.code, allowed))
     sanitized = neutralizeNodeGlobals(sanitized)
     sanitized = repairUndefinedJsxTags(sanitized, console.warn)
+    sanitized = decodeUnicodeEscapes(sanitized, console.warn)
     sanitized = ensureReactImport(sanitized)
     let { code, repaired } = ensureDefaultExport(sanitized, label)
     if (repaired) console.warn(`  \x1b[33mfixup\x1b[0m [${label}] had no default export — injected one.`)
