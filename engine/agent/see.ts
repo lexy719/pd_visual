@@ -360,6 +360,9 @@ export async function capturePage(url: string, opts?: { maxViewportShots?: numbe
         if (el.querySelector('h1,h2,h3,h4,p,li,span,a,button')) continue // only leaf-ish text
         const r = el.getBoundingClientRect()
         if (r.width < 12 || r.height < 6) continue
+        // The preview shell injects a fixed dev badge; it is not the design and must not be
+        // reported as its defect.
+        if (el.closest('[data-preview-chrome]')) continue
         const cs = getComputedStyle(el)
         if (cs.visibility === 'hidden' || cs.display === 'none') continue
         if (parseFloat(cs.opacity) < 0.15) continue

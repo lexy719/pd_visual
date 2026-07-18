@@ -1,0 +1,290 @@
+
+brief:      "Kettle — deployment monitoring for small engineering teams. Shows what changed, what broke, and who to ask. Free for up to 3 services. Mood: technical, trustworthy."
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-sonnet-5   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+  register floor (developer-tool): added missing beat(s) — how-it-works, ask
+brand:  Kettle
+mood:   technical, trustworthy
+layout: Product proof: show the change before the claim, bento-grid, progressive-trust
+sections:
+  0. the-page-that-answers-itself [36mcinematic[0m/xl  Open with the exact artifact Kettle produces: a deploy timeline showing a change, a red status, and a name — before any claim is made.
+  1. 3am-problem      [36meditorial[0m/md  Name the real cost: a small team's service breaks, nobody knows what shipped, and the on-call engineer is guessing instead of fixing.
+  2. what-changed     [36masymmetric[0m/lg  Show the before/after: a raw commit list on one side, Kettle's annotated timeline (who deployed, what changed, blast radius) on the other.
+  3. what-broke       [36mnarrative[0m/lg  Demonstrate the alerting/diagnosis flow: an incident is detected, correlated to the deploy that caused it, and routed to the right person automatically.
+  4. who-to-ask       [36mmodular[0m/md  Show ownership mapping as a concrete grid: which services, which teams, which humans — so accountability is visible before an incident, not during one.
+  5. proof-in-the-wild [36meditorial[0m/sm  Build trust progressively with a specific engineering team's account of catching a bad deploy in minutes instead of hours.
+  6. free-for-three   [36meditorial[0m/md  State the concrete offer plainly: free for up to 3 services, transparent pricing beyond that, no sales call required to start.
+  7. start-watching   [36meditorial[0m/sm  Single clear call to connect a repo and see the first deploy timeline populate — the natural next step after proof, not a generic sign-up pitch.
+  8. how-it-works     [36meditorial[0m/md  show the tool actually being used — a real, runnable example, not a description of one
+  9. ask              [36meditorial[0m/md  point to documentation or installation as the next step
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated, subject="a dark-mode deploy timeline UI panel with a monosp" · establishing → medium → wide → detail → medium → detail → wide → medium → detail → wide[0m
+  primary   [48;2;18;94;74m   [0m #125E4A
+  accent    [48;2;232;84;30m   [0m #E8541E
+  bg / fg   [48;2;247;249;250m   [0m #F7F9FA  /  [48;2;17;24;39m   [0m #111827
+  card/bord [48;2;255;255;255m   [0m #FFFFFF  /  [48;2;221;227;229m   [0m #DDE3E5
+  motion    [36msubtle[0m  (locked for the whole run)
+  rhythm    [36m█▄██▁▁▄▁▄▄  peak@0[0m  (page pacing: ▁tight ▄normal █open)
+  kit       [36moutline/square corners/arrow icon/hairline edges/mono-tracked eyebrow/regular[0m  (this project's own components, emitted as CSS)
+  [2m(no rationale given)[0m
+  surface   [36minset-ring/soft elevation/radial-glow light/none edges[0m
+  [2m(no rationale given)[0m
+  interact  [36m200ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-1px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2mA near-neutral cool background with a single deep-teal primary and a saturated safety-orange accent lets red-status alerts and owner tags carry real signal without competing decoration, while restrained 200ms translateY interactions and a tight 1.2 type scale keep every moment measured — trust built by removing noise, not by adding polish.[0m
+  [2manchors: Calm / wellness / health, premium / calm micro-interactions, trustworthy / fintech micro-interactions, transition discipline, Type scale ratios by mood, Calm / wellness typography, Trustworthy / fintech typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, Cantor8 — Bold and calm at the same time. The type is large and s…, PP Neue Montreal — throughline[0m
+  [33mADJUSTED[0m shot beat[0] wide → establishing (the page opens the world once)
+  [33mADJUSTED[0m kit.corner "" is not in the grammar → square
+  [33mADJUSTED[0m kit.button "" is not in the grammar → outline
+  [33mADJUSTED[0m kit.icon "" is not in the grammar → arrow
+  [33mADJUSTED[0m kit.edge "" is not in the grammar → hairline
+  [33mADJUSTED[0m kit.eyebrow "" is not in the grammar → mono-tracked
+  [33mADJUSTED[0m kit.density "" is not in the grammar → regular
+  [33mADJUSTED[0m surface.surface "" is not in the grammar → inset-ring
+  [33mADJUSTED[0m surface.elevation "" is not in the grammar → soft
+  [33mADJUSTED[0m surface.light "" is not in the grammar → radial-glow
+  [33mADJUSTED[0m surface.blend "" is not in the grammar → none
+  [33mADJUSTED[0m surface.edgeFade "" is not in the grammar → none
+  [33mADJUSTED[0m surface.texture "" is not in the grammar → none
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Kettle  ·  technical/trustworthy  ·  Product proof: show the change before the claim
+  motion: subtle   palette: Amber
+┌──────────────────────────────────────────────────┐
+│ the-page-that-answers-itself  ·  cinematic  ·  p │
+│   ↳ Open with the exact artifact Kettle produces │
+│     media: Full-width product screenshot: a depl │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ 3am-problem  ·  editorial  ·  Premium / calm spa │
+│   ↳ Name the real cost: a small team's service b │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ what-changed  ·  asymmetric  ·  When to break th │
+│   ↳ Show the before/after: a raw commit list on  │
+│     media: Split screenshot: left is a bare git  │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ what-broke  ·  narrative  ·  Container and grid  │
+│   ↳ Demonstrate the alerting/diagnosis flow: an  │
+│     media: Three stacked mini-screens: alert fir │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ who-to-ask  ·  modular  ·  bento-grid            │
+│   ↳ Show ownership mapping as a concrete grid: w │
+│     media: Bento grid: one large cell showing a  │
+│   [--] [--] [--]                                 │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ proof-in-the-wild  ·  editorial  ·  Premium / ca │
+│   ↳ Build trust progressively with a specific en │
+│     media: Small team headshot or team-logo stri │
+│   [--] [--]                                      │
+├──────────────────────────────────────────────────┤
+│ free-for-three  ·  editorial  ·  Premium / calm  │
+│   ↳ State the concrete offer plainly: free for u │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ start-watching  ·  editorial  ·  Base scale — 4p │
+│   ↳ Single clear call to connect a repo and see  │
+│   [--] [--]                                      │
+├──────────────────────────────────────────────────┤
+│ how-it-works  ·  editorial  ·  Premium / calm sp │
+│   ↳ show the tool actually being used — a real,  │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ ask  ·  editorial  ·  Section padding            │
+│   ↳ point to documentation or installation as th │
+│   [--] [--]                                      │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+[1m── SKETCH  (compose the whole page before building any of it) [0m
+[2m  composition sketched: full → anchored → compare → staggered → grid → quote → stat → centred → media → anchored  focal@0[0m
+  0. [36mfull-bleed-media  [0m full          the-page-that-answers-itself [35m◀ page focal[0m
+     [2meye: the deploy timeline itself: a red status marker next to a name, mid-timeline[0m
+     [2mwhy: the brief says show the artifact before any claim — the timeline is the product, so it should fill the frame with nothing else competing before a word is read[0m
+  1. [36manchored-statement[0m top-left      3am-problem
+     [2meye: the sentence naming the on-call engineer guessing instead of fixing[0m
+     [2mwhy: follows a dense visual section, so it holds text only, hung off one edge so the rest of the frame reads as the empty 3am silence the copy describes[0m
+  2. [36mcompare           [0m top-left      what-changed
+     [2meye: the raw commit list beside Kettle's annotated timeline[0m
+     [2mwhy: two artifacts being directly contrasted is a comparison, and the asymmetric hint matches commit-list-vs-annotated-timeline being unequal in density, not two equal panels[0m
+  3. [36mstaggered-grid    [0m top-left      what-broke
+     [2meye: the detected-incident card linking downward to the deploy that caused it[0m
+     [2mwhy: this is a sequence of three linked events (detect, correlate, route), so steps need to read as a chain rather than a static comparison, which the prior section already used[0m
+  4. [36mgrid              [0m top-left      who-to-ask
+     [2meye: one service-to-team-to-person row, repeated[0m
+     [2mwhy: ownership mapping is inherently tabular — service, team, human — and a grid is the only shape that makes that correspondence checkable at a glance[0m
+  5. [36mquote-break       [0m centre        proof-in-the-wild
+     [2meye: the one line about catching the bad deploy in minutes[0m
+     [2mwhy: a single team's specific account is a testimonial, not a layout of parts, and this is the one place on the page contrast from a quote is worth spending[0m
+  6. [36mstat-row          [0m top-left      free-for-three
+     [2meye: the number 3, in 'free for up to 3 services'[0m
+     [2mwhy: the offer is concrete numbers and thresholds, not prose, so it reads fastest as a row of figures rather than paragraph copy[0m
+  7. [36mcentred-statement [0m centre        start-watching
+     [2meye: the single action: connect a repo[0m
+     [2mwhy: one short imperative with nothing to weigh against it earns a centred treatment, reserved for exactly this kind of terminal, single-choice moment[0m
+  8. [36mmedia-beside-text [0m top-right     how-it-works
+     [2meye: a terminal/CLI running the actual connect-a-repo command[0m
+     [2mwhy: the brief demands a runnable example, not a description, so real running output needs to sit beside the explanatory text rather than stand alone full-bleed again[0m
+  9. [36manchored-statement[0m bottom-left   ask
+     [2meye: the link to documentation[0m
+     [2mwhy: anchored-statement suits this section's content; no specific reason was committed[0m
+  [33mADJUSTED[0m sketch[9] reason was not substantive ("this is the page's final, smallest gesture — a q") — replaced with the structural fact
+
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] the-page-that-answers-itself/cinematic → motion-primitive pinned-crossfade (wraps:section-block, motion:subtle)
+       ↳ [bulk]
+  [1] 3am-problem/editorial  → scratch  [structure: Premium / calm spacing, Container and grid, Base scale — 4px and 8px systems]
+       ↳ design-system violation(s): multi-column grid built by hand (grid-cols-*) with no composition device — apply a dev-* class instead of arranging the columns yourself — escalating one retry to reasoning tier…
+       ↳ design violations 1 → 0 after escalation
+       ↳ [bulk→escalated]
+  [2] what-changed/asymmetric → scratch  [structure: When to break the grid on purpose, asymmetric-grid, split-hero]
+       ↳ [bulk]
+  [3] what-broke/narrative   → scratch  [structure: Container and grid, Premium / calm spacing, z-pattern-landing]
+       ↳ design-system violation(s): hand-built card surface (bg-* + border) instead of "s-raised" — a page must have one way of making a surface; 2 sentences run well past the page's committed rhythm (~16 words) — break them or cut them — escalating one retry to reasoning tier…
+       ↳ design violations 2 → 0 after escalation
+       ↳ [bulk→escalated]
+  [4] who-to-ask/modular     → scratch  [structure: bento-grid, card-gallery, When to break the grid on purpose]
+       ↳ design-system violation(s): hand-built card surface (bg-* + border) instead of "s-raised" — a page must have one way of making a surface — escalating one retry to reasoning tier…
+       ↳ design violations 1 → 0 after escalation
+       ↳ [bulk→escalated]
+  [5] proof-in-the-wild/editorial → scratch  [structure: Premium / calm spacing, Container and grid, Technical / developer spacing]
+       ↳ [bulk]
+  [6] free-for-three/editorial → scratch  [structure: Premium / calm spacing, Container and grid, Base scale — 4px and 8px systems]
+       ↳ [bulk]
+  [7] start-watching/editorial → scratch  [structure: Base scale — 4px and 8px systems, split-hero, Premium / calm spacing]
+       ↳ design-system violation(s): wrapping flex row of siblings with no composition device — the page already owns this geometry — escalating one retry to reasoning tier…
+       ↳ escalated retry did not improve (1 design, parses:true); keeping the bulk output
+       ↳ [bulk]
+  [8] how-it-works/editorial → scratch  [structure: Premium / calm spacing, Container and grid, Section padding]
+       ↳ design-system violation(s): hand-rolled scroll reveal (opacity-0 toggled from JS) — content is invisible if the effect never runs. Use the locked "reveal" class, which is CSS-only and cannot strand content — escalating one retry to reasoning tier…
+       ↳ design violations 1 → 0 after escalation
+       ↳ [bulk→escalated]
+  [9] ask/editorial          → scratch  [structure: Section padding, Technical / developer spacing, Container and grid]
+       ↳ design-system violation(s): multi-column grid built by hand (grid-cols-*) with no composition device — apply a dev-* class instead of arranging the columns yourself — escalating one retry to reasoning tier…
+       ↳ escalated retry did not improve (1 design, parses:true); keeping the bulk output
+       ↳ [bulk]
+       ↳ shot plan [generated, subject-locked]: upgraded 1 image(s) → 1 Unsplash
+       ↳ hardened 1 <img> tag(s): explicit width/height + lazy below the fold
+
+[1m── SELF-CRITIQUE ───────────────────────────────────────────[0m
+[2m  reviewing [0] the-page-that-answers-itself…[0m
+[2m  reviewing [1] 3am-problem…[0m
+[2m  reviewing [2] what-changed…[0m
+[2m  reviewing [3] what-broke…[0m
+[2m  reviewing [4] who-to-ask…[0m
+[2m  reviewing [5] proof-in-the-wild…[0m
+[2m  reviewing [6] free-for-three…[0m
+[2m  reviewing [7] start-watching…[0m
+[2m  reviewing [8] how-it-works…[0m
+[2m  reviewing [9] ask…[0m
+  [31mFLAG[0m [0:the-page-that-answers-itself] uses pinned-crossfade, which carries a known caveat: "Two-panel pinned crossfade on the proven @bsmnt/scrollytelling rail (same as kinetic-text-split). Panel one dissolves into panel two while t"
+  [33mwarn[0m [0:the-page-that-answers-itself] h1 has no explicit font-size/weight class, risking hero-to-body ratio outside the required 2.5–3× step and unclear weight (should be 400/600, nothing above 700)
+  [33mwarn[0m [0:the-page-that-answers-itself] animate-[pulse-once_1.1s_ease-out_1] uses 1.1s duration, violating the committed 200ms standard-out micro-interaction spec
+  [33mwarn[0m [0:the-page-that-answers-itself] mi-lift hover treatment applied to both the dashboard card and the image with no indication of easing/duration matching the specified cubic-bezier(0.22,1,0.36,1) 200ms standard
+  [33mwarn[0m [0:the-page-that-answers-itself] bg-primary/5 and text-primary accent used alongside pulsing dot creates two simultaneous accent treatments on one row, exceeding the 'quiet, one neutral accent' expectation for trustworthy/fintech mood
+  [33mwarn[0m [1:3am-problem] No verification that heading weight stays within 400/600; 'h2' default browser/theme weight may exceed 700 cap — needs explicit font-weight class to confirm compliance.
+  [33mwarn[0m [1:3am-problem] Hero-to-body size ratio not verifiable from code; h2 has no explicit type-scale class, risking a jump larger than the required 2.5–3× ceiling.
+  [33mwarn[0m [1:3am-problem] '— every incident, before Kettle' is a generic, vague attribution rather than a concrete named source, undermining institutional trust tone.
+  [33mwarn[0m [1:3am-problem] No hover/transition classes defined anywhere in this static section, but reveal/s-raised classes imply motion — can't confirm 200ms standard-out easing is applied.
+  [33mwarn[0m [2:what-changed] sevColor uses text-primary for both High severity items — accent color signals urgency/state but is reused as a generic brand accent, not a distinct severity system (High/Medium/Low collapse to only two visual tones).
+  [33mwarn[0m [2:what-changed] Arbitrary inline marginLeft alternation (0.5rem) breaks the spacing scale and isn't tied to any documented token.
+  [33mwarn[0m [2:what-changed] h2 has no explicit weight/size class shown — risk of exceeding 600 weight or breaking the 1.2 step ratio if relying on default heading styles.
+  [33mwarn[0m [2:what-changed] Two s-raised cards with different heights (h-full vs lg:mt-10 offset) create asymmetry not clearly grounded in the 'progressive-trust' staged reveal — right card dominance isn't earned through sequential disclosure, just size/position.
+  [33mwarn[0m [3:what-broke] H2 uses default heavy/large browser heading styling with no visible clamp to 700 weight ceiling or 1.2 step ratio — hero-to-body jump likely exceeds the 2.5–3x max for trustworthy mood.
+  [33mwarn[0m [3:what-broke] Three accent uses of text-primary (icon color) plus ring-primary/40 and bg-primary/5 on the same card stack multiple accent treatments, risking 'too many accents' for a quiet fintech palette.
+  [33mwarn[0m [3:what-broke] mi-lift hover class on all three cards with no stated duration/easing in code — cannot verify 200ms cubic-bezier(0.22,1,0.36,1) compliance.
+  [33mwarn[0m [3:what-broke] Progressive-trust narrative jumps straight to full technical detail (p99 latency, deploy hash, routing) in stage one with no earlier lighter-weight step, undercutting staged trust-building.
+  [33mwarn[0m [4:who-to-ask] Generic icon usage (grid squares, clock) adds decorative accents beyond the 'quiet' one-neutral-sans mood without clear functional purpose.
+  [33mwarn[0m [4:who-to-ask] h2 has no explicit weight/size class shown; if it inherits a bold (700+) default heading style, it violates the max-700 weight rule.
+  [33mwarn[0m [4:who-to-ask] text-primary used for icons and inline highlighted text (#billing-alerts) introduces an accent color beyond the 'nothing above 700 weight, quiet' restraint — risks being one of multiple accent uses across the section.
+  [33mwarn[0m [4:who-to-ask] Truncated markup ('clas') suggests incomplete component, cannot verify closing structure/accessibility of remaining cards.
+  [33mwarn[0m [6:free-for-three] Four repeated 'text-primary' accent uses across stat row and terminal blocks plus icons create more than one accent color emphasis point, violating 'quiet' single-accent restraint.
+  [33mwarn[0m [6:free-for-three] h2 hero copy has no explicit type scale class shown; if it renders above 700 weight or exceeds 2.5–3x body size per default heading styles, it breaks the step-ratio 1.2 constraint — needs verification/enforcement in code.
+  [33mwarn[0m [6:free-for-three] Code is truncated mid-render (third feature card cut off), leaving incomplete/broken JSX — accessibility and rendering risk.
+  [33mwarn[0m [6:free-for-three] Terminal-style mock blocks use font-mono, introducing a second typeface family alongside the neutral sans, violating 'One neutral sans' rule.
+  [33mwarn[0m [7:start-watching] Primary CTA is an <a> styled as a button but has no href target; should be a <button type="submit"> for a form, and lacks a real destination — accessibility/semantics issue for keyboard and screen reader users.
+  [33mwarn[0m [7:start-watching] Form has no visible label for the input beyond aria-label; no error/validation state or feedback pattern shown, undermining the 'reassuring' fintech interaction rule.
+  [33mwarn[0m [7:start-watching] Terminal/log mock uses font-mono, an implicit second typeface family in addition to the base sans, violating 'one neutral sans' rule.
+  [33mwarn[0m [7:start-watching] Multiple text-primary highlights (timestamps) inside the log block create repeated accent usage, conflicting with the 'quiet, nothing above minimal accent' trustworthy tone.
+  [33mwarn[0m [8:how-it-works] Multiple opacity variants of bg-primary (40/25/15) used as decorative dots — adds gratuitous accent variation not specified by rules.
+  [33mwarn[0m [8:how-it-works] text-primary applied to timestamps and icons in multiple places, creating more than one accent use case beyond the 'quiet' fintech mood.
+  [33mwarn[0m [8:how-it-works] h2 'Connect a repo. Watch it ship.' has no explicit font-size/weight class shown — risk of exceeding 700 weight if relying on default h2 styling; must verify against 400/600 cap.
+  [33mwarn[0m [8:how-it-works] Terminal code block uses font-mono alongside the neutral sans elsewhere — introduces a second typeface family, violating 'one neutral sans' rule.
+  [33mwarn[0m [9:ask] Three feature bullets each use a distinct icon shape, adding decorative variety not specified by the quiet/trustworthy mood — icons should be uniform in weight/style or omitted.
+  [33mwarn[0m [9:ask] Repeated use of text-primary as accent color across code prompt symbols and all three icons risks exceeding the mood's restrained accent usage; no clear single-accent rule enforced.
+  [33mwarn[0m [9:ask] No visible focus states defined on 'Read the docs' and 'View install reference' links/buttons, failing accessibility for keyboard navigation.
+  [33mwarn[0m [9:ask] Code block content lacks aria-label or accessible text alternative; terminal output conveyed only visually/via color (text-primary vs text-muted-foreground) which may not meet contrast/semantic requirements for screen readers.
+
+[1m── WRITE  → preview/app ────────────────────────────────────[0m
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+       ↳ visual critique: 11 defect(s) — 11 actionable (0 minor)
+         [blocking] s0 contrast: MEASURED (DOM, not vision): "@owner: resolving" renders color(srgb 0.0705882 0.368627 0.290196) on color(srgb 
+         [blocking] s0 contrast: MEASURED (DOM, not vision): "preview" renders rgb(255, 255, 255) on rgb(247, 249, 250) — contrast ratio 1.06:1
+         [blocking] s3 contrast: MEASURED (DOM, not vision): "Deployed 6 min before first breach — top match" renders color(srgb 0.356863 0.419
+         [blocking] s0 contrast: MEASURED (DOM, not vision): "2:52 PM" renders color(srgb 0.0392157 0.0392157 0.0392157) on color(srgb 0.070588
+         [blocking] s0 contrast: MEASURED (DOM, not vision): "retry-handler.ts +18 −6 · 500s spiking post-deploy" renders color(srgb 0.0392157 
+         [blocking] s3 contrast: MEASURED (DOM, not vision): "#4127 "raise connection pool timeout"" renders color(srgb 0.0392157 0.0392157 0.0
+         [major] s0 dead-zone: viewport-0: entire area from top of page (below nav, ~y120) down to the deploy feed card (~y420) is blank empt
+         [major] s2 dead-zone: viewport-2294: large empty gap between the quote card (ends ~y210) and the 'PRODUCT PROOF' label (~y425), roug
+         [major] s6 dead-zone: viewport-4588: large blank gap between the bottom of the 'Map your services free' CTA row (~y650) and the 'PRO
+         [major] s7 dead-zone: viewport-6882: large empty space between 'See full pricing' buttons (~y210) and the 'START WATCHING' label (~y
+         [major] s8 dead-zone: viewport-9176: large blank area between the three-item feature list/CTA buttons (~y440) and the footer (~y650)
+       ↳ revised section 0 (5 defect(s))
+       ↳ revised section 3 (2 defect(s))
+       ↳ revised section 2 (1 defect(s))
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+       ↳ section 0 did not improve on re-critique — original restored
+       ↳ section 3 did not improve on re-critique — original restored
+       ↳ section 2 improved: 1 → 0 actionable defect(s)
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+  [31mVISUAL[0m shipped WITH 9 visible defect(s) after the revise pass:
+  [31m      [0m [blocking] s0 contrast: MEASURED (DOM, not vision): "@owner: resolving" renders color(srgb 0.0705882 0.368627 0.290196) on c
+  [31m      [0m [blocking] s0 contrast: MEASURED (DOM, not vision): "preview" renders rgb(255, 255, 255) on rgb(247, 249, 250) — contrast ra
+  [31m      [0m [blocking] s3 contrast: MEASURED (DOM, not vision): "#4127 "raise connection pool timeout"" renders color(srgb 0.0666667 0.0
+  [31m      [0m [blocking] s3 contrast: MEASURED (DOM, not vision): "Deployed 6 min before first breach — top match" renders color(srgb 0.06
+  [31m      [0m [blocking] s0 contrast: MEASURED (DOM, not vision): "2:52 PM" renders color(srgb 0.0392157 0.0392157 0.0392157) on color(srg
+  [31m      [0m [blocking] s0 contrast: MEASURED (DOM, not vision): "retry-handler.ts +18 −6 · 500s spiking post-deploy" renders color(srgb 
+  [31m      [0m [major] s0 dead-zone: viewport-0: large empty gap between the hero subheading ('...the diff, the error, the owner.') and t
+  [31m      [0m [major] s1 dead-zone: viewport-2290: large empty area to the right of the pull-quote card ('The fix took four minutes...')
+  [31m      [0m [major] s8 dead-zone: viewport-9160: large empty whitespace gap between the install code block/feature list and the footer
+  [31m      [0m screenshots + critiques: logs\visual\2026-07-18T23-44-58-337Z
+  10 sections  (1 motion-primitive, 9 from scratch)
+  primitives: pinned-crossfade
+  [36mTIERS[0m  plan/art-direction/questions: [35m[reasoning][0m claude-sonnet-5
+         sections: 6 [36m[bulk][0m, 4 [33m[bulk→escalated][0m (repaired on claude-sonnet-5)
+           [0] the-page-that-answers-itself/cinematic → [36m[bulk][0m
+           [1] 3am-problem/editorial → [33m[bulk→escalated][0m
+           [2] what-changed/asymmetric → [36m[bulk][0m
+           [3] what-broke/narrative → [33m[bulk→escalated][0m
+           [4] who-to-ask/modular → [33m[bulk→escalated][0m
+           [5] proof-in-the-wild/editorial → [36m[bulk][0m
+           [6] free-for-three/editorial → [36m[bulk][0m
+           [7] start-watching/editorial → [36m[bulk][0m
+           [8] how-it-works/editorial → [33m[bulk→escalated][0m
+           [9] ask/editorial → [36m[bulk][0m
+  deps:       @bsmnt/scrollytelling, gsap
+  files:      15 written under preview/app/src
+  [36mMOTION[0m [0:the-page-that-answers-itself] wrapped by motion-primitive pinned-crossfade
+  [33mLAYOUT[0m [0:the-page-that-answers-itself] flex row without gap: "flex items-center justify-between px-5 py-3 border-b border-bord"
+  [33mDESIGN[0m [7:start-watching] wrapping flex row of siblings with no composition device — the page already owns this geometry
+  [33mDESIGN[0m [9:ask] multi-column grid built by hand (grid-cols-*) with no composition device — apply a dev-* class instead of arranging the columns yourself
+  [36mIMAGES[0m upgraded 1 placeholder(s) to on-theme imagery (Unsplash or Flux-generated).
+
+--no-serve: page written. Start it with:  cd preview/app && npm run dev

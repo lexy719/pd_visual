@@ -69,6 +69,9 @@ function Root(): React.ReactElement {
   return (
     <>
       <div
+        /* Harness chrome, not part of the generated page. The visual pass skips anything inside this
+           so the dev badge cannot be reported as a contrast or layout defect of the design. */
+        data-preview-chrome=""
         style={{
           position: 'fixed',
           top: 8,
