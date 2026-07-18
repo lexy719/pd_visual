@@ -1,4 +1,4 @@
-import type { Composition, SearchHit } from '../types.js'
+import type { Composition, Register, SearchHit } from '../types.js'
 import type { CreativeBrief } from './brief.js'
 
 /** The 8-tag mood vocabulary — the only moods the plan may emit. */
@@ -48,6 +48,11 @@ export interface Plan {
   moodProfile: string
   /** headings of the layout patterns / page archetypes that conditioned the section list */
   layoutPatterns?: string[]
+  /**
+   * The page's genre, decided once. Binds chrome (nav/footer) and density downstream — this is what
+   * stops every brief becoming the same chrome-less editorial scroll.
+   */
+  register: Register
   /** whether to bypass library components in favor of bespoke generation */
   designStrategy?: 'scratch' | 'components'
   /** Concrete anti-patterns the rest of the run must not introduce. */

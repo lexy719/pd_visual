@@ -19,6 +19,7 @@ import { createRequire } from 'node:module'
 import type { ComponentDoc } from '../types.js'
 import type { GenerateResult } from './generate.js'
 import { SCALE_ASPECT } from './art-direction.js'
+import { buildChrome } from './chrome.js'
 import type { ArtDirection, InteractionSpec, LayoutSpec, Palette, TypographySpec } from './art-direction.js'
 import type { Plan, SectionResult } from './types.js'
 
@@ -484,15 +485,17 @@ function css(v: string): string {
   return /^[-0-9a-z.,()#%/ ]+$/i.test(v) ? v : 'none'
 }
 
-function composeApp(gen: GenerateResult): string {
+function composeApp(gen: GenerateResult, hasChrome: boolean): string {
   const imports = gen.sections
     .map((s) => `import Section${s.index} from '${s.moduleName}'`)
     .join('\n')
+  // wrap each section in an anchor id so the chrome's nav links resolve to real content
   const body = gen.sections
-    .map((s) => `      <Boundary name="${s.index}-${s.name}"><Section${s.index} /></Boundary>`)
+    .map((s) => `      <div id="${s.index}-${s.name}"><Boundary name="${s.index}-${s.name}"><Section${s.index} /></Boundary></div>`)
     .join('\n')
+  const chromeImport = hasChrome ? `\nimport { SiteNav, SiteFooter } from './generated/chrome'` : ''
   return `import React from 'react'
-${imports}
+${imports}${chromeImport}
 
 class Boundary extends React.Component<{ name: string; children: React.ReactNode }, { err?: Error }> {
   state: { err?: Error } = {}
@@ -512,8 +515,10 @@ class Boundary extends React.Component<{ name: string; children: React.ReactNode
 export default function App() {
   return (
     <>
+${hasChrome ? '      <SiteNav />\n' : ''}      <main id="top">
 ${body}
-    </>
+      </main>
+${hasChrome ? '      <SiteFooter />\n' : ''}    </>
   )
 }
 `
@@ -588,7 +593,14 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
   }
 
   // 3. composition + registry + deps
-  writeFileSync(join(SRC, 'App.tsx'), composeApp(gen), 'utf8')
+  // CHROME — nav/footer built from the locked register. Deterministic on purpose: the model has
+  // never once produced a <nav>, because chrome is not a "section" and nothing owned it.
+  const chromeSrc = buildChrome(plan.register, plan.brand, gen.sections)
+  if (chromeSrc) {
+    writeFileSync(join(GENERATED, 'chrome.tsx'), chromeSrc, 'utf8')
+    files.push('generated/chrome.tsx')
+  }
+  writeFileSync(join(SRC, 'App.tsx'), composeApp(gen, !!chromeSrc), 'utf8')
   files.push('App.tsx', 'globals.css')
   writeRegistry([...regSet])
   ensureDeps([...depSet])

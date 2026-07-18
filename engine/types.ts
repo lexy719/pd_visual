@@ -19,6 +19,50 @@ export const COMPOSITIONS = ['cinematic', 'editorial', 'gallery', 'narrative', '
 export type Composition = (typeof COMPOSITIONS)[number]
 
 /**
+ * The page's REGISTER — what genre of website this is. Decided once per run (see plan.ts) and it
+ * binds real structure: whether the page carries chrome (a sticky nav + footer, or none), how dense
+ * it runs, and what furniture the section list must include. Knowledge for each lives in
+ * knowledge/guidelines/registers.md.
+ *
+ * This exists because the system had exactly ONE gear: every brief — a law firm, a bookbindery, a
+ * vet clinic, a mezcal brand — came out as a chrome-less editorial scroll document. A register is
+ * NOT a template (that would make every SaaS page identical); it is the genre's conventions, inside
+ * which composition stays free.
+ */
+export const REGISTERS = [
+  'saas-product',
+  'editorial-story',
+  'local-service-business',
+  'portfolio-showcase',
+  'agency-studio',
+  'ecommerce-product',
+  'developer-tool',
+  'event-launch'
+] as const
+export type Register = (typeof REGISTERS)[number]
+
+/** What page furniture a register requires. Applied deterministically by the writer, never left to
+ *  model compliance — the model has never once produced a nav on its own. */
+export interface ChromeSpec {
+  /** a sticky top navigation with the brand + links; 'none' for immersive/editorial registers */
+  nav: 'sticky-cta' | 'minimal-masthead' | 'none'
+  /** a full site-map footer, a single quiet line, or nothing */
+  footer: 'sitemap' | 'minimal' | 'none'
+}
+
+/** Per-register chrome + density conventions — the genre's known-good shape. */
+export const REGISTER_CHROME: Record<Register, ChromeSpec> = {
+  'saas-product': { nav: 'sticky-cta', footer: 'sitemap' },
+  'developer-tool': { nav: 'sticky-cta', footer: 'sitemap' },
+  'ecommerce-product': { nav: 'sticky-cta', footer: 'sitemap' },
+  'local-service-business': { nav: 'sticky-cta', footer: 'minimal' },
+  'agency-studio': { nav: 'minimal-masthead', footer: 'minimal' },
+  'portfolio-showcase': { nav: 'minimal-masthead', footer: 'minimal' },
+  'event-launch': { nav: 'minimal-masthead', footer: 'minimal' },
+  'editorial-story': { nav: 'none', footer: 'minimal' }
+}
+
+/**
  * Generation target. `react` is the project's target (plain React + Vite, not Next.js).
  * `html` exists only so a legacy/plain component can be stored without lying about it —
  * the agent must never mix frameworks in one page, so this is a retrieval filter, not a hint.

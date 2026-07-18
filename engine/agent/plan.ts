@@ -3,7 +3,7 @@
 import { completeReasoning, extractJson } from '../llm/llm.js'
 import { queryKnowledge, retrievePlanningEvidence, type PlanningEvidence } from '../retrieval/query.js'
 import { MOODS, type Emphasis, type Mood, type Plan, type SectionPlan } from './types.js'
-import { COMPOSITIONS, type Composition } from '../types.js'
+import { COMPOSITIONS, REGISTERS, type Composition, type Register } from '../types.js'
 import { parseCreativeBrief } from './brief.js'
 
 const SYSTEM = `You are the planning step of a web-design agent. Given a one-line brief, decide the
@@ -11,6 +11,7 @@ brand feel, the underlying story architecture, and the page structure. Respond w
 
 {
   "brand": "<short brand/product name inferred from the brief>",
+  "register": "<the page's genre>",
   "mood": ["<1-3 moods>"],
   "layoutPatterns": ["<pattern name>", "<pattern name>"],
   "avoidances": ["<3-6 concrete things this site must not do>"],
@@ -18,6 +19,13 @@ brand feel, the underlying story architecture, and the page structure. Respond w
 }
 
 RULES:
+- "register" MUST be one of: saas-product | editorial-story | local-service-business | portfolio-showcase | agency-studio | ecommerce-product | developer-tool | event-launch.
+  It is the GENRE of the page and it binds real structure downstream: saas-product / developer-tool /
+  ecommerce-product run DENSE and carry a sticky nav with one call to action; local-service-business
+  leads with practical trust (who, what it costs, where, how to reach them); editorial-story runs
+  SPARSE and sequential with little or no chrome; portfolio-showcase and agency-studio put evidence
+  first. Choose from the BRIEF's actual purpose, not from its mood. See the RETRIEVED PATTERN
+  GUIDANCE for each register's required furniture, and make the section list satisfy it.
 - "mood" MUST be chosen only from: ${MOODS.join(', ')}. Pick the 1-3 that fit best; do not invent moods.
 - INVENT the section structure freely — there is NO fixed section vocabulary. Name sections for the story
   they tell ("manifesto", "process-atlas", "the-ritual", "field-notes"). Do NOT default to a
@@ -78,6 +86,29 @@ const clampMood = (m: unknown): Mood[] => {
   const arr = Array.isArray(m) ? m : []
   const valid = arr.map((x) => String(x).toLowerCase().trim()).filter((x): x is Mood => (MOODS as readonly string[]).includes(x))
   return valid.length ? [...new Set(valid)].slice(0, 3) : ['minimal']
+}
+
+/**
+ * Deterministic register fallback from the brief's own words, used when the model returns something
+ * outside the vocabulary. Ordered most-specific first — a "shop" that is also a "studio" is a shop.
+ */
+const REGISTER_HINTS: Array<[Register, RegExp]> = [
+  ['developer-tool', /(api|sdk|cli|open.?source|library|framework|developer|package|npm)/i],
+  ['ecommerce-product', /(shop|store|buy|cart|checkout|product page|for sale|ecommerce|e-commerce)/i],
+  ['saas-product', /(saas|platform|dashboard|app for|software|subscription|b2b|tool for teams|pricing)/i],
+  ['event-launch', /(conference|festival|event|summit|launch day|tickets|programme|lineup)/i],
+  ['portfolio-showcase', /(portfolio|my work|selected works|photographer|designer's own)/i],
+  ['agency-studio', /(agency|studio for|consultancy|we help brands|creative studio)/i],
+  ['local-service-business', /(clinic|practice|salon|shop in|bakery|vet|dentist|lawyer|law firm|barber|garage|local)/i],
+  ['editorial-story', /(story|manifesto|brand story|editorial|magazine|essay)/i]
+]
+
+function clampRegister(raw: unknown, brief: string, mood: Mood[]): Register {
+  const r = String(raw ?? '').toLowerCase().trim()
+  if ((REGISTERS as readonly string[]).includes(r)) return r as Register
+  for (const [reg, re] of REGISTER_HINTS) if (re.test(brief)) return reg
+  // last resort: a technical/minimal brief is usually a product; anything else tells a story
+  return mood.includes('technical') ? 'saas-product' : 'editorial-story'
 }
 
 const EMPHASES: readonly Emphasis[] = ['sm', 'md', 'lg', 'xl']
@@ -147,7 +178,7 @@ ${evidence.motionMedia.map((x) => `- ${toRule(x)}`).join('\n') || '(none retriev
 CRITIQUE METHODS (apply the reasoning, never copy a site):
 ${evidence.critiques.map((x) => `- ${toCritique(x)}`).join('\n') || '(none retrieved)'}${avoidBlock}`
   const raw = await completeReasoning(SYSTEM, user, { temperature: 0.3 })
-  const parsed = extractJson<{ brand?: string; mood?: unknown; layoutPatterns?: unknown; sections?: unknown; avoidances?: unknown }>(raw)
+  const parsed = extractJson<{ brand?: string; register?: unknown; mood?: unknown; layoutPatterns?: unknown; sections?: unknown; avoidances?: unknown }>(raw)
   // HARD CONSTRAINT: an approved concept's mood BINDS the plan — applied deterministically, so the
   // model cannot quietly deviate from what the user approved (the prompt line above is a courtesy;
   // this override is the guarantee). Same discipline as the question-answers fix.
@@ -156,6 +187,7 @@ ${evidence.critiques.map((x) => `- ${toCritique(x)}`).join('\n') || '(none retri
     brief,
     creativeBrief,
     brand: (parsed.brand ?? '').trim() || 'Brand',
+    register: clampRegister(parsed.register, brief, mood),
     mood,
     moodProfile: mood.join(', '),
     designStrategy: 'scratch',
