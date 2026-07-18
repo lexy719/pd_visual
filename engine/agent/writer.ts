@@ -22,6 +22,7 @@ import { SCALE_ASPECT } from './art-direction.js'
 import { DEVICE_CSS } from './devices.js'
 import { rhythmCss } from './rhythm.js'
 import { feelForMotion, scrollCss, smoothScrollModule, type ScrollFeel } from './scroll.js'
+import { revealCss, revealIntensity } from './reveal.js'
 import { buildChrome } from './chrome.js'
 import type { ArtDirection, InteractionSpec, LayoutSpec, Palette, TypographySpec } from './art-direction.js'
 import type { Plan, SectionResult } from './types.js'
@@ -250,7 +251,9 @@ export function decodeUnicodeEscapes(code: string, log?: (m: string) => void): s
  */
 export function stampRhythm(code: string, beat: { density: string; volume: string } | undefined): string {
   if (!beat) return code
-  const add = `rhythm-${beat.density} vol-${beat.volume}`
+  // `reveal` rides along with the rhythm classes: both are page-level decisions stamped onto the
+  // section root, and both exist because a section cannot make them correctly on its own.
+  const add = `rhythm-${beat.density} vol-${beat.volume} reveal`
   if (new RegExp(`\\brhythm-`).test(code)) return code // already stamped — never double-stamp
   let done = false
   return code.replace(/(<section\b[^>]*?className=)(?:"([^"]*)"|\{`([^`]*)`\})/s, (full, head, dq, tq) => {
@@ -415,7 +418,7 @@ const SCALE_ASPECT_CSS = Object.entries(SCALE_ASPECT)
   .map(([scale, a]) => `.shot-${scale} { aspect-ratio: ${a.css}; object-fit: cover; width: 100%; height: auto; }`)
   .join('\n')
 
-export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec, feel: ScrollFeel = 'native'): string {
+export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec, feel: ScrollFeel = 'native', reveal: 'calm' | 'standard' | 'sharp' = 'standard'): string {
   const h = headingSizes(type.scaleRatio)
   const vars = `  --background: ${p.background};
   --foreground: ${p.foreground};
@@ -531,6 +534,7 @@ h3 { font-size: ${css(h.h3)}; }
 ${SCALE_ASPECT_CSS}
 ${rhythmCss()}
 ${scrollCss(feel)}
+${revealCss(mi, reveal)}
 
 /*
  * ============================ COMPOSITION DEVICES ============================
@@ -630,7 +634,7 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
 
   // Deterministic art-direction: re-skin the whole page by rewriting the theme variables.
   const scrollFeel = feelForMotion(art.motion)
-  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions, art.typography, art.layout, scrollFeel), 'utf8')
+  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions, art.typography, art.layout, scrollFeel, revealIntensity(art.motion)), 'utf8')
 
   const files: string[] = []
   const depSet = new Set<string>()

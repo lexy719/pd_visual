@@ -16,6 +16,7 @@ import { queryKnowledge, retrieveForSection } from '../retrieval/query.js'
 import type { Composition, ComponentDoc, MotionPrimitiveDoc, SearchHit } from '../types.js'
 import { SCALE_ASPECT } from './art-direction.js'
 import { DEFAULT_DEVICE, DEVICE_NAMES, DEVICE_RE, unknownDeviceClasses } from './devices.js'
+import { lintReveal } from './reveal.js'
 import type { ArtDirection, InteractionSpec, ShotBeat, ShotPlan, ShotScale, ShotWorld } from './art-direction.js'
 import type { Plan, SectionPlan, SectionResult } from './types.js'
 
@@ -623,6 +624,9 @@ export function lintDesign(code: string): string[] {
       warns.push(`${cardLiterals} sibling blocks arranged with no composition device (stacked rectangles)`)
     }
   }
+
+  // Improvised entrances — the last piece of motion sections were still inventing for themselves.
+  warns.push(...lintReveal(code))
 
   // Interior escapes — content that breaks OUT of the locked container (observed live: text flush
   // against the viewport edge, a numeral clipped in half at the right edge).
