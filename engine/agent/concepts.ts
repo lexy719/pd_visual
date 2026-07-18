@@ -1,25 +1,38 @@
 /**
  * Concept-selection step — the "thinks, then plans, then asks" layer. Runs BETWEEN the clarifying
  * questions and plan(): it reasons over the brief + answers + retrieved design evidence and proposes
- * 2-3 genuinely distinct, NAMED creative directions for the human to choose between, each anchored
- * in a specific retrieved reference. The chosen concept then binds plan() as a hard constraint (its
+ * 2-3 genuinely distinct, NAMED creative directions for the human to choose between, each a BLEND of
+ * qualities drawn from several retrieved references. The chosen concept then binds plan() as a hard constraint (its
  * mood is locked, not suggested) — an approved concept the plan could quietly ignore would be the
  * same class of bug as question answers that never reached generation.
  *
- * Grounding discipline: an anchor citing a reference that was NOT actually retrieved is repaired to
- * the nearest real one or the concept is dropped — a concept "grounded" in an invented source is
- * decoration, not reasoning.
+ * Grounding discipline: every quality must cite a reference that was ACTUALLY retrieved (repaired to
+ * the nearest real one, else dropped), and no two qualities of a concept may share a source — a
+ * concept grounded in one reference is an impression of that site, not a direction of its own.
  */
 
 import { completeReasoning, extractJson } from '../llm/llm.js'
 import { retrievePlanningEvidence } from '../retrieval/query.js'
 import { MOODS, type Mood } from './types.js'
 
-export interface ConceptAnchor {
-  /** the EXACT name of a retrieved critique/guideline chunk this concept is grounded in */
-  source: string
-  /** one line: how that reference grounds this direction */
-  why: string
+/**
+ * A QUALITY this concept borrows, and where it was learned.
+ *
+ * This replaced a single `anchor` naming one retrieved chunk, which was the structural cause of a
+ * real complaint: the options came out as "based on this critique / based on that critique", so a
+ * concept was a whole reference site wearing a new brief. One anchor can only ever be copied.
+ *
+ * Taste is not a reference; it is a set of qualities, and qualities MIX. A concept now carries two
+ * or three of them from DIFFERENT sources, so the direction is a blend that belongs to this brief
+ * rather than an impression of somebody else's page. `from` is kept only for grounding — it proves
+ * the quality came from real retrieved evidence rather than being invented, and it is never shown as
+ * the identity of the concept.
+ */
+export interface ConceptQuality {
+  /** the quality in plain design words — NEVER a site name, never a specification */
+  quality: string
+  /** the EXACT name of the retrieved chunk it was learned from (grounding only) */
+  from: string
 }
 
 export interface Concept {
@@ -29,7 +42,8 @@ export interface Concept {
   mood: Mood[]
   /** one concrete line: the visual idea, not marketing copy */
   premise: string
-  anchor: ConceptAnchor
+  /** 2-3 qualities borrowed from DIFFERENT sources — a blend, never a single reference */
+  qualities: ConceptQuality[]
   /**
    * TRUE when the premise implies a structurally SPARSE layout — floating/pinned/scattered items,
    * lots of negative space, noticeboard/gallery-of-fragments framing. Such concepts reliably produce
@@ -60,7 +74,10 @@ discovering it after the build. Respond with ONLY JSON:
       "name": "<evocative 2-4 word name, e.g. 'The Silent Reveal' — NEVER generic ('Option A', 'Modern Clean')>",
       "mood": ["<1-3 from: ${MOODS.join(', ')}> — the FIRST is the primary and is LOCKED into the build if chosen"],
       "premise": "<ONE concrete visual sentence: what the page looks and behaves like in this direction>",
-      "anchor": { "source": "<copied EXACTLY from the RETRIEVED REFERENCES list>", "why": "<one line: how that reference grounds this direction>" }
+      "qualities": [
+        { "quality": "<the QUALITY you are borrowing, in plain design words>", "from": "<copied EXACTLY from the RETRIEVED REFERENCES list>" },
+        { "quality": "<a second quality, from a DIFFERENT reference>", "from": "<exact name>" }
+      ]
     }
   ]
 }
@@ -68,8 +85,15 @@ discovering it after the build. Respond with ONLY JSON:
 RULES:
 - The concepts must be genuinely different DIRECTIONS — different primary mood, different visual strategy —
   not three adjectives on the same idea. If you cannot make a third genuinely distinct, return two.
-- "anchor.source" MUST be the exact name of one entry from the RETRIEVED REFERENCES below. Do not invent,
-  paraphrase or abbreviate a source — an anchor that is not in the list will be rejected.
+- A concept is a BLEND, never an impression of one site. Give 2-3 "qualities", and they MUST come from
+  DIFFERENT references. A concept whose qualities all come from one source is rejected.
+- "quality" states a PROPERTY the new page should have — "authority that comes from removing things
+  rather than adding them", "motion that depicts the subject instead of decorating it". It must be
+  usable on a brief that has nothing in common with the reference.
+  NEVER name the reference site in the quality, and NEVER copy specifics from it — no hex values, no
+  typeface names, no exact sizes, no library names. Those belong to that site; the quality does not.
+- "from" MUST be the exact name of one entry from the RETRIEVED REFERENCES below. Do not invent,
+  paraphrase or abbreviate it — a source that is not in the list will be rejected.
 - "premise" is a designer's sentence (composition, light, pacing, type attitude), not marketing copy.
 - Honour the brief's own constraints and the user's clarifying answers; a concept that contradicts an
   explicit answer is invalid.`
@@ -92,7 +116,7 @@ export function lockConcepts(
   const out: Concept[] = []
   const usedPrimaries = new Set<Mood>()
   for (const rawC of arr) {
-    const c = rawC as { name?: unknown; mood?: unknown; premise?: unknown; anchor?: { source?: unknown; why?: unknown } }
+    const c = rawC as { name?: unknown; mood?: unknown; premise?: unknown; qualities?: unknown }
     const name = String(c?.name ?? '').replace(/\s+/g, ' ').trim().slice(0, 60)
     // clamp long premises at a WORD boundary — a card ending mid-word ("…the gla") reads broken
     const rawPremise = String(c?.premise ?? '').replace(/\s+/g, ' ').trim()
@@ -106,25 +130,43 @@ export function lockConcepts(
       continue
     }
 
-    // Anchor must be a reference that was ACTUALLY retrieved. Exact match wins; else fuzzy-snap
-    // (models paraphrase names — "the Bucks Sauce critique" for "bucks-sauce#3"); else drop.
-    const cited = String(c?.anchor?.source ?? '').trim()
-    const why = String(c?.anchor?.why ?? '').replace(/\s+/g, ' ').trim().slice(0, 200)
-    let source = validNames.get(cited.toLowerCase())
-    if (!source && cited) {
-      const citedTokens = tokensOf(cited)
-      const match = retrievedNames.find((n) => {
-        const nt = tokensOf(n)
-        for (const t of citedTokens) if (nt.has(t)) return true
-        return false
-      })
-      if (match) {
-        adjustments.push(`concept "${name}" anchor "${cited}" → "${match}" (snapped to the real retrieved name)`)
-        source = match
+    // Each quality must be grounded in a reference that was ACTUALLY retrieved. Exact match wins;
+    // else fuzzy-snap (models paraphrase names — "the Bucks Sauce critique" for "bucks-sauce#3").
+    const rawQs = Array.isArray(c?.qualities) ? c.qualities : []
+    const qualities: ConceptQuality[] = []
+    const usedSources = new Set<string>()
+    for (const rq of rawQs) {
+      const q = rq as { quality?: unknown; from?: unknown }
+      const quality = String(q?.quality ?? '').replace(/\s+/g, ' ').trim().slice(0, 200)
+      const cited = String(q?.from ?? '').trim()
+      if (!quality) continue
+      let source = validNames.get(cited.toLowerCase())
+      if (!source && cited) {
+        const citedTokens = tokensOf(cited)
+        const match = retrievedNames.find((n) => {
+          const nt = tokensOf(n)
+          for (const t of citedTokens) if (nt.has(t)) return true
+          return false
+        })
+        if (match) source = match
       }
+      if (!source) {
+        adjustments.push(`concept "${name}" dropped a quality — "${cited || '(none)'}" is not a retrieved reference`)
+        continue
+      }
+      // One quality per source. Two qualities from the same chunk is an impression of that one
+      // reference wearing the language of a blend, which is exactly what this replaced.
+      if (usedSources.has(source)) {
+        adjustments.push(`concept "${name}" dropped a second quality from "${source}" — a concept must blend DIFFERENT sources`)
+        continue
+      }
+      usedSources.add(source)
+      qualities.push({ quality, from: source })
     }
-    if (!source) {
-      adjustments.push(`concept "${name}" REJECTED — anchor "${cited || '(none)'}" is not a retrieved reference`)
+    if (qualities.length < 2) {
+      adjustments.push(
+        `concept "${name}" REJECTED — only ${qualities.length} grounded quality from a distinct source; a concept must blend at least 2`
+      )
       continue
     }
 
@@ -144,7 +186,7 @@ export function lockConcepts(
 
     const sparseRisk = SPARSE_PREMISE.test(premise) || SPARSE_PREMISE.test(name)
     if (sparseRisk) adjustments.push(`concept "${name}" flagged sparse-risk (void-prone premise) — fill-the-width rule weighted up if chosen`)
-    out.push({ name, mood, premise, anchor: { source, why: why || 'grounds this direction' }, sparseRisk })
+    out.push({ name, mood, premise, qualities, sparseRisk })
     if (out.length === 3) break
   }
   return out
@@ -174,8 +216,10 @@ export async function synthesizeConcepts(brief: string): Promise<ConceptResult |
   const user = `Brief (including the user's clarifying answers — honour them):
 ${brief}
 
-RETRIEVED REFERENCES (anchor each concept to EXACTLY one of these, citing its [name] verbatim):
-${refs || '(none retrieved — you may not fabricate an anchor; return your 2 best directions with anchor.source "" and they will be rejected, or ground them if you can)'}
+RETRIEVED REFERENCES (draw each concept's qualities from these, citing the [name] verbatim in "from").
+BLEND them: a concept's qualities must come from DIFFERENT entries, and the quality itself must be a
+property a brand-new brief could have, never a description of the reference:
+${refs || '(none retrieved — you may not fabricate a source; ground your directions if you can)'}
 
 Propose the concepts now.`
 
@@ -209,7 +253,7 @@ CREATIVE CONCEPT (chosen by the user — this is the LOCKED direction; build THI
 - Name: ${c.name}
 - Mood (locked): ${c.mood.join(', ')}
 - Visual premise: ${c.premise}
-- Grounded in: ${c.anchor.source} — ${c.anchor.why}${
+- Qualities: ${c.qualities.map((q) => q.quality).join(' + ')}${
     c.sparseRisk
       ? `\n\nCRITICAL for THIS concept: its premise leans sparse/pinned/floating, which reliably produces void-heavy pages. Honour the FEELING of the concept, but every section must still FILL or CENTER its width — a "pinned note" or "scattered" motif is a treatment applied to content that fills its container, NEVER a licence to leave tall empty bands. If a section would be a small element floating in a wide void, center it or give it a real companion element. Do not repeat the same pinned-note motif on more than one section.`
       : ''
