@@ -1,5 +1,13 @@
 [
   {
+    "id": "f62cf055-9cba-4449-a60f-9a811d9c0739",
+    "brief": "A veterinary clinic called Fenwick & Cole, in a small English market town, run by two vets who refuse to upsell. Mood: warm, plainspoken, trustworthy.",
+    "choices": {},
+    "createdAt": "2026-07-18T07:45:25.293Z",
+    "updatedAt": "2026-07-18T07:53:13.631Z",
+    "previewUrl": "http://localhost:3001/sessions/f62cf055-9cba-4449-a60f-9a811d9c0739/site/"
+  },
+  {
     "id": "be26b615-9b13-4ba1-b859-128c6a746e91",
     "brief": "A veterinary clinic called Fenwick & Cole, in a small English market town, run by two vets\nwho left corporate veterinary chains specifically because those chains push unnecessary\nprocedures for profit. Positioning: they tell you when your pet doesn't need the expensive\noption, even if it costs them the sale. They've turned away corporate buyout offers three\ntimes. Mood: warm but no-nonsense, trustworthy, small-town, the opposite of a slick corporate\nvet-chain website with stock photos of golden retrievers.",
     "choices": {},

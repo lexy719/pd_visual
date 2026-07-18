@@ -3,7 +3,7 @@
 > concurrently -k -n api,web -c cyan,magenta "tsx studio/server.ts" "vite --config studio/ui/vite.config.ts"
 
 [web] 
-[web]   [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m1357[22m[2m[0m ms[22m
+[web]   [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m737[22m[2m[0m ms[22m
 [web] 
 [web]   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5200[22m/[39m
 [web] [2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
@@ -12,7 +12,11 @@
 [api]   Session previews →  http://localhost:3001/sessions/<id>/site/
 [api]   UI              →  http://localhost:5200
 [api] 
-[api]   [2mquestions grounded on 15 evidence hits.[0m
-[api]   [2mconcepts grounded on 15 evidence hits: "The Argument in Print" [calm], "Held Open, Off-Centre" [premium], "The Standing Objection" [trustworthy][0m
-[api]   [2mquestions grounded on 16 evidence hits.[0m
-[api]   [2mconcepts grounded on 15 evidence hits: "The Case File" [trustworthy], "One Long Argument" [calm], "Plain Statement" [brutalist][0m
+[api]   [2mconcepts repaired: concept "Slow Trust, Market Town" flagged sparse-risk (void-prone premise) — fill-the-width rule weighted up if chosen[0m
+[api]   [2mconcepts grounded on 16 evidence hits: "The Straight Answer" [trustworthy], "Slow Trust, Market Town" [calm], "One Honest Fact" [minimal][0m
+[api]   [33mfixup[0m decoded 10 literal \uXXXX escape(s) to real characters (JSX text leak)
+[api]   [33mfixup[0m decoded 6 literal \uXXXX escape(s) to real characters (JSX text leak)
+[api]   [33mfixup[0m decoded 10 literal \uXXXX escape(s) to real characters (JSX text leak)
+[api]   [33mfixup[0m decoded 6 literal \uXXXX escape(s) to real characters (JSX text leak)
+[api]   [33mfixup[0m decoded 10 literal \uXXXX escape(s) to real characters (JSX text leak)
+[api]   [33mfixup[0m decoded 6 literal \uXXXX escape(s) to real characters (JSX text leak)
