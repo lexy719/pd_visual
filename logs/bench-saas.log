@@ -1,0 +1,200 @@
+
+brief:      "Kettle — deployment monitoring for small engineering teams. Shows what changed, what broke, and who to ask. Free for up to 3 services. Mood: technical, trustworthy."
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-sonnet-5   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+brand:  Kettle
+mood:   technical, trustworthy
+layout: Product proof: show the change before the claim, bento-grid, progressive-trust
+sections:
+  0. sticky-nav       [36mmodular[0m/sm  Persistent wayfinding with a single CTA (Start free) so engineers can act at any scroll depth
+  1. the-3am-question [36meditorial[0m/lg  Open on the exact moment Kettle exists for: a deploy just broke prod and nobody knows what changed or who owns it
+  2. before-after-deploy [36masymmetric[0m/xl  Concrete state change: left panel shows chaotic incident chat, right panel shows Kettle's single timeline resolving it — same incident, two workflows
+  3. what-changed-what-broke-who-to-ask [36mmodular[0m/lg  Name the three core answers Kettle guarantees on every deploy, mapped directly to the product's three panes
+  4. trace-the-blast-radius [36mtimeline[0m/lg  Show the workflow transition in more depth — from a broken deploy to an identified service owner in under a minute, addressing the skeptic's 'does this actually work' doubt
+  5. built-for-small-teams [36meditorial[0m/md  Progressive trust: address integration and setup doubts directly — works with existing CI, no agents to install, 3 services free forever
+  6. who-relies-on-it [36mgallery[0m/md  Third-party proof from other small engineering teams to close remaining doubt before asking for signup
+  7. start-free       [36meditorial[0m/md  Close with the concrete offer: free for up to 3 services, credit-card-free signup, restate the CTA plainly
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated, subject="a dark-mode deploy-timeline UI panel with a monosp" · establishing → detail → medium → detail → wide → macro → medium → detail[0m
+  primary   [48;2;47;129;247m   [0m #2F81F7
+  accent    [48;2;47;224;168m   [0m #2FE0A8
+  bg / fg   [48;2;11;15;20m   [0m #0B0F14  /  [48;2;230;237;243m   [0m #E6EDF3
+  card/bord [48;2;17;24;35m   [0m #111823  /  [48;2;30;42;56m   [0m #1E2A38
+  motion    [36msubtle[0m  (locked for the whole run)
+  interact  [36m200ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-1px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2mA near-black slate background with a single trustworthy blue and one saturated signal-green accent lets status states (broken/fixed) carry meaning, while restrained 200ms translateY(-1px) interactions and a tight 1.2 type scale keep everything feeling measured, instrumented, and never alarmist.[0m
+  [2manchors: Calm / wellness / health, premium / calm micro-interactions, trustworthy / fintech micro-interactions, transition discipline, Type scale ratios by mood, Calm / wellness typography, Trustworthy / fintech typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, PP Neue Montreal — throughline, Bucks Sauce — Reviews section uses a hand-lettered, sketchy outline t…[0m
+  [33mADJUSTED[0m shot beat[0] wide → establishing (the page opens the world once)
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Kettle  ·  technical/trustworthy  ·  Product proof: show the change before the claim
+  motion: subtle   palette: Tide
+┌──────────────────────────────────────────────────┐
+│ sticky-nav  ·  modular  ·  bento-grid            │
+│   ↳ Persistent wayfinding with a single CTA (Sta │
+│   [--] [--] [--]                                 │
+├──────────────────────────────────────────────────┤
+│ the-3am-question  ·  editorial  ·  Container and │
+│   ↳ Open on the exact moment Kettle exists for:  │
+│     media: dark terminal-style panel showing a S │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ before-after-deploy  ·  asymmetric  ·  When to b │
+│   ↳ Concrete state change: left panel shows chao │
+│     media: split-screen product screenshot: left │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ what-changed-what-broke-who-to-ask  ·  modular   │
+│   ↳ Name the three core answers Kettle guarantee │
+│     media: bento grid: one large hero cell showi │
+│   [--] [--] [--]                                 │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ trace-the-blast-radius  ·  timeline  ·  Section  │
+│   ↳ Show the workflow transition in more depth — │
+│     media: four-step horizontal timeline of real │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ built-for-small-teams  ·  editorial  ·  parallax │
+│   ↳ Progressive trust: address integration and s │
+│     media: small inline code snippet showing a o │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ who-relies-on-it  ·  gallery  ·  When to break t │
+│   ↳ Third-party proof from other small engineeri │
+│     media: grid of 4-6 short technical testimoni │
+│   [--] [--] [--] [--]                            │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ start-free  ·  editorial  ·  split-hero          │
+│   ↳ Close with the concrete offer: free for up t │
+│     media: minimal, just the signup form and a s │
+│   [--] [--]                                      │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] sticky-nav/modular     → scratch  [structure: bento-grid, card-gallery, split-hero]
+       ↳ [bulk]
+  [1] the-3am-question/editorial → scratch  [structure: Container and grid, Premium / calm spacing, When to break the grid on purpose]
+       ↳ [bulk]
+  [2] before-after-deploy/asymmetric → scratch  [structure: When to break the grid on purpose, asymmetric-grid, split-hero]
+       ↳ design-system violation(s): negative horizontal margin escapes the locked container — escalating one retry to reasoning tier…
+       ↳ escalated retry did not improve (1 design, parses:true); keeping the bulk output
+       ↳ [bulk]
+  [3] what-changed-what-broke-who-to-ask/modular → scratch  [structure: bento-grid, card-gallery, Inside components]
+       ↳ [bulk]
+  [4] trace-the-blast-radius/timeline → scratch  [structure: Section padding, z-pattern-landing]
+       ↳ [bulk]
+  [5] built-for-small-teams/editorial → motion-primitive parallax-depth (wraps:section-block, motion:subtle)
+       ↳ [bulk]
+  [6] who-relies-on-it/gallery → scratch  [structure: When to break the grid on purpose, bento-grid, asymmetric-grid]
+       ↳ [bulk]
+  [7] start-free/editorial   → scratch  [structure: split-hero, Premium / calm spacing, Container and grid]
+       ↳ [bulk]
+       ↳ page had NO <h1> — promoted the dominant section's first <h2> (a page needs exactly one anchor)
+       ↳ shot plan [generated, subject-locked]: upgraded 2 image(s) → 2 Flux (staged)
+       ↳ hardened 1 <img> tag(s): explicit width/height + lazy below the fold
+       ↳ pre-warm 1/2 ok (1s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 2/2 ok (47s — generating fresh imagery, ~1min each)
+       ↳ pre-warm: 2/2 image(s) verified real
+
+[1m── SELF-CRITIQUE ───────────────────────────────────────────[0m
+[2m  reviewing [0] sticky-nav…[0m
+[2m  reviewing [1] the-3am-question…[0m
+[2m  reviewing [2] before-after-deploy…[0m
+[2m  reviewing [3] what-changed-what-broke-who-to-ask…[0m
+[2m  reviewing [4] trace-the-blast-radius…[0m
+[2m  reviewing [5] built-for-small-teams…[0m
+[2m  reviewing [6] who-relies-on-it…[0m
+[2m  reviewing [7] start-free…[0m
+  [31mFLAG[0m [5:built-for-small-teams] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [33mwarn[0m [0:sticky-nav] Mobile menu toggle lacks aria-expanded and aria-controls attributes, and no visible mobile menu panel is shown in the markup, risking incomplete disclosure semantics.
+  [33mwarn[0m [0:sticky-nav] Status dot uses bg-primary as a decorative status indicator with no text alternative or accessible label distinguishing it from the link text, ambiguous for screen readers.
+  [33mwarn[0m [0:sticky-nav] 'Start free' CTA uses font-semibold (600) on top of primary background — acceptable per weight rule, but combined with mi-lift/mi-press hover effects not defined here risks exceeding 'measured, nothing sudden' if lift distance/scale isn't constrained elsewhere.
+  [33mwarn[0m [0:sticky-nav] No focus-visible states defined on nav links or CTA buttons, failing keyboard accessibility for a corporate/trustworthy pattern.
+  [33mwarn[0m [1:the-3am-question] duration-700 transition violates committed micro-interaction value of 200ms
+  [33mwarn[0m [1:the-3am-question] Uses two accent colors (primary and destructive) plus muted tones, exceeding the quiet/minimal accent expectation for trustworthy fintech mood
+  [33mwarn[0m [1:the-3am-question] Terminal chat mockup with colored alert badges and highlighted message is a high-drama, sudden-attention device, contradicting 'measured and reassuring' interaction rule
+  [33mwarn[0m [1:the-3am-question] h2 heading has no explicit type-scale class shown, risking hero-to-body ratio exceeding the required 2.5–3x for this mood if default heading size is large
+  [33mwarn[0m [2:before-after-deploy] Uses h1 inside a page section (should be h2/section-level heading; h1 reserved for page title), breaking type hierarchy.
+  [33mwarn[0m [2:before-after-deploy] Eyebrow/tag text uses 'text-primary' as an accent color alongside status dot and other UI colors, risking more than one accent in a trustworthy/fintech palette.
+  [33mwarn[0m [2:before-after-deploy] font-mono chat snippet introduces a second typeface family, violating 'one neutral sans' rule.
+  [33mwarn[0m [2:before-after-deploy] font-semibold (600) used correctly, but combined with uppercase tracking-wide tag plus bold h1 risks exceeding the small hero-to-body ratio mandated (2.5–3x, smallest of any mood) — heading size not shown/constrained in code.
+  [33mwarn[0m [3:what-changed-what-broke-who-to-ask] Inline style hardcodes destructive color (#e5675f) instead of theme token, bypassing contrast control and theming.
+  [33mwarn[0m [3:what-changed-what-broke-who-to-ask] h2 'Three panes. Three answers. Every deploy.' is a stylistic flourish, not measured/quiet copy expected for fintech trust tone.
+  [33mwarn[0m [3:what-changed-what-broke-who-to-ask] Multiple accent uses of text-primary (icon, 'live' tag, three diff markers) exceed the single-accent restraint expected for trustworthy/fintech mood.
+  [33mwarn[0m [3:what-changed-what-broke-who-to-ask] 700ms transition duration violates committed micro-interaction spec of 200ms duration.
+  [33mwarn[0m [5:built-for-small-teams] Ownership card avatar image uses an overly long, malformed prompt string as the src URL, likely broken/truncated — accessibility and content risk (no alt text visible in snippet).
+  [33mwarn[0m [5:built-for-small-teams] Code block uses text-primary for inline code, introducing an accent color where quiet neutral fintech typography calls for restraint.
+  [33mwarn[0m [5:built-for-small-teams] Headline 'Built for teams without a platform team' and card h3s appear to use default/unstyled heading weight — no explicit font-weight class confirming 400/600 compliance, risking browser default bold (700+).
+  [33mwarn[0m [5:built-for-small-teams] Hero-to-body size ratio not verifiable from classes (relies on global .text-foreground/h2 styles) — no explicit scale token shown, risking exceeding 2.5–3x trustworthy ratio.
+  [33mwarn[0m [6:who-relies-on-it] Reveal transition uses duration-700 with translate-y-4 (opacity+transform slide), violating the committed 200ms standard-out micro-interaction spec for this mood.
+  [33mwarn[0m [6:who-relies-on-it] Five distinct icon glyphs (lightning, network, ledger, refresh, package) add visual variety/accent load beyond the 'nothing above quiet, one accent' expectation for trustworthy/fintech.
+  [33mwarn[0m [6:who-relies-on-it] h2 'Small teams, real incidents, honest reviews' has no explicit type-scale class shown, risking exceeding the 2.5–3x hero-to-body ratio if default heading size is large — needs verification/clamping.
+  [33mwarn[0m [6:who-relies-on-it] Eyebrow text 'Trusted by small teams shipping fast' uses font-semibold (600) which is acceptable, but combined with h2 default weight unverified — could exceed 700 if heading defaults to bold/700+.
+  [33mwarn[0m [7:start-free] duration-700 transitions violate committed micro-interaction value of 200ms
+  [33mwarn[0m [7:start-free] delay-100 combined with 700ms fade adds sluggish, non-'measured and reassuring' motion timing not matching standard-out easing spec
+  [33mwarn[0m [7:start-free] Heading 'Start free. See what breaks before your users do.' uses playful/dramatic phrasing inconsistent with quiet, trustworthy fintech tone
+  [33mwarn[0m [7:start-free] No explicit font-weight class shown above 600 risk unverified; heading/h3 defaults may exceed 600 weight if not overridden, needs confirmation
+
+[1m── WRITE  → preview/app ────────────────────────────────────[0m
+       ↳ visual critique: 4 defect(s) — 2 actionable (2 minor)
+         [minor] s0 duplicate: viewport-0 shows two stacked nav bars: a small 'preview / Kettle / light' bar and a full 'Kettle / Product Pri
+         [major] s4 broken-image: viewport-4963 shows an empty bordered dark panel on the left (roughly x0-847, y64-306) with no caption or cont
+         [minor] s6 overflow: viewport-4963 top-right shows truncated text '@ma… notifie… 4s' cut off at the edge of the image card
+         [major] s2 dead-zone: viewport-1654 shows a large empty black area from roughly y300 to y500 between the rollback status card and th
+       ↳ revised section 4 (1 defect(s))
+       ↳ revised section 2 (1 defect(s))
+       ↳ section 4 did not improve on re-critique — original restored
+       ↳ section 2 did not improve on re-critique — original restored
+  [31mVISUAL[0m shipped WITH 3 visible defect(s) after the revise pass:
+  [31m      [0m [major] s2 dead-zone: In viewport-3253/viewport-4880, there is a large empty dark panel on the left (roughly x0-847, y0-28
+  [31m      [0m [major] s4 dead-zone: viewport-4880 shows a large blank dark area between the CTA bar ('Free for up to 3 services...') aro
+  [31m      [0m [major] s5 broken-image: viewport-4880 top-right shows a partial circular image (teapot/hand) cut off at the top of the viewp
+  [31m      [0m screenshots + critiques: logs\visual\2026-07-18T10-30-38-601Z
+  8 sections  (1 motion-primitive, 7 from scratch)
+  primitives: parallax-depth
+  [36mTIERS[0m  plan/art-direction/questions: [35m[reasoning][0m claude-sonnet-5
+         sections: 8 [36m[bulk][0m (none needed escalation)
+           [0] sticky-nav/modular → [36m[bulk][0m
+           [1] the-3am-question/editorial → [36m[bulk][0m
+           [2] before-after-deploy/asymmetric → [36m[bulk][0m
+           [3] what-changed-what-broke-who-to-ask/modular → [36m[bulk][0m
+           [4] trace-the-blast-radius/timeline → [36m[bulk][0m
+           [5] built-for-small-teams/editorial → [36m[bulk][0m
+           [6] who-relies-on-it/gallery → [36m[bulk][0m
+           [7] start-free/editorial → [36m[bulk][0m
+  deps:       motion, motion/react
+  files:      12 written under preview/app/src
+  [36mMOTION[0m [5:built-for-small-teams] wrapped by motion-primitive parallax-depth
+  [33mLAYOUT[0m [3:what-changed-what-broke-who-to-ask] flex row without gap: "flex items-center justify-between mb-3 text-xs text-muted-foregr"
+  [35mOFF-THEME[0m [3:what-changed-what-broke-who-to-ask] bypasses palette tokens: raw #hex color (use theme tokens)
+  [35mOFF-THEME[0m [4:trace-the-blast-radius] bypasses palette tokens: text-red-400
+  [33mDESIGN[0m [2:before-after-deploy] negative horizontal margin escapes the locked container
+  [36mIMAGES[0m upgraded 2 placeholder(s) to on-theme imagery (Unsplash or Flux-generated).
+
+[1m── SERVE  → http://localhost:5199 ──────────────────────────[0m
+
+> dev
+> vite
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m949[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5199[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m

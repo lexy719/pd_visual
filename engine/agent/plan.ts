@@ -27,6 +27,9 @@ RULES:
   first. Choose from the BRIEF's actual purpose, not from its mood. See the RETRIEVED PATTERN
   GUIDANCE for each register's required furniture, and make the section list satisfy it.
 - "mood" MUST be chosen only from: ${MOODS.join(', ')}. Pick the 1-3 that fit best; do not invent moods.
+- NEVER create a section for navigation, a header bar, or a footer. Page chrome is built
+  automatically from the register (nav with links + one CTA, and a footer) and composed around your
+  sections. A "sticky-nav" or "footer" section would render a SECOND, duplicate bar.
 - INVENT the section structure freely — there is NO fixed section vocabulary. Name sections for the story
   they tell ("manifesto", "process-atlas", "the-ritual", "field-notes"). Do NOT default to a
   nav/hero/features/pricing/cta/footer skeleton; let the brief's narrative dictate the sequence.

@@ -224,6 +224,50 @@ export function decodeUnicodeEscapes(code: string, log?: (m: string) => void): s
   return out
 }
 
+/**
+ * Chrome is built once by the writer, so a SECTION must never render its own site nav. When one
+ * does, the page shows two stacked navigation bars (observed live: the register chrome plus a
+ * model-authored sticky nav). Detect a section-level sticky/fixed <nav> or <header> and drop that
+ * element, keeping the rest of the section intact.
+ *
+ * Deliberately narrow: only removes a nav/header that is STICKY or FIXED (site chrome), never an
+ * in-content <nav> such as tabs, breadcrumbs, or a table of contents.
+ */
+export function stripSectionChrome(code: string, log?: (m: string) => void): string {
+  let out = code
+  for (const tag of ['nav', 'header'] as const) {
+    const open = new RegExp(`<${tag}\\b[^>]*>`, 'g')
+    for (const m of [...out.matchAll(open)]) {
+      const attrs = m[0]
+      if (!/sticky|fixed/.test(attrs)) continue
+      // find the matching close tag, respecting nesting of the same tag
+      let depth = 0
+      const scan = new RegExp(`<${tag}\\b|</${tag}>`, 'g')
+      scan.lastIndex = m.index!
+      let end = -1
+      for (let x = scan.exec(out); x; x = scan.exec(out)) {
+        if (x[0].startsWith('</')) {
+          depth--
+          if (depth === 0) { end = x.index + x[0].length; break }
+        } else depth++
+      }
+      if (end === -1) continue
+      const candidate = out.slice(0, m.index!) + out.slice(end)
+      // A section whose ONLY content was the nav leaves an empty return and no longer parses. That
+      // section IS chrome, and chrome is now owned by the writer — so render nothing rather than
+      // shipping a broken or duplicate bar.
+      if (parseError(candidate)) {
+        log?.(`  \x1b[33mfixup\x1b[0m section was entirely site chrome — chrome is built once by the writer, section renders nothing`)
+        return `export default function ChromeOwnedSection() {\n  return null\n}\n`
+      }
+      out = candidate
+      log?.(`  \x1b[33mfixup\x1b[0m removed a section-level sticky <${tag}> — page chrome is built once by the writer`)
+      break // one per section is enough; re-run would need fresh indices
+    }
+  }
+  return out
+}
+
 export function repairUndefinedJsxTags(code: string, log?: (m: string) => void): string {
   const defined = new Set<string>()
   for (const m of code.matchAll(/import\s+(?:([A-Z][\w$]*)|\{([^}]*)\}|\*\s+as\s+([A-Z][\w$]*))/g)) {
@@ -609,6 +653,10 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
   }
 
   // 2. section files, with imports sanitized to what each section is allowed to use
+  // decided before the section loop: sections must not emit chrome when the writer will
+  const chromeSrc = buildChrome(plan.register, plan.brand, gen.sections)
+  const hasChromeForRun = !!chromeSrc
+
   for (const s of gen.sections) {
     let allowed: string[]
     if (s.strategy === 'motion-primitive' && s.motionPrimitiveId) {
@@ -626,6 +674,8 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
     sanitized = neutralizeNodeGlobals(sanitized)
     sanitized = repairUndefinedJsxTags(sanitized, console.warn)
     sanitized = decodeUnicodeEscapes(sanitized, console.warn)
+    // chrome is composed once by the writer — a section must not render a second site nav
+    if (hasChromeForRun) sanitized = stripSectionChrome(sanitized, console.warn)
     sanitized = ensureReactImport(sanitized)
     let { code, repaired } = ensureDefaultExport(sanitized, label)
     if (repaired) console.warn(`  \x1b[33mfixup\x1b[0m [${label}] had no default export — injected one.`)
@@ -650,9 +700,7 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
   }
 
   // 3. composition + registry + deps
-  // CHROME — nav/footer built from the locked register. Deterministic on purpose: the model has
-  // never once produced a <nav>, because chrome is not a "section" and nothing owned it.
-  const chromeSrc = buildChrome(plan.register, plan.brand, gen.sections)
+  // CHROME — nav/footer built from the locked register (computed above, before the section loop).
   if (chromeSrc) {
     writeFileSync(join(GENERATED, 'chrome.tsx'), chromeSrc, 'utf8')
     files.push('generated/chrome.tsx')

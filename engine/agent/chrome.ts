@@ -32,12 +32,37 @@ function labelFor(name: string): string {
  * there) and anything that reads like a closing CTA, then caps at 4 — a nav with every section in it
  * is a table of contents, not navigation.
  */
-export function navLinks(sections: SectionResult[], max = 4): NavLink[] {
+/**
+ * Product registers want SEMANTIC nav labels (Product, Pricing, Docs) — an evaluator scans for those
+ * words. Section-slug anchors ("The 3am question") read as a table of contents, which is why the
+ * model kept building its own nav alongside ours. Map the real sections onto conventional labels
+ * where one fits, and fall back to the section's own name where none does.
+ */
+const SEMANTIC_LABELS: Array<[RegExp, string]> = [
+  [/(pricing|price|cost|plan|tier|free)/i, 'Pricing'],
+  [/(doc|guide|reference|api|integrat)/i, 'Docs'],
+  [/(feature|capabilit|what|how.*work|product|tool)/i, 'Product'],
+  [/(customer|client|who|trust|proof|testimonial|team)/i, 'Customers'],
+  [/(story|about|why|manifesto|origin)/i, 'About'],
+  [/(work|project|case|portfolio|edition|gallery)/i, 'Work'],
+  [/(service|treatment|offer)/i, 'Services'],
+  [/(programme|program|lineup|schedule|agenda)/i, 'Programme']
+]
+
+export function navLinks(sections: SectionResult[], max = 4, semantic = false): NavLink[] {
   const CTA_LIKE = /(contact|get.?in.?touch|book|reserve|acquire|enquir|inquir|start|sign.?up|buy|order|come.?in)/i
   return sections
     .filter((s) => s.index > 0 && !CTA_LIKE.test(s.name))
     .slice(0, max)
-    .map((s) => ({ label: labelFor(s.name), href: `#${s.index}-${s.name}` }))
+    .map((s) => {
+      if (semantic) {
+        const hit = SEMANTIC_LABELS.find(([re]) => re.test(s.name))
+        if (hit) return { label: hit[1], href: `#${s.index}-${s.name}` }
+      }
+      return { label: labelFor(s.name), href: `#${s.index}-${s.name}` }
+    })
+    // a semantic map can collapse two sections onto the same label — keep the first of each
+    .filter((l, i, arr) => arr.findIndex((x) => x.label === l.label) === i)
 }
 
 /** The CTA verb belongs to the REGISTER, not to whatever the closing section happens to be called. */
@@ -68,7 +93,8 @@ export function buildChrome(register: Register, brand: string, sections: Section
   const spec: ChromeSpec = REGISTER_CHROME[register] ?? REGISTER_CHROME['editorial-story']
   if (spec.nav === 'none' && spec.footer === 'none') return null
 
-  const links = navLinks(sections)
+  const semantic = spec.nav === 'sticky-cta' // product/service registers scan for conventional labels
+  const links = navLinks(sections, 4, semantic)
   const cta = ctaTarget(register, sections)
   const year = '{new Date().getFullYear()}'
   const safeBrand = brand.replace(/[<>{}]/g, '').trim() || 'Brand'
