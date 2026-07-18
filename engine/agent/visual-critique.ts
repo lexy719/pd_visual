@@ -170,6 +170,18 @@ List the visible defects now (empty array if clean).`
     // MEASURED VERTICAL voids. Blocking when the band is enormous, because a reader scrolling
     // through a screen and a half of nothing has left. Vision-reported dead zones are capped at
     // `major` and therefore ship; this is DOM fact, so it is allowed to stop the page.
+    // MEASURED CONTRAST. Always blocking: text nobody can read is not a degraded page, it is a
+    // missing one, and it is invisible to every other check — the DOM says the words are there.
+    for (const c of capture.contrastFailures ?? []) {
+      defects.push({
+        sectionIndex: Math.max(0, c.sectionIndex),
+        defectClass: 'contrast',
+        severity: 'blocking',
+        evidence: `MEASURED (DOM, not vision): "${c.text}" renders ${c.color} on ${c.background} — contrast ratio ${c.ratio}:1 at ${c.fontPx}px. Below 4.5:1 (3:1 for large text) it cannot be read.`,
+        fix: `CAUSE: this text hardcodes a colour that assumes a background which is not actually behind it — almost always \`text-white\` written for an image or dark overlay that did not render. FIX: use the theme tokens (text-foreground on the page background, text-card-foreground inside a card) so contrast is guaranteed by the palette. Only keep a hardcoded light colour if you ALSO render the dark backdrop it needs, in the same element's stacking context. Never fix this by nudging the shade — use the token.`
+      })
+    }
+
     // Pinned sections are excluded upstream (see.ts) because their DOM geometry lies about what the
     // reader sees, so everything arriving here is a genuinely over-tall section.
     for (const v of capture.verticalVoids ?? []) {

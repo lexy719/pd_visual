@@ -11,9 +11,9 @@
 :root {
   --background: #FAF7F2;
   --foreground: #1C1811;
-  --card: #FFFFFF;
+  --card: #F3EEE4;
   --card-foreground: #0a0a0a;
-  --popover: #FFFFFF;
+  --popover: #F3EEE4;
   --popover-foreground: #0a0a0a;
   --primary: #1C1811;
   --primary-foreground: #fafafa;
@@ -21,13 +21,13 @@
   --secondary-foreground: #1C1811;
   --muted: #e8e5e0;
   --muted-foreground: #6B6153;
-  --accent: #6E1E1A;
+  --accent: #7A2E22;
   --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #E4DDD0;
-  --input: #E4DDD0;
-  --ring: #6E1E1A;
+  --border: #E1D9C9;
+  --input: #E1D9C9;
+  --ring: #7A2E22;
   --radius: 0.5rem;
   --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -37,16 +37,16 @@
   --container: 1088px;
   --section-pad: clamp(156px, 14vh, 215px);
   /* Base h2 size. The rhythm's .vol-* classes rescale THIS, which cascades to the section's h2. */
-  --h2-base: clamp(37px, 4vw, 47px);
+  --h2-base: clamp(36px, 4vw, 47px);
   --h2: var(--h2-base);
 }
 
 .dark {
   --background: #FAF7F2;
   --foreground: #1C1811;
-  --card: #FFFFFF;
+  --card: #F3EEE4;
   --card-foreground: #0a0a0a;
-  --popover: #FFFFFF;
+  --popover: #F3EEE4;
   --popover-foreground: #0a0a0a;
   --primary: #1C1811;
   --primary-foreground: #fafafa;
@@ -54,13 +54,13 @@
   --secondary-foreground: #1C1811;
   --muted: #e8e5e0;
   --muted-foreground: #6B6153;
-  --accent: #6E1E1A;
+  --accent: #7A2E22;
   --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #E4DDD0;
-  --input: #E4DDD0;
-  --ring: #6E1E1A;
+  --border: #E1D9C9;
+  --input: #E1D9C9;
+  --ring: #7A2E22;
   --radius: 0.5rem;
   --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -70,7 +70,7 @@
   --container: 1088px;
   --section-pad: clamp(156px, 14vh, 215px);
   /* Base h2 size. The rhythm's .vol-* classes rescale THIS, which cascades to the section's h2. */
-  --h2-base: clamp(37px, 4vw, 47px);
+  --h2-base: clamp(36px, 4vw, 47px);
   --h2: var(--h2-base);
 }
 
@@ -100,7 +100,7 @@ h1, h2, h3 {
   line-height: 1.05 !important;
   margin: 0;
 }
-h1 { font-size: clamp(50px, 6.5vw, 83px) !important; }
+h1 { font-size: clamp(50px, 6.5vw, 82px) !important; }
 /* h2 reads its size from a custom property so the page RHYTHM can bend it per section (.vol-*).
    The !important still locks it against per-section utility classes; only the run's own rhythm,
    which sets --h2 on the section root, can move it. */
@@ -110,7 +110,10 @@ h3 { font-size: 32px; }
 /*
  * GENERATED PER RUN — the LOCKED LAYOUT SYSTEM. One container width, one section-padding rhythm
  * for the whole page (spacing.md numbers per mood). Sections apply these instead of inventing
- * per-section padding or widths — a page whose sections each re-decide spacing reads as seven designers.
+ * per-section padding or widths — a page whose sections each re-decide spacing reads as seven
+ * designers. (Do NOT write a Tailwind glob like py-star-slash-max-w here: the slash after a star
+ * closes this comment early, and the text that follows silently swallows the NEXT rule. That exact
+ * typo disabled .container-page on every run ever generated.)
  */
 .container-page { max-width: var(--container); margin-inline: auto; padding-inline: clamp(20px, 4vw, 48px); }
 .section-pad { padding-block: var(--section-pad); }
@@ -309,7 +312,7 @@ html { overflow-x: clip; }
 }
 .mi-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(28, 24, 17, 0.08);
+  box-shadow: 0 12px 24px -16px rgba(28,24,17,0.25);
 }
 .mi-press:active {
   transform: scale(var(--mi-tap));

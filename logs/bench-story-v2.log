@@ -103,3 +103,87 @@ sections:
        ↳ hardened 6 <img> tag(s): explicit width/height + lazy below the fold
        ↳ pre-warm 1/7 ok (1s — generating fresh imagery, ~1min each)
        ↳ pre-warm 2/7 ok (44s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 3/7 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 4/7 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 5/7 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 6/7 ok (44s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 7/7 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm: 7/7 image(s) verified real, 1 dynamic skipped
+       ↳ [33mimage resolution[0m: provider returned 1024px wide for a 1440px request (it caps near 0.59MP). Generated imagery is only sharp inside container-page, never full-bleed.
+
+[1m── SELF-CRITIQUE ───────────────────────────────────────────[0m
+[2m  reviewing [0] the-quiet-before…[0m
+[2m  reviewing [1] the-smith…[0m
+[2m  reviewing [2] four-days…[0m
+[2m  reviewing [3] the-steel-remembers…[0m
+[2m  reviewing [4] why-it-outlives-you…[0m
+[2m  reviewing [5] the-mark…[0m
+[2m  reviewing [6] reserve-yours…[0m
+  [31mFLAG[0m [0:the-quiet-before] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [31mFLAG[0m [6:reserve-yours] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [33mwarn[0m [0:the-quiet-before] No text-shadow/scrim over image, so white h1/p contrast against a variable-brightness photo cannot be guaranteed to meet WCAG AA.
+  [33mwarn[0m [0:the-quiet-before] h1 has no explicit type-scale class (e.g., text-6xl/7xl + font/tracking), risking inconsistent hierarchy versus other hero sections.
+  [33mwarn[0m [0:the-quiet-before] Generic, vague copy ('Sable & Stone', 'This is the story of how one knife came to exist.') doesn't convey specific value or editorial voice.
+  [33mwarn[0m [0:the-quiet-before] pb-16 bottom padding with 90vh minHeight concentrates content at bottom without matching top/side generous spacing (140-180px section rule not evidenced).
+  [33mwarn[0m [1:the-smith] 'dev-overlap' and 'dev-quote-break' look like placeholder/dev classnames rather than defined styles, suggesting unfinished layout implementation.
+  [33mwarn[0m [1:the-smith] Overlapping caption card position/offset isn't defined in visible code, risking cramped spacing instead of the 32px+ card padding / generous whitespace rule (though p-8 padding itself is compliant).
+  [33mwarn[0m [1:the-smith] No explicit section-level spacing value shown (relies on 'section-pad' utility) — cannot verify 140–180px vertical rhythm is actually met.
+  [33mwarn[0m [1:the-smith] Quote block uses italic styling with no accent color distinction, fine for restraint, but jump from body text to text-xl/2xl quote plus separate caption creates three type sizes with no intermediate step, slightly steep hierarchy jump.
+  [33mwarn[0m [2:four-days] mi-lift hover class applied to static image without stated hover interaction spec (duration/easing) — no evidence of 260ms/cubic-bezier(0.22,1,0.36,1) restraint being honored, risks a generic scale/shadow snap.
+  [33mwarn[0m [2:four-days] Card padding is 0 (image is edge-to-edge in bordered container) and text sits directly below with no internal card padding, violating the 32px+ card padding rule for premium spacing.
+  [33mwarn[0m [2:four-days] mb-16 (64px) between intro and timeline grid is below the 140-180px section rhythm the calm/luxury spacing rule calls for.
+  [33mwarn[0m [2:four-days] Connector dash (absolute -bottom-8) is an arbitrary 32px offset not clearly tied to the spacing scale used elsewhere (12, 16, 20).
+  [33mwarn[0m [3:the-steel-remembers] Card padding p-8 (32px) meets minimum but at md:p-10 (40px) exceeds stated 32px+ baseline inconsistently, and negative overlap via dev-overlap likely compresses vertical whitespace below 140-180px section rhythm.
+  [33mwarn[0m [3:the-steel-remembers] text-primary accent on final paragraph introduces a second color accent beyond the monochrome + single desaturated accent rule, competing with existing accent usage.
+  [33mwarn[0m [3:the-steel-remembers] No visible transition/hover/motion definitions in this component to confirm the 260ms standard-out easing is applied anywhere.
+  [33mwarn[0m [3:the-steel-remembers] Heading 'The steel remembers' has no explicit type-scale class shown (relies on default h2 style), risking unclear hierarchy against the eyebrow and body text sizes.
+  [33mwarn[0m [4:why-it-outlives-you] mb-24/md:mb-32 between rows (96px/128px) falls short of the 140–180px generous section rhythm the mood requires.
+  [33mwarn[0m [4:why-it-outlives-you] Card padding p-8 md:p-10 (32px/40px) is at the minimum threshold, not clearly exceeding the 32px+ generous standard given other spacing is compressed.
+  [33mwarn[0m [4:why-it-outlives-you] text-primary accent on '01 — Origin' label combined with default heading/body colors risks exceeding the single desaturated-accent restraint if primary is saturated elsewhere in the site.
+  [33mwarn[0m [4:why-it-outlives-you] No visible hover/motion treatment defined in this snippet beyond mi-lift/mi classes — cannot verify 260ms standard-out easing is applied, so compliance is unverifiable from this code.
+  [33mwarn[0m [5:the-mark] Four small cards all use identical `text-primary` label styling, creating repeated accent emphasis rather than one restrained highlight — reads as more than the 'one accent' calm mood allows.
+  [33mwarn[0m [5:the-mark] Card padding is p-6 (24px), below the 32px+ card padding minimum specified for premium/calm spacing.
+  [33mwarn[0m [5:the-mark] gap-5 (20px) grid gutter is tight relative to the '140–180px sections, generous whitespace' mood; grid feels denser than the rest of the spacing scale implies.
+  [33mwarn[0m [5:the-mark] mb-14 (56px) below the intro paragraph is inconsistent with the generous spacing scale used elsewhere (140-180px section rhythm) — creates an uneven vertical cadence.
+  [33mwarn[0m [6:reserve-yours] Section uses only default section-pad spacing, not the required 140–180px generous section padding specified for calm/premium mood.
+  [33mwarn[0m [6:reserve-yours] CTA button uses bg-primary/text-primary-foreground, an accent-heavy solid fill that risks exceeding the 'monochrome + one desaturated accent' saturation rule; no evidence primary is desaturated (<45% saturation).
+  [33mwarn[0m [6:reserve-yours] No explicit 260ms / cubic-bezier(0.22,1,...) transition defined for the CTA hover/press — relies on generic mi-lift/mi-press utility classes with unverified timing.
+  [33mwarn[0m [6:reserve-yours] Heading 'Reserve yours' has no distinct type-scale class (only inherits default h2), risking insufficient hierarchy contrast against body copy.
+
+[1m── WRITE  → preview/app ────────────────────────────────────[0m
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+       ↳ visual critique: 3 defect(s) — 3 actionable (0 minor)
+         [blocking] s0 dead-zone: MEASURED (DOM, not vision): section is 1188px tall but only 10% of that height carries text or imagery, with a
+         [major] s6 dead-zone: MEASURED (DOM, not vision): section is 1011px tall but only 27% of that height carries text or imagery, with a
+         [major] s2 broken-image: viewport-2484 shows section '01 Day one / Forging' with an empty tinted bordered panel where an image should b
+       ↳ revised section 0 (1 defect(s))
+       ↳ revised section 6 (1 defect(s))
+       ↳ revised section 2 (1 defect(s))
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+       ↳ section 0 did not improve on re-critique — original restored
+       ↳ section 6 did not improve on re-critique — original restored
+       ↳ section 2 did not improve on re-critique — original restored
+  scroll    [36mgentle[0m  (locked from motion language "subtle")
+  [31mVISUAL[0m shipped WITH 3 visible defect(s) after the revise pass:
+  [31m      [0m [blocking] s0 dead-zone: MEASURED (DOM, not vision): section is 1108px tall but only 10% of that height carries text or image
+  [31m      [0m [major] s6 dead-zone: MEASURED (DOM, not vision): section is 1011px tall but only 27% of that height carries text or image
+  [31m      [0m [major] s2 broken-image: In viewport-2464, the panel captioned 'Forging' (left column, section 2) is an empty tinted/bordered
+  [31m      [0m screenshots + critiques: logs\visual\2026-07-18T21-55-11-179Z
+  7 sections  (2 motion-primitive, 5 from scratch)
+  primitives: parallax-depth
+  [36mTIERS[0m  plan/art-direction/questions: [35m[reasoning][0m claude-sonnet-5
+         sections: 6 [36m[bulk][0m, 1 [33m[bulk→escalated][0m (repaired on claude-sonnet-5)
+           [0] the-quiet-before/cinematic → [36m[bulk][0m
+           [1] the-smith/editorial → [33m[bulk→escalated][0m
+           [2] four-days/timeline → [36m[bulk][0m
+           [3] the-steel-remembers/asymmetric → [36m[bulk][0m
+           [4] why-it-outlives-you/narrative → [36m[bulk][0m
+           [5] the-mark/modular → [36m[bulk][0m
+           [6] reserve-yours/editorial → [36m[bulk][0m
+  deps:       motion, motion/react
+  files:      12 written under preview/app/src
+  [36mMOTION[0m [0:the-quiet-before] wrapped by motion-primitive parallax-depth
+  [36mMOTION[0m [6:reserve-yours] wrapped by motion-primitive parallax-depth
+  [36mIMAGES[0m upgraded 8 placeholder(s) to on-theme imagery (Unsplash or Flux-generated).
+
+--no-serve: page written. Start it with:  cd preview/app && npm run dev

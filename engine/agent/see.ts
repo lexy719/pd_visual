@@ -147,10 +147,33 @@ export interface VerticalVoid {
   detail: string
 }
 
+/**
+ * Text that cannot be read against what is actually behind it.
+ *
+ * The palette guarantees contrast between its OWN tokens, but that says nothing about a section that
+ * hardcodes `text-white` because it expects a dark image behind it — and then ships without the
+ * image. Observed live: a hero whose title rendered rgb(255,255,255) on rgb(250,247,242), a contrast
+ * ratio of 1.07. The words were present, correctly sized, correctly placed, and completely invisible.
+ *
+ * Nothing else could catch it. The DOM says the text exists, so the void check sees low coverage but
+ * cannot explain it; a vision critic looking at a blank cream band has no reason to call it a
+ * contrast fault. Only computing the ratio finds it, so it is computed.
+ */
+export interface ContrastFailure {
+  sectionIndex: number
+  text: string
+  color: string
+  background: string
+  ratio: number
+  fontPx: number
+}
+
 export interface CaptureResult {
   shots: PageShot[]
   pageHeight: number
   consoleErrors: string[]
+  /** measured unreadable text — worst (lowest ratio) first */
+  contrastFailures: ContrastFailure[]
   /** measured vertical voids — sections that are mostly empty down the page, worst first */
   verticalVoids: VerticalVoid[]
   /** top-level section geometry, so a critic can map a shot's scroll range to section indexes */
@@ -300,6 +323,72 @@ export async function capturePage(url: string, opts?: { maxViewportShots?: numbe
       // worst first (largest empty fraction), dedup by section+kind, cap
       return out.sort((a, b) => b.emptyFraction - a.emptyFraction).slice(0, 5)
     })()`)) as HorizontalVoid[]
+    // MEASURED CONTRAST — text against what is genuinely painted behind it.
+    // Walks ancestors for the first real background (colour or image); an image behind the text is
+    // treated as satisfied, because its brightness cannot be known from the DOM and guessing would
+    // produce false alarms on legitimate overlay heroes.
+    const contrastFailures = (await page.evaluate(`(() => {
+      // Two channel scales in the wild and they look identical to a naive parser:
+      //   rgb(107, 97, 83)                  -> 0-255
+      //   color(srgb 0.419 0.380 0.325)     -> 0-1   (what Chrome increasingly returns)
+      // Dividing the second form by 255 makes every muted colour compute as near-black and report a
+      // contrast ratio of 1 against everything. Caught exactly that on a real page: six false
+      // positives on perfectly readable body copy, which would have blocked every run.
+      const lum = (c) => {
+        const str = String(c)
+        const m = str.match(/[\\d.]+/g)
+        if (!m || m.length < 3) return null
+        const nums = m.map(Number)
+        // color(srgb ...) omits a leading colour-space number, so channels are the first three.
+        const isUnit = /^color\\(/i.test(str)
+        const ch = nums.slice(0, 3)
+        if (!isUnit && nums.length >= 4 && nums[3] === 0) return null // transparent rgba
+        if (isUnit && nums.length >= 4 && nums[3] === 0) return null
+        const v = ch.map((n) => {
+          const x = isUnit ? n : n / 255
+          return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)
+        })
+        return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]
+      }
+      const secs = Array.from(document.querySelectorAll('section')).filter((s) => !s.parentElement.closest('section'))
+      const idxOf = (el) => { const s = el.closest('section'); const t = secs.find((x) => x === s || x.contains(el)); return t ? secs.indexOf(t) : 0 }
+      const out = []
+      const seen = new Set()
+      for (const el of document.querySelectorAll('h1,h2,h3,h4,p,li,span,a,button,figcaption,blockquote')) {
+        const txt = (el.textContent || '').trim()
+        if (txt.length < 3) continue
+        if (el.querySelector('h1,h2,h3,h4,p,li,span,a,button')) continue // only leaf-ish text
+        const r = el.getBoundingClientRect()
+        if (r.width < 12 || r.height < 6) continue
+        const cs = getComputedStyle(el)
+        if (cs.visibility === 'hidden' || cs.display === 'none') continue
+        if (parseFloat(cs.opacity) < 0.15) continue
+        const fg = lum(cs.color)
+        if (fg === null) continue
+        // first ancestor that actually paints something
+        let bg = null, node = el, viaImage = false
+        while (node && node !== document.documentElement) {
+          const s2 = getComputedStyle(node)
+          if (s2.backgroundImage && s2.backgroundImage !== 'none') { viaImage = true; break }
+          const b = lum(s2.backgroundColor)
+          if (b !== null) { bg = b; break }
+          node = node.parentElement
+        }
+        if (viaImage) continue // an image is behind it; brightness unknowable, do not guess
+        if (bg === null) { const b = lum(getComputedStyle(document.body).backgroundColor); if (b === null) continue; bg = b }
+        const ratio = (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)
+        const fontPx = parseFloat(cs.fontSize) || 16
+        // WCAG AA: 4.5 normally, 3.0 for large text (>=24px, or >=18.66px bold).
+        const large = fontPx >= 24 || (fontPx >= 18.66 && Number(cs.fontWeight) >= 700)
+        if (ratio >= (large ? 3 : 4.5)) continue
+        const key = txt.slice(0, 24) + '|' + cs.color
+        if (seen.has(key)) continue
+        seen.add(key)
+        out.push({ sectionIndex: idxOf(el), text: txt.slice(0, 60), color: cs.color, background: node ? getComputedStyle(node).backgroundColor : 'body', ratio: Math.round(ratio * 100) / 100, fontPx: Math.round(fontPx) })
+      }
+      return out.sort((a, b) => a.ratio - b.ratio).slice(0, 6)
+    })()`)) as ContrastFailure[]
+
     // MEASURED VERTICAL VOIDS — how much of each section is actually covered, down the page.
     // Ink = text leaves and images, merged into bands; the gaps between bands are real emptiness.
     // Deliberately generous thresholds: normal editorial sections measure 53-64% ink, so only a
@@ -384,7 +473,7 @@ export async function capturePage(url: string, opts?: { maxViewportShots?: numbe
     shots.push({ label: 'overview', png: await overviewPage.screenshot({ type: 'png', fullPage: true }), scrollY: -1 })
     await overviewPage.close()
 
-    return { shots, pageHeight, consoleErrors, sectionRects, horizontalOverflow, horizontalVoids, verticalVoids, containerBleeds }
+    return { shots, pageHeight, consoleErrors, sectionRects, horizontalOverflow, horizontalVoids, verticalVoids, contrastFailures, containerBleeds }
   } finally {
     await browser.close()
   }
