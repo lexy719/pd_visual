@@ -31,3 +31,17 @@ For generated image-to-video, specify a shot bible before producing clips: subje
 tags: universal, media, video, performance, accessibility, avoid
 
 Use responsive encodes, a poster, lazy loading below the fold, and explicit dimensions to avoid layout shift. Do not make the call to action or key product explanation depend on a large download. On constrained networks or small screens, prefer the poster and concise copy over a degraded autoplay experience.
+
+## Generated imagery is sharp only inside the container, never full-bleed
+
+tags: media, image, resolution, bleed, quality, craft, generated, sharpness
+
+Generated imagery arrives at a fixed pixel budget, so its usable size is decided before any design
+choice is made: roughly 1173px wide at a cinematic crop, less as the frame gets squarer. Inside the
+page container that is effectively one-to-one and looks crisp; stretched across a full-bleed band it
+is upscaled by anywhere from a fifth to two and a half times, and the result reads as cheap
+regardless of how good the composition is. The mistake is invisible at authoring time and obvious on
+the page, which is why it survives so many revisions. Reserve full-bleed bands for colour fields,
+type, or genuine high-resolution photography, and keep generated imagery within the container where
+its resolution is honest. When a page truly needs an edge-to-edge photograph, source it from stock
+rather than generating it — sharpness at that size is not something a prompt can fix.

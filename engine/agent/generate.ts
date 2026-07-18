@@ -477,7 +477,21 @@ export async function resolveImages(sections: SectionResult[], shot: ShotPlan, l
     const beat = shot.beats[r.section.index]
     const mapKey = `${r.section.index}:${r.token}`
     if (resolved.has(mapKey)) continue
-    let url = useStock ? await fetchUnsplash(r.kw, r.w, r.h, key!, usedIds) : null
+    // SOURCE ROUTING BY SLOT SIZE, not by page-level source alone.
+    //
+    // Measured, repeatedly: image.pollinations.ai caps EVERY response at ~0.59 megapixels whatever
+    // is requested — 1680x720 comes back 1173x502, and even 2048x878 returns 1172x502, across flux,
+    // turbo and the default model. So a generated image tops out around 1173px wide at 21:9. That is
+    // effectively sharp at container width (~1216px) and hopeless full-bleed, where the slot is
+    // 1440-2560px and the browser upscales 1.2x-2.5x. That is the softness on every run so far.
+    //
+    // A wide/establishing beat therefore prefers STOCK, which returns multi-thousand-pixel files —
+    // but only when the shot is not carrying the page's recurring subject, because keyword search
+    // cannot return the same subject twice and continuity outranks sharpness.
+    const subjectForRouting = !!world.subject && isSubjectKw(r.kw, head)
+    const bigSlot = beat ? beat.scale === 'establishing' || beat.scale === 'wide' : r.w >= 1400
+    const preferStock = !!key && !subjectForRouting && (useStock || bigSlot)
+    let url = preferStock ? await fetchUnsplash(r.kw, r.w, r.h, key!, usedIds) : null
     if (url) unsplashCount++
     else {
       // Continuity is keyed on the KEYWORD showing the subject, not on the beat's role — a prove
@@ -501,6 +515,15 @@ export async function resolveImages(sections: SectionResult[], shot: ShotPlan, l
   for (const s of sections) {
     if (/picsum\.photos/.test(s.code)) {
       s.imageWarnings = [...(s.imageWarnings ?? []), 'unstaged dynamic image src (unrecognised shape) — bypasses the shot plan']
+    }
+    // A GENERATED image inside a full-bleed band is soft by arithmetic, not by bad luck: the source
+    // caps at ~1173px wide and dev-bleed stretches it across the whole viewport. Contained is sharp,
+    // bleeding is not — so this pairing is always wrong and is worth naming precisely.
+    if (/image\.pollinations\.ai/.test(s.code) && /\bdev-bleed\b/.test(s.code)) {
+      s.imageWarnings = [
+        ...(s.imageWarnings ?? []),
+        'generated image inside dev-bleed — the image source caps at ~1173px wide, so a full-viewport band upscales it and it reads soft. Keep generated imagery inside container-page, or reserve dev-bleed for a colour field or stock photography'
+      ]
     }
   }
 
@@ -782,6 +805,39 @@ function fallbackSvg(palette: { background: string; card: string; accent: string
  * failure would fall back perfectly healthy images). 'bad' = a real content failure worth a seed change.
  */
 type FetchVerdict = 'ok' | 'ratelimited' | 'bad'
+
+/**
+ * Real pixel dimensions from a PNG/JPEG header. Cheap: reads the header bytes we already hold, no
+ * decoding and no dependency. Needed because the provider's response says nothing about how much it
+ * downscaled the request.
+ */
+export function imageDimensions(b: Buffer): { w: number; h: number } | null {
+  if (b.length > 24 && b[0] === 0x89 && b[1] === 0x50) return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) }
+  if (b.length > 4 && b[0] === 0xff && b[1] === 0xd8) {
+    let o = 2
+    while (o < b.length - 9) {
+      if (b[o] !== 0xff) {
+        o++
+        continue
+      }
+      const m = b[o + 1]!
+      // SOF markers carry the frame size; skip DHT/DAC/DRI which share the c0-cf range.
+      if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) {
+        return { w: b.readUInt16BE(o + 7), h: b.readUInt16BE(o + 5) }
+      }
+      o += 2 + b.readUInt16BE(o + 2)
+    }
+  }
+  return null
+}
+
+/** Last observed resolution shortfall, reported once per run rather than per image. */
+let lastShortfall: { url: string; asked: number; got: number } | null = null
+export const takeShortfall = (): typeof lastShortfall => {
+  const s = lastShortfall
+  lastShortfall = null
+  return s
+}
 async function fetchImageVerdict(url: string, timeoutMs: number): Promise<FetchVerdict> {
   const ctl = new AbortController()
   const timer = setTimeout(() => ctl.abort(), timeoutMs)
@@ -791,7 +847,17 @@ async function fetchImageVerdict(url: string, timeoutMs: number): Promise<FetchV
     if (!res.ok) return 'bad'
     if (!(res.headers.get('content-type') ?? '').startsWith('image/')) return 'bad'
     const buf = await res.arrayBuffer()
-    return buf.byteLength > 5120 ? 'ok' : 'bad'
+    if (buf.byteLength <= 5120) return 'bad'
+    // Record what the provider ACTUALLY returned. It silently ignores the requested size and caps
+    // every response near 0.59MP, so "the file exists" was never evidence the image is usable —
+    // which is exactly how soft imagery shipped on three consecutive runs without one warning.
+    const got = imageDimensions(Buffer.from(buf))
+    const want = url.match(/[?&]width=(\d+)/)
+    if (got && want) {
+      const asked = Number(want[1])
+      if (got.w < asked * 0.8) lastShortfall = { url, asked, got: got.w }
+    }
+    return 'ok'
   } catch {
     return 'ratelimited' // timeout/network — the render may just be slow; retrying is cheap, falling back isn't
   } finally {
@@ -879,6 +945,14 @@ export async function prewarmImages(
     await new Promise((r) => setTimeout(r, 400))
   }
   log(`       ↳ pre-warm: ${out.verified}/${urls.size} image(s) verified real${out.retried ? ` (${out.retried} on retried seeds)` : ''}${out.fallbacks ? `, ${out.fallbacks} → fallback` : ''}${out.skippedDynamic ? `, ${out.skippedDynamic} dynamic skipped` : ''}`)
+  // Surface the provider's silent downscaling once per run. Without this the page just looks soft
+  // and nothing anywhere says why.
+  const short = takeShortfall()
+  if (short) {
+    log(
+      `       ↳ \x1b[33mimage resolution\x1b[0m: provider returned ${short.got}px wide for a ${short.asked}px request (it caps near 0.59MP). Generated imagery is only sharp inside container-page, never full-bleed.`
+    )
+  }
   return out
 }
 
