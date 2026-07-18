@@ -1,0 +1,105 @@
+
+brief:      "Sable & Stone — a hand-forged carbon steel kitchen knife made by one smith in Sheffield. The story of how a single knife is made over four days, and why it outlives the person who buys it. Mood: premium, calm."
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-sonnet-5   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+brand:  Sable & Stone
+mood:   premium, calm
+layout: origin-to-proof, escalation
+sections:
+  0. the-quiet-before [36mcinematic[0m/xl  Open on stillness: a single knife on stone, no headline noise — just the object and the promise that this is the story of how it came to exist.
+  1. the-smith        [36meditorial[0m/md  Introduce the one maker in Sheffield by name — his workshop, his hands, decades of repetition — establishing origin before any claim is made.
+  2. four-days        [36mtimeline[0m/xl  Walk through the four-day process — forging, grinding, heat-treat, handle-fitting — as a sequence of discrete stages, each with its own moment.
+  3. the-steel-remembers [36masymmetric[0m/lg  Isolate one fact as the emotional anchor of the page: carbon steel develops a patina and an edge that improves with use, unlike the disposable knives it will replace.
+  4. why-it-outlives-you [36mnarrative[0m/md  Address the harder claim directly: this knife is built to be resharpened and repaired for generations, made to be handed down rather than replaced.
+  5. the-mark         [36mmodular[0m/sm  Show the maker's stamp on the tang and explain that each knife is individually numbered and dated — proof this is not a batch product.
+  6. reserve-yours    [36meditorial[0m/md  Close with quiet invitation — knives are made to order, one smith, limited per month — positioning acquisition as patience rewarded, not urgency manufactured.
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated, subject="a hand-forged carbon steel kitchen knife: dark for" · establishing → medium → detail → macro → medium → macro → wide[0m
+  primary   [48;2;28;24;17m   [0m #1C1811
+  accent    [48;2;122;46;34m   [0m #7A2E22
+  bg / fg   [48;2;250;247;242m   [0m #FAF7F2  /  [48;2;28;24;17m   [0m #1C1811
+  card/bord [48;2;243;238;228m   [0m #F3EEE4  /  [48;2;225;217;201m   [0m #E1D9C9
+  motion    [36msubtle[0m  (locked for the whole run)
+  rhythm    [36m█▄▁█▄▁▄  peak@0[0m  (page pacing: ▁tight ▄normal █open)
+  interact  [36m260ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-2px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2mA warm near-black on warm cream with a single oxblood accent signals expense through restraint, subtle scroll-reveal motion and unhurried 260ms translateY interactions make every moment feel earned rather than triggered, and the serif-display/grotesque-body pairing at a 1.374 ratio lets the object's gravity speak without shouting.[0m
+  [2manchors: Calm / wellness / health, Premium / luxury / editorial, marquee-ticker, scroll-reveal-fade-up, premium / calm micro-interactions, duration scale, Micro-interactions, Type scale ratios by mood, Calm / wellness typography, Premium / editorial typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, PP Neue Montreal — throughline, Bucks Sauce — throughline[0m
+  [33mADJUSTED[0m shot beat[0] macro → establishing (the page opens the world once)
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Sable & Stone  ·  premium/calm  ·  origin-to-proof
+  motion: subtle   palette: Ember
+┌──────────────────────────────────────────────────┐
+│ the-quiet-before  ·  cinematic  ·  parallax-dept │
+│   ↳ Open on stillness: a single knife on stone,  │
+│     media: full-bleed macro shot of the finished │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-smith  ·  editorial  ·  Premium / calm spaci │
+│   ↳ Introduce the one maker in Sheffield by name │
+│     media: portrait of the smith at the forge, t │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ four-days  ·  timeline  ·  sticky-scroll-narrati │
+│   ↳ Walk through the four-day process — forging, │
+│     media: four sequential close-ups of the same │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-steel-remembers  ·  asymmetric  ·  When to b │
+│   ↳ Isolate one fact as the emotional anchor of  │
+│     media: single oversized macro of the blade's │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ why-it-outlives-you  ·  narrative  ·  Container  │
+│   ↳ Address the harder claim directly: this knif │
+│     media: alternating shots: an old, worn but s │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-mark  ·  modular  ·  bento-grid              │
+│   ↳ Show the maker's stamp on the tang and expla │
+│     media: tight macro of the hand-stamped maker │
+│   [--] [--] [--]                                 │
+├──────────────────────────────────────────────────┤
+│ reserve-yours  ·  editorial  ·  parallax-depth ( │
+│   ↳ Close with quiet invitation — knives are mad │
+│     media: the finished knife wrapped in linen c │
+│   [--] [--]                                      │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] the-quiet-before/cinematic → motion-primitive parallax-depth (wraps:section-block, motion:subtle)
+       ↳ [bulk]
+  [1] the-smith/editorial    → scratch  [structure: Premium / calm spacing, Base scale — 4px and 8px systems, magazine-editorial]
+       ↳ design-system violation(s): 2 sentences run well past the page's committed rhythm (~28 words) — break them or cut them — escalating one retry to reasoning tier…
+       ↳ design violations 1 → 0 after escalation
+       ↳ [bulk→escalated]
+  [2] four-days/timeline     → scratch  [structure: sticky-scroll-narrative]
+       ↳ [bulk]
+  [3] the-steel-remembers/asymmetric → scratch  [structure: When to break the grid on purpose, asymmetric-grid, split-hero]
+       ↳ [bulk]
+  [4] why-it-outlives-you/narrative → scratch  [structure: Container and grid, Premium / calm spacing, When to break the grid on purpose]
+       ↳ [bulk]
+  [5] the-mark/modular       → scratch  [structure: bento-grid, card-gallery, stacked-void]
+       ↳ [bulk]
+  [6] reserve-yours/editorial → motion-primitive parallax-depth (wraps:section-block, motion:subtle)
+       ↳ [bulk]
+       ↳ shot plan [generated, subject-locked]: upgraded 8 image(s) → 7 Flux (staged) + 1 dynamic src(s) rewritten to staged templates
+       ↳ hardened 6 <img> tag(s): explicit width/height + lazy below the fold
+       ↳ pre-warm 1/7 ok (1s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 2/7 ok (44s — generating fresh imagery, ~1min each)

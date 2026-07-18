@@ -6,8 +6,9 @@
  * page. Every assertion about @supports and reduced-motion exists to keep that guarantee, not for
  * tidiness.
  */
-import { revealCss, revealIntensity, lintReveal, REVEAL_BY_INTENSITY } from './reveal.js'
+import { revealCss, revealIntensity, lintReveal, REVEAL_BY_INTENSITY, revealKind, REVEAL_KINDS } from './reveal.js'
 import type { InteractionSpec } from './art-direction.js'
+import { COMPOSITIONS } from '../types.js'
 import type { MotionLanguage } from '../types.js'
 
 let failed = 0
@@ -50,6 +51,26 @@ const langs: MotionLanguage[] = ['none', 'subtle', 'aggressive', 'parallax-slow'
 for (const m of langs) check(`"${m}" resolves to an intensity`, ['calm', 'standard', 'sharp'].includes(revealIntensity(m)))
 check('aggressive is sharp', revealIntensity('aggressive') === 'sharp')
 check('parallax-slow is calm', revealIntensity('parallax-slow') === 'calm')
+
+console.log('\nentrance kinds\n')
+
+// One fade for every section is consistent but flat. Variety must still be DERIVED, never improvised.
+for (const c of COMPOSITIONS) {
+  check(`${c}: maps to a known kind (${revealKind(c)})`, (REVEAL_KINDS as readonly string[]).includes(revealKind(c)))
+}
+check('cinematic settles rather than slides — a big image sliding reads as a slide deck', revealKind('cinematic') === 'lift')
+check('editorial barely moves — moving text mid-read is worse than still text', revealKind('editorial') === 'settle')
+check('a grid staggers so items arrive as items', revealKind('modular') === 'stagger')
+check('more than one kind is actually in use', new Set(COMPOSITIONS.map(revealKind)).size >= 3)
+
+for (const k of ['rise', 'lift', 'settle']) check(`@keyframes reveal-${k} is emitted`, css.includes(`@keyframes reveal-${k}`))
+check('stagger does not animate the section itself, only its children', /\.reveal-stagger \{ animation: none; \}/.test(css))
+check('every kind still hides only inside @supports', css.indexOf('opacity: 0') > css.indexOf('@supports'))
+// Scope to the reveal-lift block itself: an unbounded scan runs on into reveal-settle, which
+// legitimately uses translateY, and reports a false failure.
+const liftBlock = css.slice(css.indexOf('@keyframes reveal-lift'), css.indexOf('@keyframes reveal-settle'))
+check('lift uses scale', /scale\(1\.04\)/.test(liftBlock), liftBlock.slice(0, 90))
+check('lift has NO vertical travel — a big image sliding upward reads as a slide deck', !/translateY\(\s*[1-9]/.test(liftBlock))
 
 console.log('\nlint — improvised entrances\n')
 

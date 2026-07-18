@@ -37,7 +37,7 @@
  * reduced motion. There is no code path where content can be hidden with no mechanism to reveal it.
  */
 import type { InteractionSpec } from './art-direction.js'
-import type { MotionLanguage } from '../types.js'
+import type { Composition, MotionLanguage } from '../types.js'
 
 /** How much the element travels on entry, per motion language intensity. */
 export interface RevealSpec {
@@ -56,11 +56,37 @@ export const REVEAL_BY_INTENSITY: Record<'calm' | 'standard' | 'sharp', RevealSp
 }
 
 /**
- * Reveal intensity from the run's locked motion language, so the entrance agrees with the motion
- * character already committed to rather than being a second, unrelated decision.
+ * The KIND of entrance, bound to a section's composition.
  *
- * 'none' still maps to a spec, but it is never emitted with any travel worth noticing — a page that
- * chose no motion gets the shortest range, and reduced-motion users get nothing at all.
+ * One fade applied to every section is consistent but flat — nine sections arriving identically
+ * reads as a template, which is the fair criticism of a single locked reveal. Different kinds of
+ * content want different arrivals: a cinematic frame should settle INTO place like a shot landing,
+ * body copy should barely move because a reader's eye is already there, and a grid of items should
+ * arrive as items rather than as one slab.
+ *
+ * Still one decision per section, made deterministically from what the section already is — variety
+ * without improvisation, which is the same bargain as the rhythm plan.
+ */
+export const REVEAL_KINDS = ['rise', 'lift', 'settle', 'stagger'] as const
+export type RevealKind = (typeof REVEAL_KINDS)[number]
+
+export const KIND_BY_COMPOSITION: Record<Composition, RevealKind> = {
+  cinematic: 'lift', // a held frame arriving: scale settling out, no vertical jump
+  immersive: 'lift',
+  editorial: 'settle', // prose: fade with almost no travel — moving text the eye is already reading is worse than still text
+  narrative: 'settle',
+  gallery: 'stagger', // items arrive as items, each on its own position in the viewport
+  modular: 'stagger',
+  timeline: 'rise',
+  asymmetric: 'rise'
+}
+
+export const revealKind = (c: Composition): RevealKind => KIND_BY_COMPOSITION[c] ?? 'rise'
+
+/**
+ * Reveal intensity from the run's locked motion language, so the entrance agrees with the motion
+ * character already committed to rather than being a second, unrelated decision. Intensity sets HOW
+ * FAR and HOW LONG; the kind above sets WHICH movement.
  */
 export function revealIntensity(m: MotionLanguage): 'calm' | 'standard' | 'sharp' {
   if (m === 'aggressive' || m === 'kinetic' || m === 'brutalist-cut') return 'sharp'
@@ -90,14 +116,33 @@ export function revealCss(mi: InteractionSpec, intensity: 'calm' | 'standard' | 
       from { opacity: 0; transform: translateY(${r.rise}px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .reveal {
+    /* A held frame landing: the scale settles out and there is no vertical jump, because a large
+       image sliding upward reads as a slide deck rather than as photography. */
+    @keyframes reveal-lift {
+      from { opacity: 0; transform: scale(1.04); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    /* Prose. Almost no travel on purpose — moving text the eye has already started reading is more
+       irritating than text that simply appears. */
+    @keyframes reveal-settle {
+      from { opacity: 0; transform: translateY(${Math.round(r.rise / 3)}px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal, .reveal-children > * {
       animation: reveal-rise both ${mi.easing};
       animation-timeline: view();
       animation-range: ${r.range};
     }
-    /* Staggering children reads as considered rather than mechanical: each child runs on its OWN
-       view timeline, so the offset comes from real position on screen, not an invented delay. */
-    .reveal-children > * {
+    .reveal-lift { animation-name: reveal-lift; }
+    .reveal-settle { animation-name: reveal-settle; }
+
+    /* STAGGER — the section itself does NOT animate; its children each run on their own view
+       timeline, so the offset between them comes from real position on screen rather than an
+       invented per-child delay. That is why it survives any number of items and any reflow. */
+    .reveal-stagger { animation: none; }
+    .reveal-stagger .container-page > *,
+    .reveal-stagger [class*="dev-"] > * {
       animation: reveal-rise both ${mi.easing};
       animation-timeline: view();
       animation-range: ${r.range};

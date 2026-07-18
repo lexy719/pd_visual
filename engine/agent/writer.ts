@@ -22,7 +22,7 @@ import { SCALE_ASPECT } from './art-direction.js'
 import { DEVICE_CSS } from './devices.js'
 import { rhythmCss } from './rhythm.js'
 import { feelForMotion, scrollCss, smoothScrollModule, type ScrollFeel } from './scroll.js'
-import { revealCss, revealIntensity } from './reveal.js'
+import { revealCss, revealIntensity, revealKind } from './reveal.js'
 import { buildChrome } from './chrome.js'
 import type { ArtDirection, InteractionSpec, LayoutSpec, Palette, TypographySpec } from './art-direction.js'
 import type { Plan, SectionResult } from './types.js'
@@ -249,11 +249,12 @@ export function decodeUnicodeEscapes(code: string, log?: (m: string) => void): s
  * Handles both `className="…"` and `className={`…`}`; leaves a section alone if it somehow has no
  * root className rather than corrupting the JSX.
  */
-export function stampRhythm(code: string, beat: { density: string; volume: string } | undefined): string {
+export function stampRhythm(code: string, beat: { density: string; volume: string } | undefined, kind = 'rise'): string {
   if (!beat) return code
   // `reveal` rides along with the rhythm classes: both are page-level decisions stamped onto the
   // section root, and both exist because a section cannot make them correctly on its own.
-  const add = `rhythm-${beat.density} vol-${beat.volume} reveal`
+  // 'rise' is the default keyframe, so it needs no extra class.
+  const add = `rhythm-${beat.density} vol-${beat.volume} reveal${kind === 'rise' ? '' : ` reveal-${kind}`}`
   if (new RegExp(`\\brhythm-`).test(code)) return code // already stamped — never double-stamp
   let done = false
   return code.replace(/(<section\b[^>]*?className=)(?:"([^"]*)"|\{`([^`]*)`\})/s, (full, head, dq, tq) => {
@@ -675,7 +676,7 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
     sanitized = decodeUnicodeEscapes(sanitized, console.warn)
     // chrome is composed once by the writer — a section must not render a second site nav
     if (hasChromeForRun) sanitized = stripSectionChrome(sanitized, console.warn)
-    sanitized = stampRhythm(sanitized, art.rhythm?.beats[s.index])
+    sanitized = stampRhythm(sanitized, art.rhythm?.beats[s.index], revealKind(s.composition))
     sanitized = ensureReactImport(sanitized)
     let { code, repaired } = ensureDefaultExport(sanitized, label)
     if (repaired) console.warn(`  \x1b[33mfixup\x1b[0m [${label}] had no default export — injected one.`)
