@@ -16,6 +16,7 @@ import { queryKnowledge } from '../retrieval/query.js'
 import type { MotionLanguage, Register, SearchHit } from '../types.js'
 import type { Mood, Plan } from './types.js'
 import { planRhythm, type RhythmPlan } from './rhythm.js'
+import { clampKit, type KitSpec } from './kit.js'
 import { ensureContrast, hslToHex, isHex, mixHex, readableOn, saturation } from './color.js'
 
 /** The 7 committed values the model synthesizes. The rest are derived deterministically. */
@@ -256,6 +257,8 @@ export interface ArtDirection {
   typography: TypographySpec
   /** the ONE locked container width + section-padding rhythm — emitted as .container-page/.section-pad. */
   layout: LayoutSpec
+  /** this project's OWN component form, emitted as real CSS before any section (see kit.ts) */
+  kit: KitSpec
   /** page-level vertical pacing — decided once, stamped per section (see rhythm.ts) */
   rhythm: RhythmPlan
   /** the ONE locked visual staging plan — how the page's images relate as a sequence. */
@@ -597,6 +600,15 @@ Respond with ONLY JSON in this exact shape (every color a #rrggbb hex):
     "bodyLineHeight": <body leading, 1.5-1.65>,
     "pairing": "one line: why this display+body pairing fits THIS brand"
   },
+  "kit": {
+    "corner": "<one of: square | soft | pill>",
+    "button": "<one of: solid | outline | split-cell | underline>",
+    "icon": "<one of: arrow | chevron | none>",
+    "edge": "<one of: rule | hairline | tint | none>",
+    "eyebrow": "<one of: mono-tracked | small-caps | none>",
+    "density": "<one of: tight | regular | generous>",
+    "rationale": "one line: why this component form suits THIS brief"
+  },
   "shotPlan": {
     "subject": "<the ONE recurring physical subject if the brand has one, described concretely enough to re-render identically (e.g. 'a squat amber glass bottle with a cream paper label'), or \"\" if none>",
     "source": "<generated | stock>",
@@ -627,6 +639,12 @@ RULES:
   premium/editorial → ratio 1.333-1.414, weight 500-600 (restraint reads as expensive; heaviness reads as
   loud — do NOT go heavy here). minimal → ratio 1.25, tracking -0.03em. technical/trustworthy/calm →
   ratio 1.2. Body weight is never below 400, body leading 1.5-1.65.
+- "kit" is THIS PROJECT'S component form, committed once and then built as real CSS before any section
+  exists. It is not a preset: choose the combination that suits THIS brief. A hand-forged-knife story and
+  an enterprise dashboard should not share a button. Square corners + outline/underline read instrument-like
+  and institutional; pill + solid reads consumer and friendly; split-cell (label and icon in divided cells)
+  reads engineered and considered. Choose "icon": "none" unless a directional mark genuinely earns its place —
+  an arrow on every button is a tic, not a decision.
 - "interactions" is the LOCKED hover/cursor/transition contract for the WHOLE site — commit ONE set of
   concrete values (durations in ms, easing as a literal cubic-bezier, hover transform as literal CSS),
   grounded in the retrieved MICRO-INTERACTION RULES for this mood. Do not hedge or describe; commit numbers.
@@ -848,5 +866,9 @@ export async function artDirect(plan: Plan, log: (m: string) => void = () => {})
   // independently and so cannot create contrast between neighbours; this is decided for them.
   const rhythm = planRhythm(plan.sections)
 
-  return { palette, motion, interactions, typography, layout, rhythm, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
+  // The project kit: model commits within a closed grammar, we validate and emit it as real code.
+  const { kit, adjustments: kitAdj } = clampKit((raw as { kit?: unknown }).kit, plan.mood, plan.register)
+  adjustments.push(...kitAdj)
+
+  return { palette, motion, interactions, typography, layout, kit, rhythm, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
 }

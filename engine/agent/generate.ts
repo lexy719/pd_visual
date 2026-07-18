@@ -18,6 +18,7 @@ import { SCALE_ASPECT } from './art-direction.js'
 import { DEFAULT_DEVICE, DEVICE_NAMES, DEVICE_RE, unknownDeviceClasses } from './devices.js'
 import { lintReveal } from './reveal.js'
 import { lintVoice, voiceFor, voicePromptBlock } from './voice.js'
+import { kitPromptBlock, lintKit, type KitSpec } from './kit.js'
 import type { ArtDirection, InteractionSpec, ShotBeat, ShotPlan, ShotScale, ShotWorld } from './art-direction.js'
 import type { Plan, SectionPlan, SectionResult } from './types.js'
 
@@ -1277,6 +1278,8 @@ async function genScratch(
   /** 2 ready-made DEVICES (verified CSS classes) this section can apply directly */
   devices: SearchHit[],
   mi: InteractionSpec,
+  /** this project's OWN component kit — already emitted as CSS, so sections apply it, never rebuild it */
+  kit: KitSpec,
   tier: GenTier,
   /** this section's beat in the locked shot plan (omitted for non-photo moods) */
   shot?: { beat?: ShotBeat; dominant: boolean; subjectHead?: string },
@@ -1301,6 +1304,8 @@ READY-MADE DEVICES (globals.css already defines these; their geometry is correct
 ${guidelineDigest(devices, 460) || '- (none retrieved)'}
 The full set of classes available to you: ${DEVICE_NAMES.join(', ')}. Retrieval showed the two most relevant above, but any of these is defined and safe to use.
 DEFAULT for a "${section.composition}" section: ${DEFAULT_DEVICE[section.composition]}. Apply it, or another device above that genuinely fits this content better. Only skip devices entirely if this section is a single short statement with no repeating items, no media, and no quotation — a section of stacked text blocks and plain rectangles is a FAILURE this library exists to prevent.
+
+${kitPromptBlock(kit)}
 
 ${voicePromptBlock(voiceFor(plan.register, plan.mood), plan.brand)}
 
@@ -1434,11 +1439,11 @@ export async function generateSections(
       // First pass on BULK, then AT MOST ONE escalation to REASONING — either because the section
       // won't parse (it would be quarantined at write time), or because it ignored the committed
       // palette. Capped at one retry so a section never costs three LLM calls.
-      let code = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, 'bulk', sectionShot)
+      let code = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, art.kit, 'bulk', sectionShot)
       if (FORCE_PARSE_FAIL === 'bulk' || FORCE_PARSE_FAIL === 'both') code = corruptSyntax(code)
       let tier: SectionResult['tier'] = 'bulk'
       const retry = async (push?: string) => {
-        const out = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, 'reasoning', sectionShot, push)
+        const out = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, art.kit, 'reasoning', sectionShot, push)
         return FORCE_PARSE_FAIL === 'both' ? corruptSyntax(out) : out
       }
 
@@ -1486,7 +1491,7 @@ export async function generateSections(
           // Voice violations join the same escalation queue as layout ones. Copy is judged by the
           // same standard as CSS: a page that drifts between three ways of speaking is as broken as
           // one that drifts between three spacing systems, and neither is visible without a check.
-          const design = [...lintDesign(code), ...lintVoice(code, voiceFor(plan.register, plan.mood))]
+          const design = [...lintDesign(code), ...lintKit(code), ...lintVoice(code, voiceFor(plan.register, plan.mood))]
           if (design.length >= 1) {
             log(`       ↳ design-system violation(s): ${design.join('; ')} — escalating one retry to reasoning tier…`)
             tier = 'bulk→escalated'

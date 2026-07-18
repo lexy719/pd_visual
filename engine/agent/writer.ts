@@ -23,6 +23,10 @@ import { DEVICE_CSS } from './devices.js'
 import { rhythmCss } from './rhythm.js'
 import { feelForMotion, scrollCss, smoothScrollModule, type ScrollFeel } from './scroll.js'
 import { revealCss, revealIntensity, revealKind } from './reveal.js'
+import { kitCss, type KitSpec } from './kit.js'
+
+/** Only used when themeCss is called outside a run (tests/tools); a real run always passes art.kit. */
+const DEFAULT_KIT: KitSpec = { corner: 'soft', button: 'solid', icon: 'none', edge: 'rule', eyebrow: 'mono-tracked', density: 'regular', rationale: 'default' }
 import { buildChrome } from './chrome.js'
 import type { ArtDirection, InteractionSpec, LayoutSpec, Palette, TypographySpec } from './art-direction.js'
 import type { Plan, SectionResult } from './types.js'
@@ -419,7 +423,7 @@ const SCALE_ASPECT_CSS = Object.entries(SCALE_ASPECT)
   .map(([scale, a]) => `.shot-${scale} { aspect-ratio: ${a.css}; object-fit: cover; width: 100%; height: auto; }`)
   .join('\n')
 
-export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec, feel: ScrollFeel = 'native', reveal: 'calm' | 'standard' | 'sharp' = 'standard'): string {
+export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec, feel: ScrollFeel = 'native', reveal: 'calm' | 'standard' | 'sharp' = 'standard', kit: KitSpec = DEFAULT_KIT): string {
   const h = headingSizes(type.scaleRatio)
   const vars = `  --background: ${p.background};
   --foreground: ${p.foreground};
@@ -539,6 +543,7 @@ ${SCALE_ASPECT_CSS}
 ${rhythmCss()}
 ${scrollCss(feel)}
 ${revealCss(mi, reveal)}
+${kitCss(kit, mi, type)}
 
 /*
  * ============================ COMPOSITION DEVICES ============================
@@ -638,7 +643,7 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection): W
 
   // Deterministic art-direction: re-skin the whole page by rewriting the theme variables.
   const scrollFeel = feelForMotion(art.motion)
-  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions, art.typography, art.layout, scrollFeel, revealIntensity(art.motion)), 'utf8')
+  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions, art.typography, art.layout, scrollFeel, revealIntensity(art.motion), art.kit), 'utf8')
 
   const files: string[] = []
   const depSet = new Set<string>()
