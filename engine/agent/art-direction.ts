@@ -13,7 +13,7 @@
 
 import { completeReasoning, extractJson } from '../llm/llm.js'
 import { queryKnowledge } from '../retrieval/query.js'
-import type { MotionLanguage, SearchHit } from '../types.js'
+import type { MotionLanguage, Register, SearchHit } from '../types.js'
 import type { Mood, Plan } from './types.js'
 import { ensureContrast, hslToHex, isHex, mixHex, readableOn, saturation } from './color.js'
 
@@ -202,9 +202,47 @@ const LAYOUT_BY_MOOD: Record<string, LayoutSpec> = {
   brutalist: { containerPx: 1280, sectionPadMin: 64, sectionPadMax: 96 }
 }
 
-export function layoutForMood(mood: Mood[]): LayoutSpec {
-  for (const m of mood) if (LAYOUT_BY_MOOD[m]) return LAYOUT_BY_MOOD[m]
-  return LAYOUT_BY_MOOD.minimal
+/**
+ * How each register bends the mood's density.
+ *
+ * Mood alone was deciding layout, which is why a dense SaaS product and a slow editorial story came
+ * out with the same airy rhythm whenever they shared a mood — a real cause of the sameness across
+ * runs. Density is a genre property as much as a feeling one: a developer tool earns trust by
+ * fitting more on screen, an editorial story earns it by giving each idea room. `pad` scales section
+ * padding, `container` shifts the content width in px.
+ *
+ * Bounded deliberately (0.72–1.22): enough to be visible on the page, not enough to fight a mood the
+ * user explicitly chose. Mood still leads; register adjusts.
+ */
+const REGISTER_DENSITY: Record<Register, { pad: number; container: number }> = {
+  'developer-tool': { pad: 0.72, container: 96 }, // information density IS the value proposition
+  'saas-product': { pad: 0.82, container: 64 },
+  'ecommerce-product': { pad: 0.86, container: 64 }, // merchandise wants to be seen, not contemplated
+  'local-service-business': { pad: 0.92, container: 0 },
+  'event-launch': { pad: 1.0, container: 0 },
+  'agency-studio': { pad: 1.08, container: -32 },
+  'portfolio-showcase': { pad: 1.14, container: -32 }, // the work needs silence around it
+  'editorial-story': { pad: 1.22, container: -64 } // reading pace is the whole design
+}
+
+export function layoutForMood(mood: Mood[], register?: Register): LayoutSpec {
+  let base = LAYOUT_BY_MOOD.minimal!
+  for (const m of mood) {
+    if (LAYOUT_BY_MOOD[m]) {
+      base = LAYOUT_BY_MOOD[m]!
+      break
+    }
+  }
+  if (!register) return base
+  const d = REGISTER_DENSITY[register]
+  if (!d) return base
+  // Clamped so no combination can produce a cramped or absurd page.
+  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, Math.round(v)))
+  return {
+    containerPx: clamp(base.containerPx + d.container, 1040, 1360),
+    sectionPadMin: clamp(base.sectionPadMin * d.pad, 48, 160),
+    sectionPadMax: clamp(base.sectionPadMax * d.pad, 72, 220)
+  }
 }
 
 export interface ArtDirection {
@@ -799,8 +837,9 @@ export async function artDirect(plan: Plan, log: (m: string) => void = () => {})
     accentForeground: ensureContrast(readableOn(accent), accent, TEXT_CONTRAST)
   }
 
-  // Layout system is a pure per-mood table — deterministic, no model involvement to validate.
-  const layout = layoutForMood(plan.mood)
+  // Layout system is a pure table lookup — deterministic, no model involvement to validate. Mood
+  // sets the rhythm; register bends its density (a dev tool is dense, an essay is not).
+  const layout = layoutForMood(plan.mood, plan.register)
 
   return { palette, motion, interactions, typography, layout, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
 }

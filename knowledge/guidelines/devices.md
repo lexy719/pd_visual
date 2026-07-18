@@ -91,3 +91,54 @@ image on the page: the value is in the repetition, since one consistent frame tr
 signal while three different treatments read as carelessness. It suits editorial, portfolio, and
 product pages where imagery should feel presented rather than pasted in. Skip it entirely on
 full-bleed media, where a frame would contradict the bleed.
+
+## Device: dev-side-rail — a sticky label column beside long content
+
+tags: device, composition, sticky, side-rail, navigation, orientation, long-form, editorial
+
+Use dev-side-rail when a section is long enough that a reader loses their place — a process with many
+steps, a long specification, a chaptered story: the FIRST child becomes a rail that holds position
+while the SECOND child scrolls past it. The rail should carry orientation, not decoration: a section
+label, a step count, a short contents list, occasionally a persistent call to action. It is the
+cheapest way to make a long section feel authored rather than dumped, because the reader always knows
+where they are. Do not use it for a short section, where the rail would sit alone in empty space and
+read as an unfinished column. The rail unsticks and stacks on narrow screens, where sticky content in
+a short viewport would crowd the reader out instead of orienting them.
+
+## Device: dev-compare — an aligned comparison table
+
+tags: device, composition, table, comparison, saas, product, pricing, decision
+
+Use dev-compare when the page asks the reader to choose between options — plans, tiers, your approach
+against the usual approach, specifications across models: put a real table inside the container and
+let alignment do the work. This is the one place where rhythm devices are WRONG: when items are being
+compared, alignment IS the meaning, and a stagger or offset reads as a rendering error. Mark
+presence and absence with "dev-compare-yes" and "dev-compare-no" rather than raw ticks and crosses so
+the emphasis stays with the locked accent. Keep it to the axes that genuinely differ; a comparison
+padded with rows where every column is identical is transparently rigged and destroys the trust the
+table was built to earn.
+
+## Device: dev-faq — questions as a typographic list
+
+tags: device, composition, faq, questions, disclosure, editorial, local-service, saas
+
+Use dev-faq for genuine recurring questions — objections before a purchase, practicalities before a
+visit, integration questions before adoption: each child is a "details" element with a "summary"
+question, and the answer is prose beneath it. Carding an FAQ is one of the clearest tells of a
+generated page: answers are prose, and prose does not want a border around it, so the device gives
+them a rule and a measure instead. It works with no JavaScript and stays keyboard-accessible, so it
+never becomes a motion or hydration problem. Write real questions in the reader's words, not
+marketing questions the brand wishes it were asked; five honest entries outperform twelve invented
+ones.
+
+## Device: dev-price-table — pricing tiers with one emphasised plan
+
+tags: device, composition, pricing, plans, saas, product, conversion, decision
+
+Use dev-price-table for plan or package selection: each child is a tier with a "dev-price-n" figure
+and a "dev-price-p" period, and EXACTLY ONE child also takes "dev-price-featured". The emphasis is
+the entire point of the device — three undifferentiated prices hand the decision back to the reader,
+which is precisely how a pricing section fails to convert. The device stretches every tier to equal
+height and pins the final child of each to the bottom, so the calls to action align across the row
+however uneven the feature lists are. Name what each tier is FOR in a short line under the figure;
+a tier whose only differentiator is a number gives the reader nothing to decide with.

@@ -15,6 +15,7 @@ import { parseError } from './writer.js'
 import { queryKnowledge, retrieveForSection } from '../retrieval/query.js'
 import type { Composition, ComponentDoc, MotionPrimitiveDoc, SearchHit } from '../types.js'
 import { SCALE_ASPECT } from './art-direction.js'
+import { DEFAULT_DEVICE, DEVICE_NAMES, DEVICE_RE } from './devices.js'
 import type { ArtDirection, InteractionSpec, ShotBeat, ShotPlan, ShotScale, ShotWorld } from './art-direction.js'
 import type { Plan, SectionPlan, SectionResult } from './types.js'
 
@@ -132,24 +133,8 @@ const STRUCT_FILES = new Set(['knowledge/guidelines/spacing.md', 'knowledge/guid
 const CRAFT_FILE = 'knowledge/guidelines/composition-craft.md'
 const DEVICE_FILE = 'knowledge/guidelines/devices.md'
 
-/**
- * The DEFAULT device for each composition. Devices were retrieved correctly but adopted in only 1 of
- * 8 sections on the first benchmark, because the prompt offered them as optional. A composition
- * carries an expectation — a "modular" section without a card grid, or a "cinematic" one without a
- * bleed, is the stacked-rectangles failure the whole device library exists to prevent — so each
- * composition now names its default, which the model may override with a better-fitting device but
- * may not silently ignore.
- */
-const DEFAULT_DEVICE: Record<Composition, string> = {
-  cinematic: 'dev-bleed',
-  editorial: 'dev-quote-break',
-  gallery: 'dev-offset-grid',
-  narrative: 'dev-overlap',
-  asymmetric: 'dev-overlap',
-  modular: 'dev-feature-grid',
-  immersive: 'dev-bleed',
-  timeline: 'dev-offset-grid'
-}
+// DEFAULT_DEVICE (the device each composition falls back to) and DEVICE_RE live in devices.ts,
+// alongside the CSS they describe, so adding a device is a one-file change.
 
 /**
  * Retrieve 2 compositional DEVICES for this section. Rules tell a section what not to do; these tell
@@ -172,7 +157,7 @@ export async function retrieveDevices(composition: Composition, intent: string):
   // k is generous (30) on purpose: the filter keeps only device-file hits, and at k=16 the pool was
   // crowded out by other guidelines — editorial sections were retrieving ZERO devices, which is the
   // most common composition on the site. Cost is unchanged; only the filtered survivors are used.
-  const hits = await queryKnowledge(`${COMPOSITION_HINT[composition]} — ${intent}. apply a composition device: overlap occlusion, offset grid, pull-quote breaking the measure, full-bleed band, oversized stat numerals, feature cards, wordmark row, matted frame`, {
+  const hits = await queryKnowledge(`${COMPOSITION_HINT[composition]} — ${intent}. apply a composition device: overlap occlusion, offset grid, pull-quote breaking the measure, full-bleed band, oversized stat numerals, feature cards, wordmark row, matted frame, sticky side rail, comparison table, FAQ list, pricing tiers`, {
     kind: 'guideline',
     k: 30
   })
@@ -600,7 +585,7 @@ export function lintDesign(code: string): string[] {
   // FLATNESS — a section with several sibling blocks and no composition device is the stacked-
   // rectangles failure. Narrow on purpose: only fires when there is real repeating structure to
   // arrange (3+ sibling cards/items), so a single-statement section is never flagged.
-  const hasDevice = /\bdev-(overlap|offset-grid|quote-break|bleed|stat-row|feature-grid|logo-wall|frame)\b/.test(code)
+  const hasDevice = DEVICE_RE.test(code)
   const siblingBlocks = (code.match(/className="[^"]*\b(rounded-|border |bg-card)/g) ?? []).length
   if (!hasDevice && siblingBlocks >= 3) {
     warns.push(`${siblingBlocks} sibling blocks arranged with no composition device (stacked rectangles)`)
@@ -1196,6 +1181,7 @@ ${guidelineDigest(craft, 520) || '- (none retrieved; at minimum give the section
 
 READY-MADE DEVICES (globals.css already defines these; their geometry is correct and responsive — apply the CLASS, never rebuild the layout by hand):
 ${guidelineDigest(devices, 460) || '- (none retrieved)'}
+The full set of classes available to you: ${DEVICE_NAMES.join(', ')}. Retrieval showed the two most relevant above, but any of these is defined and safe to use.
 DEFAULT for a "${section.composition}" section: ${DEFAULT_DEVICE[section.composition]}. Apply it, or another device above that genuinely fits this content better. Only skip devices entirely if this section is a single short statement with no repeating items, no media, and no quotation — a section of stacked text blocks and plain rectangles is a FAILURE this library exists to prevent.
 
 DESIGN JUDGEMENT (from critiques of real sites — apply the underlying principle, don't copy):

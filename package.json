@@ -17,7 +17,10 @@
     "typecheck": "tsc --noEmit",
     "ui": "concurrently -k -n api,web -c cyan,magenta \"tsx studio/server.ts\" \"vite --config studio/ui/vite.config.ts\"",
     "studio:server": "tsx studio/server.ts",
-    "check:bytes": "tsx engine/tools/check-bytes.ts"
+    "check:bytes": "tsx engine/tools/check-bytes.ts",
+    "test:devices": "tsx engine/agent/devices.test.ts",
+    "test": "npm run typecheck && npm run check:bytes && npm run test:devices && npm run test:plan && npm run test:wireframe",
+    "test:plan": "tsx engine/agent/plan.test.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.5.0",

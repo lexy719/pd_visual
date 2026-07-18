@@ -1,0 +1,149 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>device harness</title><style>
+:root {
+  --foreground: #14181f; --muted-foreground: #6b7480; --card: #ffffff; --border: #e2e6ea;
+  --accent: #2f6df6; --radius: 12px; --font-display: Georgia, serif; --container: 1152px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: var(--foreground); background: #fbfcfd; }
+.container-page { max-width: var(--container); margin-inline: auto; padding-inline: 24px; }
+.section-pad { padding-block: 96px; }
+h2 { font-family: var(--font-display); font-size: 34px; margin: 0 0 32px; }
+h3 { margin: 0 0 8px; font-size: 18px; }
+p { margin: 0; color: var(--muted-foreground); }
+.btn { display: inline-block; background: var(--accent); color: #fff; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+
+/* html-level clip makes edge bleeds safe: a full-bleed child can never create a horizontal
+   scrollbar, which is what normally makes designers avoid the device entirely. */
+html { overflow-x: clip; }
+
+/* dev-overlap — OCCLUSION depth. Two children; the second overlaps the first and sits above it.
+   Occlusion is the only reliable depth signal (a shadow on a flat box reads as a sticker). */
+.dev-overlap { position: relative; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+.dev-overlap > :first-child { grid-column: 1 / span 8; grid-row: 1; position: relative; z-index: 1; }
+.dev-overlap > :nth-child(2) { grid-column: 7 / -1; grid-row: 1; position: relative; z-index: 2; margin-top: clamp(48px, 9vw, 120px); }
+.dev-overlap.dev-overlap-left > :first-child { grid-column: 5 / -1; }
+.dev-overlap.dev-overlap-left > :nth-child(2) { grid-column: 1 / span 6; }
+@media (max-width: 820px) {
+  .dev-overlap { display: flex; flex-direction: column; gap: 20px; }
+  .dev-overlap > :first-child, .dev-overlap > :nth-child(2) { margin-top: 0; }
+}
+
+/* dev-offset-grid — a grid whose alternate columns sit lower, replacing the dead uniform row. */
+.dev-offset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.dev-offset-grid > :nth-child(even) { margin-top: clamp(32px, 6vw, 88px); }
+@media (max-width: 820px) { .dev-offset-grid > :nth-child(even) { margin-top: 0; } }
+
+/* dev-quote-break — a pull-quote that breaks OUT of the text measure, the classic editorial tension
+   device. Large enough to read as intentional (never a 4px near-miss). */
+.dev-quote-break { position: relative; margin-inline: clamp(-64px, -4vw, -16px); padding-inline: clamp(16px, 4vw, 64px); border-left: 2px solid var(--accent); }
+@media (max-width: 820px) { .dev-quote-break { margin-inline: 0; } }
+
+/* dev-bleed — escape the container to the full viewport width, safely (html clips the excess).
+   One bleed per page: the device works by contrast with everything that respects the container. */
+.dev-bleed { width: 100vw; margin-inline: calc(50% - 50vw); }
+
+/* dev-stat-row — oversized numerals. The single scale jump, systematised. */
+.dev-stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: clamp(24px, 4vw, 56px); }
+.dev-stat-row .dev-stat-n { font-family: var(--font-display); font-size: clamp(44px, 6vw, 84px); line-height: 0.95; letter-spacing: -0.03em; color: var(--foreground); display: block; }
+.dev-stat-row .dev-stat-l { font-size: 13px; color: var(--muted-foreground); margin-top: 6px; display: block; }
+
+/* dev-feature-grid — uniform cards that COMPLETE their rows (auto-fit prevents the ragged trailing
+   gap that reads as a broken layout). SaaS/product furniture. */
+.dev-feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: clamp(16px, 2vw, 28px); }
+.dev-feature-grid > * { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: clamp(20px, 2.4vw, 32px); }
+
+/* dev-logo-wall — evenly spaced wordmarks; text, never images (a row of mismatched logo files is
+   the cheapest-looking element on the web). */
+.dev-logo-wall { display: flex; flex-wrap: wrap; align-items: center; gap: clamp(24px, 5vw, 64px); opacity: 0.72; }
+.dev-logo-wall > * { font-weight: 600; letter-spacing: 0.02em; color: var(--muted-foreground); }
+
+/* dev-frame — a matted frame around media. Repeating one frame treatment is a craft signal. */
+.dev-frame { padding: clamp(8px, 1vw, 14px); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+
+/* dev-side-rail — a sticky label/nav column beside long content. The single most effective cure for
+   a long scrolling section that loses the reader: the rail holds position while the content moves.
+   First child is the rail, second is the content. Collapses to a normal stack on narrow screens,
+   where sticky positioning in a short viewport would trap the reader instead of orienting them. */
+.dev-side-rail { display: grid; grid-template-columns: minmax(180px, 22%) minmax(0, 1fr); gap: clamp(24px, 5vw, 72px); align-items: start; }
+.dev-side-rail > :first-child { position: sticky; top: clamp(24px, 8vh, 96px); align-self: start; }
+@media (max-width: 900px) {
+  .dev-side-rail { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .dev-side-rail > :first-child { position: static; }
+}
+
+/* dev-compare — an aligned comparison table. Deliberately NOT offset or staggered: when items are
+   being compared, alignment IS the meaning, and any rhythm device would read as an error. Scrolls
+   inside itself on narrow screens so it can never widen the page. */
+.dev-compare { width: 100%; overflow-x: auto; }
+.dev-compare table { width: 100%; border-collapse: collapse; min-width: 520px; }
+.dev-compare th, .dev-compare td { text-align: left; padding: clamp(12px, 1.6vw, 20px); border-bottom: 1px solid var(--border); vertical-align: top; }
+.dev-compare thead th { font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-foreground); font-weight: 600; }
+.dev-compare tbody tr:last-child td { border-bottom: 0; }
+.dev-compare .dev-compare-yes { color: var(--accent); font-weight: 600; }
+.dev-compare .dev-compare-no { color: var(--muted-foreground); }
+
+/* dev-faq — questions as a typographic list, not as a row of cards. Carding an FAQ is the classic
+   tell of a generated page: the answers are prose and prose does not want a border. Uses <details>
+   so it works with zero JS and stays keyboard-accessible. */
+.dev-faq { border-top: 1px solid var(--border); }
+.dev-faq > details { border-bottom: 1px solid var(--border); padding: clamp(16px, 2vw, 24px) 0; }
+.dev-faq > details > summary { cursor: pointer; list-style: none; font-weight: 600; font-size: clamp(16px, 1.4vw, 19px); display: flex; justify-content: space-between; gap: 24px; align-items: baseline; }
+.dev-faq > details > summary::-webkit-details-marker { display: none; }
+.dev-faq > details > summary::after { content: '+'; color: var(--muted-foreground); font-weight: 400; }
+.dev-faq > details[open] > summary::after { content: '\2212'; }
+.dev-faq > details > :not(summary) { margin-top: 12px; max-width: 68ch; color: var(--muted-foreground); line-height: 1.65; }
+
+/* dev-price-table — pricing tiers that stay aligned, with ONE emphasised plan. The emphasis is the
+   whole point: an undifferentiated row of three prices makes the reader do the work, which is how a
+   pricing section fails. Add dev-price-featured to exactly one child. */
+.dev-price-table { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: clamp(16px, 2vw, 24px); align-items: stretch; }
+.dev-price-table > * { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: clamp(24px, 2.6vw, 36px); }
+.dev-price-table > .dev-price-featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.dev-price-table .dev-price-n { font-family: var(--font-display); font-size: clamp(32px, 3.4vw, 48px); line-height: 1; letter-spacing: -0.02em; color: var(--foreground); display: block; }
+.dev-price-table .dev-price-p { font-size: 13px; color: var(--muted-foreground); margin-top: 6px; display: block; }
+.dev-price-table > * > :last-child { margin-top: auto; padding-top: clamp(16px, 2vw, 24px); }
+</style></head><body>
+
+<section class="section-pad" id="s-side-rail"><div class="container-page">
+  <h2>dev-side-rail</h2>
+  <div class="dev-side-rail">
+    <div id="rail"><strong>Contents</strong><p>01 Intake<br>02 Diagnosis<br>03 Treatment<br>04 Aftercare</p></div>
+    <div id="rail-body">
+      <div style="margin-bottom:40px"><h3>Step 1</h3><p>A paragraph of body copy long enough that the rail has something to hold position against while the reader scrolls through the content beside it.</p></div><div style="margin-bottom:40px"><h3>Step 2</h3><p>A paragraph of body copy long enough that the rail has something to hold position against while the reader scrolls through the content beside it.</p></div><div style="margin-bottom:40px"><h3>Step 3</h3><p>A paragraph of body copy long enough that the rail has something to hold position against while the reader scrolls through the content beside it.</p></div><div style="margin-bottom:40px"><h3>Step 4</h3><p>A paragraph of body copy long enough that the rail has something to hold position against while the reader scrolls through the content beside it.</p></div><div style="margin-bottom:40px"><h3>Step 5</h3><p>A paragraph of body copy long enough that the rail has something to hold position against while the reader scrolls through the content beside it.</p></div><div style="margin-bottom:40px"><h3>Step 6</h3><p>A paragraph of body copy long enough that the rail has something to hold position against while the reader scrolls through the content beside it.</p></div><div style="margin-bottom:40px"><h3>Step 7</h3><p>A paragraph of body copy long enough that the rail has something to hold position against while the reader scrolls through the content beside it.</p></div><div style="margin-bottom:40px"><h3>Step 8</h3><p>A paragraph of body copy long enough that the rail has something to hold position against while the reader scrolls through the content beside it.</p></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="section-pad" id="s-compare"><div class="container-page">
+  <h2>dev-compare</h2>
+  <div class="dev-compare"><table>
+    <thead><tr><th>Capability</th><th>Standard</th><th>Extended</th></tr></thead>
+    <tbody>
+      <tr><td>Same-day appointments</td><td class="dev-compare-yes">Included</td><td class="dev-compare-yes">Included</td></tr>
+      <tr><td>Out-of-hours cover</td><td class="dev-compare-no">Not included</td><td class="dev-compare-yes">Included</td></tr>
+      <tr><td>Dental scale and polish</td><td class="dev-compare-no">Not included</td><td class="dev-compare-yes">Annual</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section class="section-pad" id="s-faq"><div class="container-page">
+  <h2>dev-faq</h2>
+  <div class="dev-faq">
+    <details id="faq-1"><summary>Do you treat exotic pets?</summary><p>Yes — rabbits, ferrets and most birds. Reptiles are referred to a specialist practice two miles away.</p></details>
+    <details><summary>How do I get my records transferred?</summary><p>Give us your previous practice name and we request the file the same day.</p></details>
+    <details><summary>Is there parking?</summary><p>Six spaces at the rear, including one accessible bay.</p></details>
+  </div>
+</div></section>
+
+<section class="section-pad" id="s-price"><div class="container-page">
+  <h2>dev-price-table</h2>
+  <div class="dev-price-table">
+    <div id="tier-1"><h3>Basic</h3><span class="dev-price-n">£12</span><span class="dev-price-p">per month</span><p>Routine care for one healthy adult animal.</p><div><a class="btn" href="#">Choose Basic</a></div></div>
+    <div id="tier-2" class="dev-price-featured"><h3>Complete</h3><span class="dev-price-n">£24</span><span class="dev-price-p">per month</span><p>Everything in Basic, plus dental and out-of-hours cover, and a longer list of included treatments so this card is deliberately taller than its neighbours.</p><div><a class="btn" href="#">Choose Complete</a></div></div>
+    <div id="tier-3"><h3>Senior</h3><span class="dev-price-n">£29</span><span class="dev-price-p">per month</span><p>For animals over eight.</p><div><a class="btn" href="#">Choose Senior</a></div></div>
+  </div>
+</div></section>
+
+</body></html>
