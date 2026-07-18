@@ -11,6 +11,9 @@
  */
 import { lockSketch, isSubstantiveWhy, sketchPromptBlock, ARRANGEMENT_DEVICE, ARRANGEMENTS } from './sketch.js'
 import { DEVICE_NAMES } from './devices.js'
+import { readFileSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { SectionPlan, Emphasis } from './types.js'
 import type { Composition } from '../types.js'
 
@@ -98,6 +101,33 @@ check('states where the mass hangs', block.includes(beat.anchor))
 check('carries the reason through to the builder', block.includes(beat.why.slice(0, 20)))
 check('tells the focal section it is the focal section', block.includes("page's strongest"))
 check('a non-focal section is not told that', !sketchPromptBlock(beat, false).includes("page's strongest"))
+
+console.log('\nboth generation paths receive the page-level decisions\n')
+
+/**
+ * There are TWO ways a section gets built — genScratch (from scratch) and genUse (adapting a motion
+ * primitive) — and anything decided for the whole page must reach both.
+ *
+ * This has now failed twice in the same function. First the shot plan: a primitive-backed dominant
+ * section was never told it owned the page's single h1. Then the sketch: genUse was the only path
+ * that never received the composition, and the one primitive-backed section on a real run was the
+ * one section that ignored its arrangement. Both times the bug was invisible until a page was built.
+ *
+ * A source-level check is crude, but it catches the omission at the only moment it is cheap to fix.
+ */
+const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'generate.ts'), 'utf8')
+const fnBody = (name: string): string => {
+  const i = src.indexOf(`async function ${name}(`)
+  return i < 0 ? '' : src.slice(i, src.indexOf('): Promise<string> {', i))
+}
+for (const fn of ['genScratch', 'genUse']) {
+  const sig = fnBody(fn)
+  check(`${fn} exists`, sig.length > 0)
+  check(`${fn} receives the composition beat`, /beat:\s*SketchBeat/.test(sig), sig.slice(0, 0))
+  check(`${fn} receives the project kit`, /kit:\s*KitSpec/.test(sig))
+  check(`${fn} receives the surface language`, /surface:\s*SurfaceSpec/.test(sig))
+  check(`${fn} is told whether it is the page focal`, /isFocal:\s*boolean/.test(sig))
+}
 
 console.log(failed ? `\nFAIL — ${failed} check(s)\n` : '\nPASS — the page composes before it builds\n')
 process.exit(failed ? 1 : 0)

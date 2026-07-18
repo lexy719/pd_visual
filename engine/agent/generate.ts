@@ -1205,9 +1205,19 @@ async function genUse(
   comp: ComponentDoc,
   importPath: string,
   mi: InteractionSpec,
+  /** the project's own components — a primitive-backed section must use them like any other */
+  kit: KitSpec,
+  /** the run's surface language — likewise */
+  surface: SurfaceSpec,
+  /** this section's place in the page composition */
+  beat: SketchBeat,
+  isFocal: boolean,
   tier: GenTier,
   /** dominance (h1 ownership) + image beat — primitive-backed sections need this too, or a
-   *  primitive-backed dominant section is never told it owns the page's single h1 (observed live) */
+   *  primitive-backed dominant section is never told it owns the page's single h1 (observed live).
+   *  The SAME omission happened again with the sketch: genUse was the only path that never received
+   *  the composition, and the one primitive-backed section was the only one to ignore its
+   *  arrangement. Anything decided for the whole page must reach BOTH generation paths. */
   shot?: { beat?: ShotBeat; dominant: boolean; subjectHead?: string },
   strict = false
 ): Promise<string> {
@@ -1233,6 +1243,12 @@ Notes: ${comp.notes ?? '(none)'}
 
 USAGE EXAMPLE (adapt the copy/data to the brief; keep the imports + prop shape):
 ${skeleton}
+
+${sketchPromptBlock(beat, isFocal)}
+
+${surfacePromptBlock(surface)}
+
+${kitPromptBlock(kit)}
 
 ${interactionDirective(mi)}${shotDirective(shot)}
 ${
@@ -1410,12 +1426,14 @@ export async function generateSections(
       log(`  [${i}] ${label} → motion-primitive ${prim.id} (wraps:${prim.wraps}, motion:${motion})`)
 
       // First pass on BULK; escalate the import-repair retry to REASONING (not a blind bulk retry).
-      let code = await genUse(plan, section, comp, importPath, mi, 'bulk', sectionShot)
+      const uBeat = sketchPlan.beats[i] ?? sketchPlan.beats[0]!
+      const uFocal = sketchPlan.focalIndex === i
+      let code = await genUse(plan, section, comp, importPath, mi, art.kit, art.surface, uBeat, uFocal, 'bulk', sectionShot)
       let tier: SectionResult['tier'] = 'bulk'
       if (!usesComponent(code, importPath)) {
         log(`       ↳ did not import ${prim.id}; escalating repair to reasoning tier…`)
         tier = 'bulk→escalated'
-        code = await genUse(plan, section, comp, importPath, mi, 'reasoning', sectionShot, true)
+        code = await genUse(plan, section, comp, importPath, mi, art.kit, art.surface, uBeat, uFocal, 'reasoning', sectionShot, true)
         if (!usesComponent(code, importPath) && comp.usage_example) {
           log(`       ↳ still ignored it; falling back to the stored usage_example.`)
           code = comp.usage_example.replace(/'\.\/component'/g, `'${importPath}'`)
