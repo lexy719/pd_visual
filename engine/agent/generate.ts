@@ -130,6 +130,7 @@ const STRUCT_FILES = new Set(['knowledge/guidelines/spacing.md', 'knowledge/guid
  *  spacing/layout rules for the same 3 slots — and the craft devices (occlusion, scale jump, grid
  *  break, bleed) are exactly what the pages have been missing, so they must never lose that race. */
 const CRAFT_FILE = 'knowledge/guidelines/composition-craft.md'
+const DEVICE_FILE = 'knowledge/guidelines/devices.md'
 
 /**
  * Retrieve 2 compositional DEVICES for this section. Rules tell a section what not to do; these tell
@@ -141,6 +142,22 @@ export async function retrieveCraft(composition: Composition, intent: string): P
     k: 14
   })
   return hits.filter((h) => h.source_path === CRAFT_FILE).slice(0, 2)
+}
+
+/**
+ * Retrieve 2 DEVICES this section can actually apply. Craft chunks say what good composition is;
+ * devices are the verified, ready-made CSS that builds it — the model picks a class, never the
+ * geometry. Own lane for the same reason craft has one: it must not lose slots to spacing rules.
+ */
+export async function retrieveDevices(composition: Composition, intent: string): Promise<SearchHit[]> {
+  // k is generous (30) on purpose: the filter keeps only device-file hits, and at k=16 the pool was
+  // crowded out by other guidelines — editorial sections were retrieving ZERO devices, which is the
+  // most common composition on the site. Cost is unchanged; only the filtered survivors are used.
+  const hits = await queryKnowledge(`${COMPOSITION_HINT[composition]} — ${intent}. apply a composition device: overlap occlusion, offset grid, pull-quote breaking the measure, full-bleed band, oversized stat numerals, feature cards, wordmark row, matted frame`, {
+    kind: 'guideline',
+    k: 30
+  })
+  return hits.filter((h) => h.source_path === DEVICE_FILE).slice(0, 2)
 }
 
 /** Retrieve spacing + layout rules for a section's COMPOSITION (structure-matched, not mood-matched). */
@@ -1120,8 +1137,10 @@ async function genScratch(
   structural: SearchHit[],
   critiques: SearchHit[],
   avoidances: SearchHit[],
-  /** 2 compositional DEVICES — how to build depth/hierarchy, not what to avoid */
+  /** 2 compositional CRAFT principles — how to build depth/hierarchy, not what to avoid */
   craft: SearchHit[],
+  /** 2 ready-made DEVICES (verified CSS classes) this section can apply directly */
+  devices: SearchHit[],
   mi: InteractionSpec,
   tier: GenTier,
   /** this section's beat in the locked shot plan (omitted for non-photo moods) */
@@ -1140,8 +1159,11 @@ Narrative patterns: ${plan.layoutPatterns?.length ? plan.layoutPatterns.join(', 
 STRUCTURE RULES (spacing + layout for THIS composition — follow these precisely):
 ${guidelineDigest(structural, 600) || '- (none retrieved; use a centered max-w container, an even grid with gap, generous but not excessive padding)'}
 
-COMPOSITION DEVICES (pick ONE or TWO and execute them deliberately — this is how the section gets depth and hierarchy instead of stacked rectangles):
+COMPOSITION CRAFT (the principle to apply — how this section earns depth and hierarchy instead of stacked rectangles):
 ${guidelineDigest(craft, 520) || '- (none retrieved; at minimum give the section one clear focal element and one scale contrast)'}
+
+READY-MADE DEVICES (globals.css already defines these and their geometry is correct + responsive — apply the CLASS, never rebuild the layout by hand. Pick ONE that genuinely fits this section's content; skip them if none does):
+${guidelineDigest(devices, 460) || '- (none retrieved)'}
 
 DESIGN JUDGEMENT (from critiques of real sites — apply the underlying principle, don't copy):
 ${critiqueDigest(critiques) || '- (none retrieved)'}
@@ -1261,9 +1283,10 @@ export async function generateSections(
     {
       // Scratch: retrieve STRUCTURAL rules (spacing/layout) by composition — not buried by mood —
       // and feed critiques in as design judgement, not just mood-matched typography snippets.
-      const [structural, craft] = await Promise.all([
+      const [structural, craft, devices] = await Promise.all([
         retrieveStructural(section.composition, section.intent),
-        retrieveCraft(section.composition, section.intent)
+        retrieveCraft(section.composition, section.intent),
+        retrieveDevices(section.composition, section.intent)
       ])
       log(
         `  [${i}] ${label} → scratch` +
@@ -1272,11 +1295,11 @@ export async function generateSections(
       // First pass on BULK, then AT MOST ONE escalation to REASONING — either because the section
       // won't parse (it would be quarantined at write time), or because it ignored the committed
       // palette. Capped at one retry so a section never costs three LLM calls.
-      let code = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, mi, 'bulk', sectionShot)
+      let code = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, 'bulk', sectionShot)
       if (FORCE_PARSE_FAIL === 'bulk' || FORCE_PARSE_FAIL === 'both') code = corruptSyntax(code)
       let tier: SectionResult['tier'] = 'bulk'
       const retry = async (push?: string) => {
-        const out = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, mi, 'reasoning', sectionShot, push)
+        const out = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, 'reasoning', sectionShot, push)
         return FORCE_PARSE_FAIL === 'both' ? corruptSyntax(out) : out
       }
 

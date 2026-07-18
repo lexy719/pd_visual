@@ -454,6 +454,63 @@ h3 { font-size: ${css(h.h3)}; }
 ${SCALE_ASPECT_CSS}
 
 /*
+ * ============================ COMPOSITION DEVICES ============================
+ * The repertoire. Rules elsewhere say what NOT to do; these are the positive devices that create
+ * depth, tension and hierarchy — the difference between a correct page and a designed one. They are
+ * emitted as verified CSS so the geometry is always right; a section chooses WHICH device to apply
+ * (class names), never how to build it. Every device is responsive and container-safe by
+ * construction, so none of them can produce the overflow/void defects the measurements catch.
+ */
+
+/* html-level clip makes edge bleeds safe: a full-bleed child can never create a horizontal
+   scrollbar, which is what normally makes designers avoid the device entirely. */
+html { overflow-x: clip; }
+
+/* dev-overlap — OCCLUSION depth. Two children; the second overlaps the first and sits above it.
+   Occlusion is the only reliable depth signal (a shadow on a flat box reads as a sticker). */
+.dev-overlap { position: relative; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+.dev-overlap > :first-child { grid-column: 1 / span 8; grid-row: 1; position: relative; z-index: 1; }
+.dev-overlap > :nth-child(2) { grid-column: 7 / -1; grid-row: 1; position: relative; z-index: 2; margin-top: clamp(48px, 9vw, 120px); }
+.dev-overlap.dev-overlap-left > :first-child { grid-column: 5 / -1; }
+.dev-overlap.dev-overlap-left > :nth-child(2) { grid-column: 1 / span 6; }
+@media (max-width: 820px) {
+  .dev-overlap { display: flex; flex-direction: column; gap: 20px; }
+  .dev-overlap > :first-child, .dev-overlap > :nth-child(2) { margin-top: 0; }
+}
+
+/* dev-offset-grid — a grid whose alternate columns sit lower, replacing the dead uniform row. */
+.dev-offset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.dev-offset-grid > :nth-child(even) { margin-top: clamp(32px, 6vw, 88px); }
+@media (max-width: 820px) { .dev-offset-grid > :nth-child(even) { margin-top: 0; } }
+
+/* dev-quote-break — a pull-quote that breaks OUT of the text measure, the classic editorial tension
+   device. Large enough to read as intentional (never a 4px near-miss). */
+.dev-quote-break { position: relative; margin-inline: clamp(-64px, -4vw, -16px); padding-inline: clamp(16px, 4vw, 64px); border-left: 2px solid var(--accent); }
+@media (max-width: 820px) { .dev-quote-break { margin-inline: 0; } }
+
+/* dev-bleed — escape the container to the full viewport width, safely (html clips the excess).
+   One bleed per page: the device works by contrast with everything that respects the container. */
+.dev-bleed { width: 100vw; margin-inline: calc(50% - 50vw); }
+
+/* dev-stat-row — oversized numerals. The single scale jump, systematised. */
+.dev-stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: clamp(24px, 4vw, 56px); }
+.dev-stat-row .dev-stat-n { font-family: var(--font-display); font-size: clamp(44px, 6vw, 84px); line-height: 0.95; letter-spacing: -0.03em; color: var(--foreground); display: block; }
+.dev-stat-row .dev-stat-l { font-size: 13px; color: var(--muted-foreground); margin-top: 6px; display: block; }
+
+/* dev-feature-grid — uniform cards that COMPLETE their rows (auto-fit prevents the ragged trailing
+   gap that reads as a broken layout). SaaS/product furniture. */
+.dev-feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: clamp(16px, 2vw, 28px); }
+.dev-feature-grid > * { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: clamp(20px, 2.4vw, 32px); }
+
+/* dev-logo-wall — evenly spaced wordmarks; text, never images (a row of mismatched logo files is
+   the cheapest-looking element on the web). */
+.dev-logo-wall { display: flex; flex-wrap: wrap; align-items: center; gap: clamp(24px, 5vw, 64px); opacity: 0.72; }
+.dev-logo-wall > * { font-weight: 600; letter-spacing: 0.02em; color: var(--muted-foreground); }
+
+/* dev-frame — a matted frame around media. Repeating one frame treatment is a craft signal. */
+.dev-frame { padding: clamp(8px, 1vw, 14px); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+
+/*
  * GENERATED PER RUN by the art-direction step — the committed micro-interaction contract. Sections
  * apply these classes to interactive elements instead of inventing their own durations/easings, so
  * hover/press feel is identical across the whole page. Reduced-motion is baked in.
