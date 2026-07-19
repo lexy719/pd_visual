@@ -142,3 +142,26 @@ which is precisely how a pricing section fails to convert. The device stretches 
 height and pins the final child of each to the bottom, so the calls to action align across the row
 however uneven the feature lists are. Name what each tier is FOR in a short line under the figure;
 a tier whose only differentiator is a number gives the reader nothing to decide with.
+
+## Device: dev-stage — a frame, not a band
+
+tags: device, composition, stage, cinematic, immersive, full-viewport, media, hero, layering, anchor
+
+Use dev-stage when a section should be a FRAME rather than a strip of page: media filling it edge to
+edge, type layered over the image and hung hard off one corner. Every other device arranges content
+inside a horizontal band that the page then stacks, which is why a page of them reads as competent
+and never as cinematic — a band can hold a good composition, but the composition is always
+subordinate to the stack. A stage is the one structure that is not. Give it a media child with
+"dev-stage-media" and a text child with "dev-stage-body"; the corner comes from the page's committed
+composition, not from the section.
+
+Reach for it when the image IS the argument — an opening frame, a single held moment, the one place
+in a story where the reader should stop. It is spent by repetition in the same way a full bleed is:
+two stages on a page are a rhythm, five are a slideshow, and a stage used for a section whose content
+is really a list or a comparison is a photograph with an argument buried under it. Keep the body text
+short, because type at frame scale is read as an image before it is read as a sentence — a stage
+holding a paragraph is a band wearing a costume.
+
+The readability of type over the photograph is handled for you and should not be second-guessed with
+hand-picked colours: the image is unknown when the page is written, so a scrim keyed to the anchor
+guarantees the contrast instead.

@@ -27,7 +27,8 @@ export const DEVICE_NAMES = [
   'dev-side-rail',
   'dev-compare',
   'dev-faq',
-  'dev-price-table'
+  'dev-price-table',
+  'dev-stage'
 ] as const
 
 export type DeviceName = (typeof DEVICE_NAMES)[number]
@@ -41,6 +42,13 @@ export const DEVICE_RE = new RegExp(`\\b(${DEVICE_NAMES.join('|')})\\b`)
  * made up".
  */
 export const DEVICE_MODIFIERS = [
+  'dev-stage-tl',
+  'dev-stage-bl',
+  'dev-stage-tr',
+  'dev-stage-br',
+  'dev-stage-c',
+  'dev-stage-media',
+  'dev-stage-body',
   'dev-overlap-left',
   'dev-stat-n',
   'dev-stat-l',
@@ -184,6 +192,68 @@ html { overflow-x: clip; }
 .dev-faq > details > summary::after { content: '+'; color: var(--muted-foreground); font-weight: 400; }
 .dev-faq > details[open] > summary::after { content: '\\2212'; }
 .dev-faq > details > :not(summary) { margin-top: 12px; max-width: 68ch; color: var(--muted-foreground); line-height: 1.65; }
+
+/* dev-stage — A FRAME, not a band.
+ *
+ * Every other device arranges content INSIDE a horizontal strip that the page then stacks. That is
+ * why pages read as competent and never as cinematic: cinematic work composes within a frame — media
+ * filling it edge to edge, type anchored hard to one corner, layers rather than flow.
+ *
+ * The stage is the page's one structure that is not a band. Media is absolutely positioned and
+ * covers; the body sits above it and is placed against a corner by a modifier that the writer stamps
+ * FROM THE SKETCH'S ANCHOR — the sketch has been deciding an anchor per section all along and nothing
+ * consumed it until now.
+ *
+ * The scrim is not decoration. Type over a photograph is the single most reliable way to ship
+ * unreadable text, and it cannot be solved by choosing a colour because the photograph is unknown at
+ * authoring time. A gradient scrim keyed to the anchor guarantees contrast under the type wherever it
+ * sits, so the failure stops being possible rather than being caught later. */
+.dev-stage {
+  position: relative;
+  min-height: 86vh;
+  display: grid;
+  overflow: clip;
+  isolation: isolate;
+  padding: clamp(28px, 5vw, 88px);
+}
+/* Media fills the frame. object-fit keeps a portrait photograph from distorting into a landscape box. */
+.dev-stage > .dev-stage-media,
+.dev-stage > .dev-stage-media img,
+.dev-stage > img {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; object-fit: cover;
+}
+/* The readability scrim — strongest at the anchored corner, gone at the opposite one. */
+.dev-stage::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(to top, color-mix(in srgb, #000 72%, transparent) 0%, color-mix(in srgb, #000 28%, transparent) 42%, transparent 72%);
+}
+.dev-stage.dev-stage-tl::before, .dev-stage.dev-stage-tr::before {
+  background: linear-gradient(to bottom, color-mix(in srgb, #000 72%, transparent) 0%, color-mix(in srgb, #000 28%, transparent) 42%, transparent 72%);
+}
+.dev-stage.dev-stage-c::before {
+  background: radial-gradient(75% 65% at 50% 50%, color-mix(in srgb, #000 62%, transparent) 0%, color-mix(in srgb, #000 18%, transparent) 62%, transparent 100%);
+}
+/* The body layers above both, and hangs off the anchor the sketch committed to. */
+.dev-stage > .dev-stage-body {
+  position: relative; z-index: 2;
+  max-width: min(94%, 22ch);
+  /* Type on a stage is white-on-image by construction, so it takes its own tokens rather than the
+     section's ground — the scrim above guarantees this stays readable whatever the photograph is. */
+  color: #fff;
+}
+.dev-stage > .dev-stage-body :is(h1, h2, h3) { color: #fff; }
+.dev-stage-bl > .dev-stage-body { place-self: end start; }
+.dev-stage-br > .dev-stage-body { place-self: end end; text-align: right; }
+.dev-stage-tl > .dev-stage-body { place-self: start start; }
+.dev-stage-tr > .dev-stage-body { place-self: start end; text-align: right; }
+.dev-stage-c  > .dev-stage-body { place-self: center; text-align: center; max-width: min(94%, 26ch); }
+/* A stage is a frame, so it should not also carry the page's section padding. */
+.dev-stage.section-pad, .section-pad > .dev-stage { padding-block: clamp(28px, 5vw, 88px); }
+@media (max-width: 820px) {
+  .dev-stage { min-height: 72vh; }
+  .dev-stage > .dev-stage-body { max-width: 100%; place-self: end start; text-align: left; }
+}
 
 /* dev-price-table — pricing tiers that stay aligned, with ONE emphasised plan. The emphasis is the
    whole point: an undifferentiated row of three prices makes the reader do the work, which is how a

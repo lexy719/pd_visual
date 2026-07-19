@@ -57,7 +57,10 @@ export type Anchor = (typeof ANCHORS)[number]
 
 /** The arrangement decides the device. This is the sketch's grip on what actually gets built. */
 export const ARRANGEMENT_DEVICE: Record<Arrangement, DeviceName | null> = {
-  'full-bleed-media': 'dev-bleed',
+  // A full-bleed media beat is a FRAME, not a wide band. dev-bleed only released the container;
+  // dev-stage composes inside the frame — media covering it, type anchored to the corner this beat
+  // already committed to, and a scrim guaranteeing the type stays readable over an unknown image.
+  'full-bleed-media': 'dev-stage',
   'media-beside-text': 'dev-overlap',
   'centred-statement': null, // type alone: a device here would add furniture the section does not want
   'anchored-statement': null,
@@ -70,6 +73,16 @@ export const ARRANGEMENT_DEVICE: Record<Arrangement, DeviceName | null> = {
   'disclosure-list': 'dev-faq',
   'tier-choice': 'dev-price-table',
   'proof-wall': 'dev-logo-wall'
+}
+
+/** The stage modifier for a beat's anchor — this is what finally consumes the committed anchor. */
+export const ANCHOR_STAGE_CLASS: Record<Anchor, string> = {
+  'top-left': 'dev-stage-tl',
+  'bottom-left': 'dev-stage-bl',
+  'top-right': 'dev-stage-tr',
+  'bottom-right': 'dev-stage-br',
+  centre: 'dev-stage-c',
+  full: 'dev-stage-bl'
 }
 
 export interface SketchBeat {
@@ -256,7 +269,13 @@ export const describeSketch = (s: SketchPlan): string =>
 export function sketchPromptBlock(beat: SketchBeat, isFocal: boolean): string {
   const device = ARRANGEMENT_DEVICE[beat.arrangement]
   return `COMPOSITION (decided for the whole page — this section's place in it):
-- Arrangement: ${beat.arrangement}${device ? ` → apply the device "${device}"` : ' → type-led; do NOT add a card grid or media frame here'}.
+- Arrangement: ${beat.arrangement}${
+    device === 'dev-stage'
+      ? ` → build a STAGE: <section class="dev-stage ${ANCHOR_STAGE_CLASS[beat.anchor]}"> containing exactly two children — an <img class="dev-stage-media"> that fills the frame, and a <div class="dev-stage-body"> holding a SHORT headline and at most one line. The image covers the frame and the text is anchored and kept readable for you; do NOT add your own overlay, gradient or text colour.`
+      : device
+        ? ` → apply the device "${device}"`
+        : ' → type-led; do NOT add a card grid or media frame here'
+  }.
 - The mass hangs from: ${beat.anchor}${beat.anchor === 'centre' ? '' : '. Any empty area must sit AGAINST that edge, never around floating centred content'}.
 - The eye should hit first: ${beat.focal}.
 - Why this and not the obvious alternative: ${beat.why}
