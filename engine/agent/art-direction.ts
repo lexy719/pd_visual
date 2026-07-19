@@ -70,10 +70,9 @@ export interface InteractionSpec {
 }
 
 /**
- * The four font stacks the type lock may choose between. Deliberately a CLOSED set of SYSTEM stacks:
- * nothing is downloaded, so there is no webfont loading step, no licensing question, and no way for a
- * model-proposed family to silently fail to load and degrade to an unintended fallback. The model
- * commits the *character* (ratio / weight / tracking); the family resolves deterministically.
+ * Typefaces now come from the curated, self-hosted catalogue in fonts.ts — ten real faces bundled
+ * from node_modules, so there is still no CDN request and nothing that can fail to load, but the page
+ * is no longer limited to system stacks. FontStack is an alias of FaceKey for that reason.
  */
 export type FontStack = FaceKey
 
@@ -117,8 +116,14 @@ export interface TypographySpec {
 /** Absolute ceiling for the page's largest heading, as its own decision. */
 export const DISPLAY_SCALES = ['modest', 'large', 'huge'] as const
 export type DisplayScale = (typeof DISPLAY_SCALES)[number]
-/** h1 max in px. `huge` is deliberately cinematic — type as the image. */
-export const DISPLAY_MAX: Record<DisplayScale, number> = { modest: 64, large: 104, huge: 168 }
+/**
+ * h1 max in px. `huge` is deliberately cinematic — type as the image.
+ *
+ * Raised from 64/104/168 because the vw term reached these ceilings far too early: a "large" page
+ * capped at 1156px of viewport, so the headline was the same size on a laptop and a 2560 monitor
+ * while the canvas quadrupled. These caps are now reached near the top of the desktop range instead.
+ */
+export const DISPLAY_MAX: Record<DisplayScale, number> = { modest: 82, large: 132, huge: 210 }
 
 /** How far the camera stands — the vocabulary of the page's visual tempo (image-sequencing.md). */
 export const SHOT_SCALES = ['establishing', 'wide', 'medium', 'detail', 'macro'] as const
@@ -520,7 +525,9 @@ function lockShotPlan(raw: Partial<ShotPlan> | undefined, plan: Plan, adjustment
   // Rule: a recurring subject disqualifies stock — keyword search cannot return the same object twice.
   let source: ShotWorld['source'] = rw.source === 'stock' || rw.source === 'generated' ? rw.source : 'generated'
   if (subject && source !== 'generated') {
-    adjustments.push(`shot source 'stock' → 'generated' (recurring subject "${subject.slice(0, 40)}…" requires a fixed identity)`)
+    // Recorded for the shot PROMPT (a subject-led page still describes one recurring object), but
+    // this no longer changes routing — resolveImages is stock-first regardless. Kept silent rather
+    // than pushing an ADJUSTED line that claims a routing change which will not happen.
     source = 'generated'
   }
 
@@ -705,9 +712,8 @@ ${faceCatalogueForPrompt()}
   body is the classic editorial answer; one family used for both is the disciplined answer. Do not
   reach for the neutral workhorse by default — it is correct when the type should have no opinion,
   and wrong when the page is meant to have one.
-- "typography" is the LOCKED type pairing for the WHOLE site. Choose both stacks ONLY from the closed set
-  above — these are system stacks, nothing is downloaded, so do NOT name a specific font (no "Inter",
-  no "Neue Haas"). Commit the NUMBERS from the retrieved TYPE RULES for this mood: aggressive → ratio
+- "typography" is the LOCKED type pairing for the WHOLE site. The FACES come from the catalogue above
+  (that is what displayFace/bodyFace are for); everything else here is numbers. Commit the NUMBERS from the retrieved TYPE RULES for this mood: aggressive → ratio
   ~1.5, weight 800-900, tracking -0.04em, display line-height ~0.95. brutalist → ratio 1.618+, weight 900.
   premium/editorial → ratio 1.333-1.414, weight 500-600 (restraint reads as expensive; heaviness reads as
   loud — do NOT go heavy here). minimal → ratio 1.25, tracking -0.03em. technical/trustworthy/calm →

@@ -124,7 +124,7 @@ html { overflow-x: clip; }
    were a latent overflow: -4vw can outgrow a 48px-capped padding, so on a wide viewport the quote
    punched out of the page. Measured live: scrollWidth 1331px against a 1280px viewport, reported as
    a blocking defect. Using the identical expression makes the two cancel exactly. */
-.dev-quote-break { position: relative; margin-inline: calc(-1 * clamp(20px, 4vw, 48px)); padding-inline: clamp(20px, 4vw, 48px); border-left: 2px solid var(--accent); }
+.dev-quote-break { max-width: 46ch; position: relative; margin-inline: calc(-1 * clamp(20px, 4vw, 48px)); padding-inline: clamp(20px, 4vw, 48px); border-left: 2px solid var(--accent); }
 @media (max-width: 820px) { .dev-quote-break { margin-inline: 0; padding-inline: 16px; } }
 
 /* dev-bleed — escape the container to the full viewport width, safely (html clips the excess).
@@ -154,7 +154,10 @@ html { overflow-x: clip; }
 
 /* dev-logo-wall — evenly spaced wordmarks; text, never images (a row of mismatched logo files is
    the cheapest-looking element on the web). */
-.dev-logo-wall { display: flex; flex-wrap: wrap; align-items: center; gap: clamp(24px, 5vw, 64px); opacity: 0.72; }
+/* space-between, not a left-clustered flex row: at a wide container six wordmarks occupied ~1040px
+   of 1448px and left the remainder hard against the right edge, which is the classic unfinished-at-
+   fullscreen tell. */
+.dev-logo-wall { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: clamp(24px, 5vw, 64px); opacity: 0.72; }
 .dev-logo-wall > * { font-weight: 600; letter-spacing: 0.02em; color: var(--muted-foreground); }
 
 /* dev-frame — a matted frame around media. Repeating one frame treatment is a craft signal. */
@@ -166,6 +169,9 @@ html { overflow-x: clip; }
    where sticky positioning in a short viewport would trap the reader instead of orienting them. */
 .dev-side-rail { display: grid; grid-template-columns: minmax(180px, 22%) minmax(0, 1fr); gap: clamp(24px, 5vw, 72px); align-items: start; }
 .dev-side-rail > :first-child { position: sticky; top: clamp(24px, 8vh, 96px); align-self: start; }
+/* The content column beside the rail reached ~126 characters at a wide container; prose needs a
+   measure whatever the container does. */
+.dev-side-rail > :nth-child(2) p, .dev-side-rail > :nth-child(2) li { max-width: 68ch; }
 @media (max-width: 900px) {
   .dev-side-rail { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .dev-side-rail > :first-child { position: static; }
@@ -175,7 +181,9 @@ html { overflow-x: clip; }
    being compared, alignment IS the meaning, and any rhythm device would read as an error. Scrolls
    inside itself on narrow screens so it can never widen the page. */
 .dev-compare { width: 100%; overflow-x: auto; }
-.dev-compare table { width: 100%; border-collapse: collapse; min-width: 520px; }
+/* Capped: at a 1448px container a 3-column table gave ~480px cells holding a single tick, so the eye
+   had to cross the whole container to associate a row with its mark. */
+.dev-compare table { width: 100%; max-width: 1100px; border-collapse: collapse; min-width: 520px; }
 .dev-compare th, .dev-compare td { text-align: left; padding: clamp(12px, 1.6vw, 20px); border-bottom: 1px solid var(--border); vertical-align: top; }
 .dev-compare thead th { font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-foreground); font-weight: 600; }
 .dev-compare tbody tr:last-child td { border-bottom: 0; }
@@ -200,8 +208,15 @@ html { overflow-x: clip; }
  * filling it edge to edge, type anchored hard to one corner, layers rather than flow.
  *
  * The stage is the page's one structure that is not a band. Media is absolutely positioned and
- * covers; the body sits above it and is placed against a corner by a modifier that the writer stamps
- * FROM THE SKETCH'S ANCHOR — the sketch has been deciding an anchor per section all along and nothing
+ * covers; the body sits above it and is placed against a corner by a modifier stamped FROM THE
+ * SKETCH'S ANCHOR.
+ *
+ * DESCENDANT selectors, not child. These were child combinators and that silently broke every stage on a real run:
+ * when the section adapts a motion primitive, the primitive wraps the body one level deeper, so
+ * .dev-stage with a child combinator matched nothing. The anchor never applied (so the committed corner
+ * was AGAIN not consumed), the white type colour never applied (so type sat over a covering photo in the
+ * ground's own foreground colour), and the z-index never applied (so the body rendered UNDER the
+ * scrim). Three guarantees, all silently absent, with no lint or test to notice — the sketch has been deciding an anchor per section all along and nothing
  * consumed it until now.
  *
  * The scrim is not decoration. Type over a photograph is the single most reliable way to ship
@@ -217,8 +232,8 @@ html { overflow-x: clip; }
   padding: clamp(28px, 5vw, 88px);
 }
 /* Media fills the frame. object-fit keeps a portrait photograph from distorting into a landscape box. */
-.dev-stage > .dev-stage-media,
-.dev-stage > .dev-stage-media img,
+.dev-stage .dev-stage-media,
+.dev-stage .dev-stage-media img,
 .dev-stage > img {
   position: absolute; inset: 0; z-index: 0;
   width: 100%; height: 100%; object-fit: cover;
@@ -235,24 +250,24 @@ html { overflow-x: clip; }
   background: radial-gradient(75% 65% at 50% 50%, color-mix(in srgb, #000 62%, transparent) 0%, color-mix(in srgb, #000 18%, transparent) 62%, transparent 100%);
 }
 /* The body layers above both, and hangs off the anchor the sketch committed to. */
-.dev-stage > .dev-stage-body {
+.dev-stage .dev-stage-body {
   position: relative; z-index: 2;
-  max-width: min(94%, 22ch);
+  max-width: min(88%, 34em);
   /* Type on a stage is white-on-image by construction, so it takes its own tokens rather than the
      section's ground — the scrim above guarantees this stays readable whatever the photograph is. */
   color: #fff;
 }
-.dev-stage > .dev-stage-body :is(h1, h2, h3) { color: #fff; }
-.dev-stage-bl > .dev-stage-body { place-self: end start; }
-.dev-stage-br > .dev-stage-body { place-self: end end; text-align: right; }
-.dev-stage-tl > .dev-stage-body { place-self: start start; }
-.dev-stage-tr > .dev-stage-body { place-self: start end; text-align: right; }
-.dev-stage-c  > .dev-stage-body { place-self: center; text-align: center; max-width: min(94%, 26ch); }
+.dev-stage .dev-stage-body :is(h1, h2, h3) { color: #fff; }
+.dev-stage-bl .dev-stage-body { place-self: end start; }
+.dev-stage-br .dev-stage-body { place-self: end end; text-align: right; }
+.dev-stage-tl .dev-stage-body { place-self: start start; }
+.dev-stage-tr .dev-stage-body { place-self: start end; text-align: right; }
+.dev-stage-c  .dev-stage-body { place-self: center; text-align: center; max-width: min(94%, 42ch); }
 /* A stage is a frame, so it should not also carry the page's section padding. */
 .dev-stage.section-pad, .section-pad > .dev-stage { padding-block: clamp(28px, 5vw, 88px); }
 @media (max-width: 820px) {
   .dev-stage { min-height: 72vh; }
-  .dev-stage > .dev-stage-body { max-width: 100%; place-self: end start; text-align: left; }
+  .dev-stage .dev-stage-body { max-width: 100%; place-self: end start; text-align: left; }
 }
 
 /* dev-price-table — pricing tiers that stay aligned, with ONE emphasised plan. The emphasis is the

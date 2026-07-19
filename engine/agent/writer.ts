@@ -436,6 +436,11 @@ function headingSizes(r: number, displayMax: number): { h1: string; h2: string; 
   // viewport term is what actually carries the size between the two.
   const h1Min = Math.min(s(3.4), Math.round(displayMax * 0.42))
   const h2Max = Math.max(s(3.2), Math.round(displayMax * 0.46))
+  // The vw growth rate is right; the CEILING was the problem. At 9vw a "large" h1 reached its 104px
+  // cap at a 1156px viewport, so the headline was identical on a 1280 laptop and a 2560 monitor while
+  // the canvas around it quadrupled — the largest remaining cause of "looks small at fullscreen".
+  // Lowering the vw would have shrunk type everywhere to delay the cap, which is the wrong trade; the
+  // caps in DISPLAY_MAX were raised instead so type keeps growing across the desktop range.
   return {
     h1: `clamp(${h1Min}px, 9vw, ${displayMax}px)`,
     h2: `clamp(${s(2.4)}px, 5vw, ${h2Max}px)`,
@@ -480,7 +485,7 @@ export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, 
      "looks good in half screen, bad fullscreen" report. The committed width is now the FLOOR: small
      screens are unchanged, and large ones grow to ~78vw up to a ceiling so the measure never becomes
      unreadable. Body copy is protected separately by .measure. */
-  --container: clamp(${layout.containerPx}px, 78vw, ${Math.round(layout.containerPx * 1.34)}px);
+  --container: clamp(${layout.containerPx}px, 82vw, ${Math.round(layout.containerPx * 1.72)}px);
   --section-pad: clamp(${layout.sectionPadMin}px, 14vh, ${layout.sectionPadMax}px);
   /* Base h2 size. The rhythm's .vol-* classes rescale THIS, which cascades to the section's h2. */
   --h2-base: ${css(h.h2)};

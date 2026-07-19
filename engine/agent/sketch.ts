@@ -271,7 +271,7 @@ export function sketchPromptBlock(beat: SketchBeat, isFocal: boolean): string {
   return `COMPOSITION (decided for the whole page — this section's place in it):
 - Arrangement: ${beat.arrangement}${
     device === 'dev-stage'
-      ? ` → build a STAGE: <section class="dev-stage ${ANCHOR_STAGE_CLASS[beat.anchor]}"> containing exactly two children — an <img class="dev-stage-media"> that fills the frame, and a <div class="dev-stage-body"> holding a SHORT headline and at most one line. The image covers the frame and the text is anchored and kept readable for you; do NOT add your own overlay, gradient or text colour.`
+      ? ` → build a STAGE: <section className="dev-stage ${ANCHOR_STAGE_CLASS[beat.anchor]}"> containing a media element with className "dev-stage-media" that fills the frame, and a <div className="dev-stage-body"> holding a SHORT headline and at most one line. They may be nested inside a motion primitive if this section uses one — the classes are what matter, not the depth. The image covers the frame and the text is anchored and kept readable for you; do NOT add your own overlay, gradient or text colour.`
       : device
         ? ` → apply the device "${device}"`
         : ' → type-led; do NOT add a card grid or media frame here'

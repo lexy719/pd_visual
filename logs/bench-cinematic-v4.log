@@ -1,0 +1,170 @@
+
+brief:      "Halden — a single-origin coffee roastery in Bergen that roasts one lot at a time and names the farm on every bag. A cinematic scroll story about the journey from a hillside in Huila to the cup: the altitude, the hands that pick it, the roast curve, the pour. Mood: premium, calm, cinematic."
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-sonnet-5   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+  register floor (editorial-story): added missing beat(s) — turn
+brand:  Halden
+mood:   premium, calm
+layout: origin-to-proof, editorial-brand-story
+sections:
+  0. masthead         [36mcinematic[0m/lg  A single quiet mark — Halden, and the line 'one lot at a time' — over a still, high-altitude image before any scroll happens.
+  1. the-altitude     [36meditorial[0m/md  Establish where this lot grows: the farm named, the elevation stated as fact, why altitude slows the cherry and concentrates flavor.
+  2. the-hands        [36mnarrative[0m/lg  The pickers: close, human, unglamorized. Selective picking of ripe cherry only, the labor the price reflects.
+  3. the-crossing     [36mcinematic[0m/sm  Brief, almost wordless passage — the lot leaves the farm, travels to Bergen. A pause in the story, not a sales beat.
+  4. the-roast-curve  [36masymmetric[0m/xl  Inside the Bergen roastery: this lot's actual roast curve, temperature and time, why the roaster chose a lighter, longer profile for this cherry.
+  5. the-bag          [36mmodular[0m/md  The named bag: farm, lot, elevation, process, printed plainly — proof the story is not marketing, it is the label.
+  6. the-pour         [36mcinematic[0m/xl  The cup: someone pouring, the color and steam, the end of the journey made physical and immediate.
+  7. the-invitation   [36meditorial[0m/sm  Quiet close: where to find the current lot, and a single line inviting the visitor to Bergen or to order the bag.
+  8. turn             [36meditorial[0m/md  give the piece its turn — the moment the argument changes gear
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated, subject="a squat kraft-brown paper bag with a cream label s" · establishing → wide → detail → wide → macro → detail → wide → medium → detail[0m
+  primary   [48;2;74;90;63m   [0m #4A5A3F
+  accent    [48;2;179;86;45m   [0m #B3562D
+  bg / fg   [48;2;248;246;241m   [0m #F8F6F1  /  [48;2;36;40;33m   [0m #242821
+  card/bord [48;2;255;255;255m   [0m #FFFFFF  /  [48;2;228;224;214m   [0m #E4E0D6
+  motion    [36mparallax-slow[0m  (locked for the whole run)
+  rhythm    [36m█▄███▁█▁▄  peak@4[0m  (page pacing: ▁tight ▄normal █open)
+  kit       [36munderline/square corners/none icon/hairline edges/mono-tracked eyebrow/generous[0m  (this project's own components, emitted as CSS)
+  [2msquare corners and an underline button feel like a printed label and a field notebook, not a storefront — density stays generous so each fact has room to be read slowly[0m
+  surface   [36mhairline/hairline elevation/top-sheen light (multiply)/fade-bottom edges/noise[0m
+  [2ma fine grain and a soft top sheen read like film and darkroom paper rather than screen glass, matching a story told in light and altitude[0m
+  interact  [36m260ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-2px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2mA sage-and-bone monochrome grounds the calm, unlit warmth the brief asks for, with one saturated roast-orange accent earned only at moments of proof (the curve, the pour); slow parallax and 260ms restrained easing let the story move only when the visitor scrolls, so every held frame reads as premium patience rather than static design.[0m
+  [2manchors: Calm / wellness / health, parallax-depth, premium / calm micro-interactions, duration scale, Micro-interactions, Type scale ratios by mood, Calm / wellness typography, Premium / editorial typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, PP Neue Montreal — throughline, Bucks Sauce — Reviews section uses a hand-lettered, sketchy outline t…, Cantor8 — throughline[0m
+  [33mADJUSTED[0m shot beat[8] medium → detail (no two adjacent same-scale shots)
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Halden  ·  premium/calm  ·  origin-to-proof
+  motion: parallax-slow   palette: Amber
+┌──────────────────────────────────────────────────┐
+│ masthead  ·  cinematic  ·  pinned-crossfade (mot │
+│   ↳ A single quiet mark — Halden, and the line ' │
+│     media: Full-bleed still of misty Huila hills │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-altitude  ·  editorial  ·  parallax-depth (m │
+│   ↳ Establish where this lot grows: the farm nam │
+│     media: Wide landscape photo of terraced coff │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-hands  ·  narrative  ·  Container and grid   │
+│   ↳ The pickers: close, human, unglamorized. Sel │
+│     media: Alternating left/right: close-up hand │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-crossing  ·  cinematic  ·  pinned-crossfade  │
+│   ↳ Brief, almost wordless passage — the lot lea │
+│     media: Full-bleed shot of shipping crates or │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-roast-curve  ·  asymmetric  ·  asymmetric-gr │
+│   ↳ Inside the Bergen roastery: this lot's actua │
+│     media: Large offset graphic of the roast cur │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-bag  ·  modular  ·  bento-grid               │
+│   ↳ The named bag: farm, lot, elevation, process │
+│     media: Studio product shot of the Halden bag │
+│   [--] [--] [--]                                 │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-pour  ·  cinematic  ·  parallax-depth (motio │
+│   ↳ The cup: someone pouring, the color and stea │
+│     media: Full-bleed slow-motion-style still of │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-invitation  ·  editorial  ·  Premium / calm  │
+│   ↳ Quiet close: where to find the current lot,  │
+│     media: Small still of the Bergen roastery st │
+│   [--] [--]                                      │
+├──────────────────────────────────────────────────┤
+│ turn  ·  editorial  ·  parallax-depth (motion)   │
+│   ↳ give the piece its turn — the moment the arg │
+│   [--] [--]                                      │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+[1m── SKETCH  (compose the whole page before building any of it) [0m
+[2m  composition sketched: full → media → anchored → full → stat → disclosure → media → centred → anchored  focal@4[0m
+  0. [36mfull-bleed-media  [0m centre        masthead
+     [2meye: the wordmark 'Halden' resting over the still high-altitude image[0m
+     [2mwhy: a single short statement with nothing to compare it to, so the mark can sit centred over the stillness rather than hung off an edge[0m
+  1. [36mmedia-beside-text [0m top-left      the-altitude
+     [2meye: the farm name and elevation figure[0m
+     [2mwhy: a fact (name, altitude) needs to be read as text next to its place, not layered over it like the masthead was[0m
+  2. [36manchored-statement[0m bottom-left   the-hands
+     [2meye: a picker's hands at the cherry[0m
+     [2mwhy: close and human per the brief, so the frame is mostly image with the labor detail spoken from the lower edge rather than centred and posed[0m
+  3. [36mfull-bleed-media  [0m full          the-crossing
+     [2meye: the lot in transit, no text competing[0m
+     [2mwhy: the brief calls it wordless and a pause — a second full-bleed is earned because it contrasts with the human close-up before it and the dense curve after it[0m
+  4. [36mstat-row          [0m top-left      the-roast-curve [35m◀ page focal[0m
+     [2meye: the actual roast curve line — temperature over time[0m
+     [2mwhy: this is real numeric data (temp, time, profile), the highest-emphasis section on the page, and a curve read left-to-right wants an asymmetric data layout, not another image frame[0m
+  5. [36mdisclosure-list   [0m top-left      the-bag
+     [2meye: the printed label fields: farm, lot, elevation, process[0m
+     [2mwhy: modular facts printed plainly, the opposite of the roast curve's motion — a flat list proves the label is documentation, not design[0m
+  6. [36mmedia-beside-text [0m bottom-left   the-pour
+     [2meye: the pour itself — color and steam[0m
+     [2mwhy: third and final full-bleed use, reserved for the emotional payoff the whole journey has been building toward; text held to the lower-left so the pour fills the frame[0m
+  7. [36mcentred-statement [0m centre        the-invitation
+     [2meye: the single invitation line[0m
+     [2mwhy: quiet close, one sentence, nothing to hang off an edge — the same reasoning as the masthead but now closing the loop instead of opening it[0m
+  8. [36manchored-statement[0m bottom-left   turn
+     [2meye: the line where the argument shifts from journey to invitation[0m
+     [2mwhy: a hinge moment needs weight without spectacle, so it sits low and left like the hands beat rather than centred like the two bookend statements[0m
+  [33mADJUSTED[0m sketch[6] "full-bleed-media" used more than 2× — it works by contrast → media-beside-text
+  grounds   [36mpunctuated: ◆··██··▒·[0m  (· base  ▒ raised  █ inverse  ◆ accent)
+
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] masthead/cinematic     → motion-primitive pinned-crossfade (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [1] the-altitude/editorial → scroll budget spent (1 pinned section(s) already); building normally
+  [1] the-altitude/editorial → scratch  [structure: Premium / calm spacing, Container and grid, Density by mood]
+       ↳ [bulk]
+  [2] the-hands/narrative    → scratch  [structure: Container and grid, Premium / calm spacing, Brutalist / raw spacing]
+       ↳ [bulk]
+  [3] the-crossing/cinematic → motion-primitive pinned-crossfade (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [4] the-roast-curve/asymmetric → scratch  [structure: asymmetric-grid, When to break the grid on purpose, Premium / calm spacing]
+       ↳ [bulk]
+  [5] the-bag/modular        → scratch  [structure: bento-grid, card-gallery, split-hero]
+       ↳ design-system violation(s): multi-column grid built by hand (grid-cols-*) with no composition device — apply a dev-* class instead of arranging the columns yourself (the items come from a .map, so a device applies to the container once) — escalating one retry to reasoning tier…
+       ↳ design violations 1 → 0 after escalation
+       ↳ [bulk→escalated]
+  [6] the-pour/cinematic     → scroll budget spent (2 pinned section(s) already); building normally
+  [6] the-pour/cinematic     → scratch  [structure: full-bleed-video, Aggressive / motorsport spacing]
+       ↳ [bulk]
+  [7] the-invitation/editorial → scratch  [structure: Premium / calm spacing, Density by mood, Container and grid]
+       ↳ [bulk]
+  [8] turn/editorial         → scroll budget spent (2 pinned section(s) already); building normally
+  [8] turn/editorial         → scratch  [structure: Premium / calm spacing, magazine-editorial, Section padding]
+       ↳ design-system violation(s): multi-column grid built by hand (grid-cols-*) with no composition device — apply a dev-* class instead of arranging the columns yourself — escalating one retry to reasoning tier…
+       ↳ escalated retry did not improve (1 design, parses:true); keeping the bulk output
+       ↳ [bulk]
+       ↳ page had NO <h1> — promoted the dominant section's first <h2> (a page needs exactly one anchor)
+       ↳ shot plan [generated, subject-locked]: upgraded 11 image(s) → 3 Unsplash + 8 Flux (staged)
+       ↳ hardened 9 <img> tag(s): explicit width/height + lazy below the fold
+       ↳ pre-warm 1/8 failed twice (content, not rate limit) → on-palette fallback (1680x720)
+       ↳ pre-warm 2/8 failed twice (content, not rate limit) → on-palette fallback (1440x810)
+       ↳ pre-warm 3/8 failed twice (content, not rate limit) → on-palette fallback (880x1100)
+       ↳ pre-warm 4/8 failed twice (content, not rate limit) → on-palette fallback (880x1100)
+       ↳ pre-warm 5/8 failed twice (content, not rate limit) → on-palette fallback (960x960)
+       ↳ pre-warm 6/8 failed twice (content, not rate limit) → on-palette fallback (880x1100)
+       ↳ pre-warm 7/8 failed twice (content, not rate limit) → on-palette fallback (1200x900)
