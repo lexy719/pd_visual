@@ -128,10 +128,10 @@ export const describeKit = (k: KitSpec): string =>
 /**
  * Emit the kit as real CSS.
  *
- * Components are written against SEMANTIC tokens (--ink, --ink-muted, --rule, --surface) rather than
- * the palette directly, so a section sitting on a different ground can re-point those tokens and the
- * SAME component is correct on it. That is why contrast cannot be authored wrong here: an atom never
- * names a colour, it names a role.
+ * Components are written against the THEME tokens (--foreground, --muted-foreground, --border,
+ * --card, --accent) directly, so a section that re-points them for its ground gets the same component
+ * rendered correctly on it. An atom never names a colour, and never names an alias either — an alias
+ * declared on :root is flattened once and stops following the ground.
  */
 export function kitCss(kit: KitSpec, mi: InteractionSpec, type: TypographySpec): string {
   const rad = CORNER_PX[kit.corner]
@@ -147,16 +147,16 @@ export function kitCss(kit: KitSpec, mi: InteractionSpec, type: TypographySpec):
   // reads most "made": the label and the icon occupy separate cells divided by a rule.
   const buttonBody = {
     solid: `
-  background: var(--kit-accent); color: var(--kit-accent-ink); border: 0;
+  background: var(--accent); color: var(--accent-foreground); border: 0;
   padding: ${pad.y} ${pad.x};`,
     outline: `
-  background: transparent; color: var(--ink); border: 1px solid var(--ink);
+  background: transparent; color: var(--foreground); border: 1px solid var(--foreground);
   padding: calc(${pad.y} - 1px) calc(${pad.x} - 1px);`,
     'split-cell': `
-  background: var(--surface); color: var(--ink); border: 1px solid var(--rule);
+  background: var(--card); color: var(--foreground); border: 1px solid var(--border);
   padding: 0; overflow: hidden;`,
     underline: `
-  background: transparent; color: var(--ink); border: 0; border-bottom: 2px solid var(--kit-accent);
+  background: transparent; color: var(--foreground); border: 0; border-bottom: 2px solid var(--accent);
   padding: ${pad.y} 2px; border-radius: 0;`
   }[kit.button]
 
@@ -166,9 +166,9 @@ export function kitCss(kit: KitSpec, mi: InteractionSpec, type: TypographySpec):
 /* split-cell: label and icon are separate cells divided by a rule — the detail that makes a button
    read as designed rather than as a rounded rectangle. */
 .c-btn > span { display: block; padding: ${pad.y} ${pad.x}; }
-.c-btn::after { border-left: 1px solid var(--rule); display: grid; place-items: center; width: calc(${pad.x} + 12px); align-self: stretch; }
-.c-btn:hover { background: var(--kit-accent); color: var(--kit-accent-ink); border-color: var(--kit-accent); }
-.c-btn:hover::after { border-left-color: color-mix(in srgb, var(--kit-accent-ink) 35%, transparent); }`
+.c-btn::after { border-left: 1px solid var(--border); display: grid; place-items: center; width: calc(${pad.x} + 12px); align-self: stretch; }
+.c-btn:hover { background: var(--accent); color: var(--accent-foreground); border-color: var(--accent); }
+.c-btn:hover::after { border-left-color: color-mix(in srgb, var(--accent-foreground) 35%, transparent); }`
       : ''
 
   return `
@@ -177,16 +177,21 @@ export function kitCss(kit: KitSpec, mi: InteractionSpec, type: TypographySpec):
  * library: the form (${describeKit(kit)}) was committed once for this brief.
  * Sections APPLY these classes; they never build their own button, tag or label.
  *
- * Written against role tokens (--ink / --rule / --surface), never raw palette colours, so the same
+ * Written against the live theme tokens, never raw palette colours and never a :root alias, so the same
  * component stays correct on any ground a section sits on.
  */
+/*
+ * NOTE: the atoms below use the theme tokens DIRECTLY (--foreground, --muted-foreground, --border,
+ * --card, --accent) rather than aliasing them to kit-specific names.
+ *
+ * An alias layer was tried and was silently broken: :root declaring --ink-muted as var(--muted-foreground)
+ * resolves ONCE on :root and inherits down as a literal colour, so a section that re-points
+ * --muted-foreground for its ground had no effect on it. Measured live: a c-eyebrow on an accent
+ * field and another on an inverse field both rendered the BASE muted colour, failing contrast on
+ * both. The claim that atoms adapt to any ground because they name roles was false — they named an
+ * alias that had already been flattened.
+ */
 :root {
-  --ink: var(--foreground);
-  --ink-muted: var(--muted-foreground);
-  --rule: var(--border);
-  --surface: var(--card);
-  --kit-accent: var(--accent);
-  --kit-accent-ink: var(--accent-foreground);
   --kit-radius: ${rad};
 }
 
@@ -205,53 +210,53 @@ ${splitParts}
 .c-btn:active { transform: scale(${mi.tapScale}); }
 /* Focus is DERIVED, never chosen: a committed form must not be able to remove the focus ring. */
 .c-btn:focus-visible, .c-link:focus-visible, .c-field:focus-visible {
-  outline: 2px solid var(--kit-accent); outline-offset: 2px;
+  outline: 2px solid var(--accent); outline-offset: 2px;
 }
 
 /* SECONDARY ACTION — same geometry, lower weight, so the pair reads as one family. */
 .c-btn-ghost {
   display: inline-flex; align-items: center; font: inherit; line-height: 1;
   padding: ${pad.y} ${pad.x}; border-radius: var(--kit-radius);
-  background: transparent; color: var(--ink); border: 1px solid var(--rule);
+  background: transparent; color: var(--foreground); border: 1px solid var(--border);
   text-decoration: none; cursor: ${mi.cursor};
   transition: border-color var(--mi-dur) var(--mi-ease), color var(--mi-dur) var(--mi-ease);
 }
-.c-btn-ghost:hover { border-color: var(--ink); }
+.c-btn-ghost:hover { border-color: var(--foreground); }
 
 /* EYEBROW — the small label above a heading. Sets the section's register in two words. */
 ${
   kit.eyebrow === 'none'
-    ? `.c-eyebrow { display: block; font-size: 13px; color: var(--ink-muted); margin-bottom: 10px; }`
+    ? `.c-eyebrow { display: block; font-size: 13px; color: var(--muted-foreground); margin-bottom: 10px; }`
     : kit.eyebrow === 'mono-tracked'
-      ? `.c-eyebrow { display: block; font-family: ${mono}; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 14px; }`
-      : `.c-eyebrow { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--ink-muted); margin-bottom: 12px; }`
+      ? `.c-eyebrow { display: block; font-family: ${mono}; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 14px; }`
+      : `.c-eyebrow { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--muted-foreground); margin-bottom: 12px; }`
 }
 
 /* TAG — metadata, never an action. Visually quieter than any button so the two never compete. */
 .c-tag {
   display: inline-block; font-size: 12px; line-height: 1; padding: 6px 10px;
   border-radius: ${kit.corner === 'pill' ? '999px' : rad};
-  color: var(--ink-muted); border: 1px solid var(--rule); background: transparent;
+  color: var(--muted-foreground); border: 1px solid var(--border); background: transparent;
 }
 
 /* INLINE LINK — the arrow shifts on hover, which is the whole affordance. */
 .c-link {
-  color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule);
+  color: var(--foreground); text-decoration: none; border-bottom: 1px solid var(--border);
   transition: border-color var(--mi-dur) var(--mi-ease);
 }
-.c-link:hover { border-bottom-color: var(--ink); }
+.c-link:hover { border-bottom-color: var(--foreground); }
 ${hasIcon ? `.c-link::after { content: ${iconGlyph}; display: inline-block; margin-left: 0.35em; transition: transform var(--mi-dur) var(--mi-ease); }
 .c-link:hover::after { transform: translate(2px, -2px); }` : ''}
 
 /* FIELD — a rule beneath, not a box around. A boxed input turns every form into a stack of cards. */
 .c-field {
-  width: 100%; font: inherit; color: var(--ink); background: transparent;
-  border: 0; border-bottom: 1px solid var(--rule); border-radius: 0;
+  width: 100%; font: inherit; color: var(--foreground); background: transparent;
+  border: 0; border-bottom: 1px solid var(--border); border-radius: 0;
   padding: ${pad.y} 2px;
   transition: border-color var(--mi-dur) var(--mi-ease);
 }
-.c-field::placeholder { color: var(--ink-muted); }
-.c-field:focus { border-bottom-color: var(--kit-accent); outline: none; }
+.c-field::placeholder { color: var(--muted-foreground); }
+.c-field:focus { border-bottom-color: var(--accent); outline: none; }
 
 /* TILE — the unified container for logos, partners, small proof items. Tinting every tile the same
    is what stops a logo wall looking like mismatched files pasted in a row. */
@@ -260,7 +265,7 @@ ${hasIcon ? `.c-link::after { content: ${iconGlyph}; display: inline-block; marg
   border-radius: var(--kit-radius);
   /* Uses the run's committed surface language, so a tile is made the same way every other surface
      on the page is made — that consistency is what a unified logo wall depends on. */
-  background: var(--s-surface-bg, color-mix(in srgb, var(--ink) 6%, transparent));
+  background: var(--s-surface-bg, color-mix(in srgb, var(--foreground) 6%, transparent));
   border: var(--s-surface-border, 0);
   box-shadow: var(--s-surface-ring, 0 0 0 0 transparent), var(--s-shadow, 0 0 0 0 transparent);
 }
@@ -268,11 +273,11 @@ ${hasIcon ? `.c-link::after { content: ${iconGlyph}; display: inline-block; marg
 /* SURFACE EDGE — how any two areas separate, committed once. */
 ${
   kit.edge === 'rule'
-    ? `.c-edge { border-top: 1px solid var(--rule); }`
+    ? `.c-edge { border-top: 1px solid var(--border); }`
     : kit.edge === 'hairline'
-      ? `.c-edge { border: 1px solid var(--rule); }`
+      ? `.c-edge { border: 1px solid var(--border); }`
       : kit.edge === 'tint'
-        ? `.c-edge { background: color-mix(in srgb, var(--ink) 4%, transparent); }`
+        ? `.c-edge { background: color-mix(in srgb, var(--foreground) 4%, transparent); }`
         : `.c-edge { }`
 }
 

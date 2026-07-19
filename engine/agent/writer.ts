@@ -27,11 +27,13 @@ import { revealCss, revealIntensity, revealKind } from './reveal.js'
 import { kitCss, type KitSpec } from './kit.js'
 import { surfaceCss, type SurfaceSpec } from './surface.js'
 import { groundsCss, type GroundPlan } from './grounds.js'
+import { gradeCss, gradeFor, type GradeSpec } from './grade.js'
 import type { SketchPlan } from './sketch.js'
 
 /** Only used when themeCss is called outside a run (tests/tools); a real run always passes art.kit. */
 const DEFAULT_KIT: KitSpec = { corner: 'soft', button: 'solid', icon: 'none', edge: 'rule', eyebrow: 'mono-tracked', density: 'regular', rationale: 'default' }
 const DEFAULT_SURFACE: SurfaceSpec = { surface: 'hairline', elevation: 'hairline', light: 'none', blend: 'none', edgeFade: 'none', texture: 'none', rationale: 'default' }
+const DEFAULT_GRADE: GradeSpec = { grade: 'contrast', strength: 0.45 }
 import { buildChrome } from './chrome.js'
 import type { ArtDirection, InteractionSpec, LayoutSpec, Palette, TypographySpec } from './art-direction.js'
 import type { Plan, SectionResult } from './types.js'
@@ -445,7 +447,7 @@ const SCALE_ASPECT_CSS = Object.entries(SCALE_ASPECT)
   .map(([scale, a]) => `.shot-${scale} { aspect-ratio: ${a.css}; object-fit: cover; width: 100%; height: auto; }`)
   .join('\n')
 
-export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec, feel: ScrollFeel = 'native', reveal: 'calm' | 'standard' | 'sharp' = 'standard', kit: KitSpec = DEFAULT_KIT, surface: SurfaceSpec = DEFAULT_SURFACE): string {
+export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec, feel: ScrollFeel = 'native', reveal: 'calm' | 'standard' | 'sharp' = 'standard', kit: KitSpec = DEFAULT_KIT, surface: SurfaceSpec = DEFAULT_SURFACE, grade: GradeSpec = DEFAULT_GRADE): string {
   const h = headingSizes(type.scaleRatio, DISPLAY_MAX[type.displayScale])
   const vars = `  --background: ${p.background};
   --foreground: ${p.foreground};
@@ -472,7 +474,13 @@ export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, 
   --mi-tap: ${mi.tapScale};
   --font-display: ${type.displayFamily};
   --font-body: ${type.bodyFamily};
-  --container: ${layout.containerPx}px;
+  /* The container SCALES with the viewport instead of sitting at a fixed pixel width.
+     Measured on a 1920px screen: a 1088px container left 416px of dead margin each side, so a page
+     that looked right in a 900px preview read as a narrow strip stranded in a wide monitor — the
+     "looks good in half screen, bad fullscreen" report. The committed width is now the FLOOR: small
+     screens are unchanged, and large ones grow to ~78vw up to a ceiling so the measure never becomes
+     unreadable. Body copy is protected separately by .measure. */
+  --container: clamp(${layout.containerPx}px, 78vw, ${Math.round(layout.containerPx * 1.34)}px);
   --section-pad: clamp(${layout.sectionPadMin}px, 14vh, ${layout.sectionPadMax}px);
   /* Base h2 size. The rhythm's .vol-* classes rescale THIS, which cascades to the section's h2. */
   --h2-base: ${css(h.h2)};
@@ -566,6 +574,7 @@ ${rhythmCss()}
 ${scrollCss(feel)}
 ${revealCss(mi, reveal)}
 ${groundsCss(p)}
+${gradeCss(grade, p)}
 ${surfaceCss(surface)}
 ${kitCss(kit, mi, type)}
 
@@ -669,7 +678,7 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection, gr
 
   // Deterministic art-direction: re-skin the whole page by rewriting the theme variables.
   const scrollFeel = feelForMotion(art.motion)
-  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions, art.typography, art.layout, scrollFeel, revealIntensity(art.motion), art.kit, art.surface), 'utf8')
+  writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions, art.typography, art.layout, scrollFeel, revealIntensity(art.motion), art.kit, art.surface, gradeFor(art.shotPlan.world.light, art.shotPlan.world.texture, plan.mood)), 'utf8')
 
   const files: string[] = []
 

@@ -70,7 +70,8 @@ const REQUIRED = [
 for (const sel of REQUIRED) check(`${sel} survives into the stylesheet`, body.includes(sel))
 
 // 4. The locked values must actually reach the custom properties.
-check('--container carries the layout width', body.includes(`--container: ${LAYOUT.containerPx}px`))
+check('--container carries the layout width as its floor', body.includes(`clamp(${LAYOUT.containerPx}px`))
+check('--container scales with the viewport', /--container:\s*clamp\([^)]*vw/.test(body))
 check('--section-pad carries the padding rhythm', body.includes(`${LAYOUT.sectionPadMin}px`))
 check('.container-page consumes --container', /\.container-page\s*\{[^}]*max-width:\s*var\(--container\)/.test(body))
 check('.container-page centres itself', /\.container-page\s*\{[^}]*margin-inline:\s*auto/.test(body))
@@ -78,6 +79,39 @@ check('.container-page centres itself', /\.container-page\s*\{[^}]*margin-inline
 // 5. A rule must not be preceded by orphaned prose — the signature of the original bug.
 const orphan = body.match(/\n\s*[a-z][a-z -]{18,}\n\s*\.[a-z-]+\s*\{/i)
 check('no orphaned prose immediately before a rule', !orphan, orphan?.[0]?.slice(0, 80))
+
+console.log('\ntokens must follow the ground, not freeze on :root\n')
+
+/**
+ * A CSS custom property is resolved ONCE where it is declared and then inherits as a literal value.
+ * So a token declared on :root whose value references something a ground changes is FLATTENED to the
+ * base palette, and silently stops following the ground.
+ *
+ * This shipped twice. The kit aliased --ink-muted to var(--muted-foreground) on :root, so eyebrows on
+ * accent and inverse fields rendered the BASE muted colour and failed contrast on both — while the
+ * grounds themselves were working perfectly, which made it look like a grounds bug. The surface
+ * language had the identical shape. Neither is visible in source; both only show as wrong colours on
+ * a rendered page.
+ */
+const GROUNDS = ['.ground-base', '.ground-raised', '.ground-inverse', '.ground-accent']
+const THEME_VARS = ['--foreground', '--background', '--muted-foreground', '--border', '--card', '--accent']
+
+const suspects: string[] = []
+for (const m of body.matchAll(/([^{}]*):root([^{}]*)\{([^}]*)\}/g)) {
+  const selector = (m[1] ?? '') + ':root' + (m[2] ?? '')
+  if (GROUNDS.some((g) => selector.includes(g))) continue // already re-declared per ground
+  for (const d of (m[3] ?? '').matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/gi)) {
+    const name = d[1] as string
+    const value = d[2] as string
+    if (!THEME_VARS.some((v) => value.includes('var(' + v + ')'))) continue
+    const onGround = GROUNDS.some((g) => body.includes(g) && new RegExp('\\' + g + '[^{]*\\{[^}]*' + name + '\\s*:').test(body))
+    if (!onGround) suspects.push(name + ': ' + value.trim().slice(0, 50))
+  }
+}
+check('no theme-derived token is frozen on :root alone', suspects.length === 0, suspects.join(' | '))
+check('kit atoms read --muted-foreground directly, with no frozen alias', body.includes('var(--muted-foreground)') && !body.includes('--ink-muted'))
+check('grounds re-point the foreground token', /\.ground-inverse[^{]*\{[^}]*--foreground/.test(body))
+check('grounds re-point the muted token', /\.ground-inverse[^{]*\{[^}]*--muted-foreground/.test(body))
 
 console.log(failed ? `\nFAIL — ${failed} check(s)\n` : '\nPASS — emitted css intact\n')
 process.exit(failed ? 1 : 0)

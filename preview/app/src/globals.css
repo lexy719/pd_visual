@@ -9,25 +9,25 @@
  * gradient stay valid.
  */
 :root {
-  --background: #F7F4EE;
-  --foreground: #211D18;
-  --card: #FDFBF7;
+  --background: #F7F5F0;
+  --foreground: #221E1A;
+  --card: #FFFFFF;
   --card-foreground: #0a0a0a;
-  --popover: #FDFBF7;
+  --popover: #FFFFFF;
   --popover-foreground: #0a0a0a;
-  --primary: #8A3B25;
+  --primary: #5C6B4E;
   --primary-foreground: #fafafa;
-  --secondary: #e6e3dd;
-  --secondary-foreground: #211D18;
-  --muted: #e6e3dd;
-  --muted-foreground: #6F6659;
-  --accent: #B5652E;
-  --accent-foreground: #0a0a0a;
+  --secondary: #e6e4df;
+  --secondary-foreground: #221E1A;
+  --muted: #e6e4df;
+  --muted-foreground: #726B60;
+  --accent: #B3521E;
+  --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #E4DDCE;
-  --input: #E4DDCE;
-  --ring: #B5652E;
+  --border: #E4DFD5;
+  --input: #E4DFD5;
+  --ring: #B3521E;
   --radius: 0.5rem;
   --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -42,25 +42,25 @@
 }
 
 .dark {
-  --background: #F7F4EE;
-  --foreground: #211D18;
-  --card: #FDFBF7;
+  --background: #F7F5F0;
+  --foreground: #221E1A;
+  --card: #FFFFFF;
   --card-foreground: #0a0a0a;
-  --popover: #FDFBF7;
+  --popover: #FFFFFF;
   --popover-foreground: #0a0a0a;
-  --primary: #8A3B25;
+  --primary: #5C6B4E;
   --primary-foreground: #fafafa;
-  --secondary: #e6e3dd;
-  --secondary-foreground: #211D18;
-  --muted: #e6e3dd;
-  --muted-foreground: #6F6659;
-  --accent: #B5652E;
-  --accent-foreground: #0a0a0a;
+  --secondary: #e6e4df;
+  --secondary-foreground: #221E1A;
+  --muted: #e6e4df;
+  --muted-foreground: #726B60;
+  --accent: #B3521E;
+  --accent-foreground: #fafafa;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #E4DDCE;
-  --input: #E4DDCE;
-  --ring: #B5652E;
+  --border: #E4DFD5;
+  --input: #E4DFD5;
+  --ring: #B3521E;
   --radius: 0.5rem;
   --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -225,38 +225,38 @@ html.lenis, html.lenis body { height: auto; }
   color: var(--foreground);
 }
 .ground-raised {
-  --background: #FDFBF7;
-  --card: #e6e3dd;
+  --background: #FFFFFF;
+  --card: #e6e4df;
   background: var(--background);
   color: var(--foreground);
 }
 .ground-inverse {
-  --background: #211D18;
-  --foreground: #F7F4EE;
-  --muted-foreground: color-mix(in srgb, #F7F4EE 62%, #211D18);
-  --border: color-mix(in srgb, #F7F4EE 22%, #211D18);
-  --card: color-mix(in srgb, #F7F4EE 8%, #211D18);
-  --secondary: color-mix(in srgb, #F7F4EE 14%, #211D18);
+  --background: #221E1A;
+  --foreground: #F7F5F0;
+  --muted-foreground: color-mix(in srgb, #F7F5F0 62%, #221E1A);
+  --border: color-mix(in srgb, #F7F5F0 22%, #221E1A);
+  --card: color-mix(in srgb, #F7F5F0 8%, #221E1A);
+  --secondary: color-mix(in srgb, #F7F5F0 14%, #221E1A);
   color-scheme: dark;
   background: var(--background);
   color: var(--foreground);
 }
 .ground-accent {
-  --background: #B5652E;
-  --foreground: #0a0a0a;
-  --muted-foreground: color-mix(in srgb, #0a0a0a 68%, #B5652E);
-  --border: color-mix(in srgb, #0a0a0a 26%, #B5652E);
-  --card: color-mix(in srgb, #0a0a0a 10%, #B5652E);
-  --secondary: color-mix(in srgb, #0a0a0a 16%, #B5652E);
-  --accent: #0a0a0a;
-  --accent-foreground: #B5652E;
+  --background: #B3521E;
+  --foreground: #fafafa;
+  --muted-foreground: color-mix(in srgb, #fafafa 68%, #B3521E);
+  --border: color-mix(in srgb, #fafafa 26%, #B3521E);
+  --card: color-mix(in srgb, #fafafa 10%, #B3521E);
+  --secondary: color-mix(in srgb, #fafafa 16%, #B3521E);
+  --accent: #fafafa;
+  --accent-foreground: #B3521E;
   background: var(--background);
   color: var(--foreground);
 }
 
 
 /*
- * THE SURFACE + LIGHT LANGUAGE — committed once for this project (hairline/hairline elevation/top-sheen light/none edges).
+ * THE SURFACE + LIGHT LANGUAGE — committed once for this project (hairline/soft elevation/top-sheen light (multiply)/fade-bottom edges/noise).
  *
  * Everything that needs to look like a surface consumes these TOKENS rather than writing its own
  * border, so the whole page re-skins from one decision. A page's identity comes far more from how
@@ -267,7 +267,7 @@ html.lenis, html.lenis body { height: auto; }
   --s-surface-bg: var(--card);
   --s-surface-ring: 0 0 0 0 transparent;
   --s-surface-border: 1px solid var(--border);
-  --s-shadow: 0 1px 0 0 color-mix(in srgb, var(--foreground) 5%, transparent);
+  --s-shadow: 0 1px 2px -1px color-mix(in srgb, var(--foreground) 12%, transparent), 0 12px 28px -8px color-mix(in srgb, var(--foreground) 14%, transparent);
 }
 
 /* Any element that should read as a surface. Deliberately does NOT set padding or radius — those
@@ -291,17 +291,21 @@ html.lenis, html.lenis body { height: auto; }
 .s-light::before {
   content: ''; position: absolute; inset: 0 0 auto 0; height: 40%; pointer-events: none; z-index: -1;
   background: linear-gradient(to bottom, color-mix(in srgb, var(--foreground) 6%, transparent) 0%, transparent 100%);
-  
+  mix-blend-mode: multiply;
 }
-
-
+.s-fade { -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%); mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%); }
+.s-texture { position: relative; }
+.s-texture::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+}
 
 @media (prefers-reduced-motion: reduce) { .s-light::before { transition: none; } }
 
 
 /*
  * THE PROJECT KIT — generated per run. These are this website's OWN components, not a preset
- * library: the form (solid/pill corners/none icon/rule edges/small-caps eyebrow/regular) was committed once for this brief.
+ * library: the form (underline/square corners/none icon/hairline edges/small-caps eyebrow/generous) was committed once for this brief.
  * Sections APPLY these classes; they never build their own button, tag or label.
  *
  * Written against role tokens (--ink / --rule / --surface), never raw palette colours, so the same
@@ -314,7 +318,7 @@ html.lenis, html.lenis body { height: auto; }
   --surface: var(--card);
   --kit-accent: var(--accent);
   --kit-accent-ink: var(--accent-foreground);
-  --kit-radius: 999px;
+  --kit-radius: 0px;
 }
 
 /* PRIMARY ACTION — one construction, used for every meaningful action on the page. */
@@ -324,8 +328,8 @@ html.lenis, html.lenis body { height: auto; }
   line-height: 1; text-decoration: none; cursor: pointer;
   border-radius: var(--kit-radius);
   transition: background-color var(--mi-dur) var(--mi-ease), color var(--mi-dur) var(--mi-ease), border-color var(--mi-dur) var(--mi-ease), transform var(--mi-dur) var(--mi-ease);
-  background: var(--kit-accent); color: var(--kit-accent-ink); border: 0;
-  padding: 12px 20px;
+  background: transparent; color: var(--ink); border: 0; border-bottom: 2px solid var(--kit-accent);
+  padding: 16px 2px; border-radius: 0;
 }
 
 
@@ -340,7 +344,7 @@ html.lenis, html.lenis body { height: auto; }
 /* SECONDARY ACTION — same geometry, lower weight, so the pair reads as one family. */
 .c-btn-ghost {
   display: inline-flex; align-items: center; font: inherit; line-height: 1;
-  padding: 12px 20px; border-radius: var(--kit-radius);
+  padding: 16px 28px; border-radius: var(--kit-radius);
   background: transparent; color: var(--ink); border: 1px solid var(--rule);
   text-decoration: none; cursor: pointer;
   transition: border-color var(--mi-dur) var(--mi-ease), color var(--mi-dur) var(--mi-ease);
@@ -353,7 +357,7 @@ html.lenis, html.lenis body { height: auto; }
 /* TAG — metadata, never an action. Visually quieter than any button so the two never compete. */
 .c-tag {
   display: inline-block; font-size: 12px; line-height: 1; padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: 0px;
   color: var(--ink-muted); border: 1px solid var(--rule); background: transparent;
 }
 
@@ -369,7 +373,7 @@ html.lenis, html.lenis body { height: auto; }
 .c-field {
   width: 100%; font: inherit; color: var(--ink); background: transparent;
   border: 0; border-bottom: 1px solid var(--rule); border-radius: 0;
-  padding: 12px 2px;
+  padding: 16px 2px;
   transition: border-color var(--mi-dur) var(--mi-ease);
 }
 .c-field::placeholder { color: var(--ink-muted); }
@@ -378,7 +382,7 @@ html.lenis, html.lenis body { height: auto; }
 /* TILE — the unified container for logos, partners, small proof items. Tinting every tile the same
    is what stops a logo wall looking like mismatched files pasted in a row. */
 .c-tile {
-  display: grid; place-items: center; padding: 20px;
+  display: grid; place-items: center; padding: 28px;
   border-radius: var(--kit-radius);
   /* Uses the run's committed surface language, so a tile is made the same way every other surface
      on the page is made — that consistency is what a unified logo wall depends on. */
@@ -388,7 +392,7 @@ html.lenis, html.lenis body { height: auto; }
 }
 
 /* SURFACE EDGE — how any two areas separate, committed once. */
-.c-edge { border-top: 1px solid var(--rule); }
+.c-edge { border: 1px solid var(--rule); }
 
 @media (prefers-reduced-motion: reduce) {
   .c-btn, .c-btn-ghost, .c-link, .c-link::after, .c-field { transition: none; }
@@ -586,7 +590,7 @@ html { overflow-x: clip; }
 }
 .mi-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px -18px rgba(33, 29, 24, 0.35);
+  box-shadow: 0 12px 24px -16px rgba(34, 30, 26, 0.25);
 }
 .mi-press:active {
   transform: scale(var(--mi-tap));

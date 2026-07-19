@@ -222,7 +222,18 @@ export function surfaceCss(s: SurfaceSpec): string {
  * border, so the whole page re-skins from one decision. A page's identity comes far more from how
  * its surfaces are made and where its light falls than from the shape of its buttons.
  */
-:root {
+/*
+ * Declared on :root AND on every ground. These tokens are color-mix() expressions over the theme
+ * tokens, and a custom property is resolved ONCE where it is declared, then inherits as a literal.
+ * Declared only on :root they would freeze to the base palette, so .s-raised inside a dark or
+ * brand-colour field would paint a light surface on it — the same flattening that silently broke the
+ * kit's atoms. Re-declaring per ground forces them to recompute against that ground's tokens.
+ */
+:root,
+.ground-base,
+.ground-raised,
+.ground-inverse,
+.ground-accent {
 ${surfaceTokens[s.surface]}
 ${elevationTokens[s.elevation]}
 }

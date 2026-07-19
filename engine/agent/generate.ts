@@ -22,6 +22,7 @@ import { kitPromptBlock, lintKit, type KitSpec } from './kit.js'
 import { surfacePromptBlock, lintSurface, type SurfaceSpec } from './surface.js'
 import { sketchPromptBlock, ARRANGEMENT_DEVICE, type SketchPlan, type SketchBeat } from './sketch.js'
 import { groundPromptBlock, type GroundPlan, type Ground } from './grounds.js'
+import { stockStyleTerms } from './grade.js'
 import type { ArtDirection, InteractionSpec, ShotBeat, ShotPlan, ShotScale, ShotWorld } from './art-direction.js'
 import type { Plan, SectionPlan, SectionResult } from './types.js'
 
@@ -307,10 +308,17 @@ corrected file — imports plus one \`export default function\` — and nothing 
  * (so repeats across the page differ) and sizes via Unsplash's raw-URL params. Returns null on any
  * failure (no key, rate limit, no match) so the caller can fall back to keyless Flux generation.
  */
-async function fetchUnsplash(kw: string, w: number, h: number, key: string, usedIds: Set<string>): Promise<string | null> {
+async function fetchUnsplash(kw: string, w: number, h: number, key: string, usedIds: Set<string>, style = ''): Promise<string | null> {
   try {
-    const q = encodeURIComponent(kw.replace(/[-_]+/g, ' ').trim())
-    const res = await fetch(`https://api.unsplash.com/search/photos?query=${q}&per_page=8&orientation=landscape&content_filter=high`, {
+    // The committed world's own words steer the search, so the returned set already leans toward the
+  // page's light before the grade touches it. This is the only route by which ShotWorld reaches a
+  // stock image at all — previously light/lens/texture only ever built Flux prompt strings.
+  const q = encodeURIComponent(`${kw.replace(/[-_]+/g, ' ').trim()}${style ? ' ' + style : ''}`.trim())
+    // Orientation follows the BEAT, not a hardcoded landscape. detail (4:5) and macro (1:1) beats were
+  // being served landscape photographs and hard-cropped by object-fit, which throws away the
+  // photographer's framing — the most avoidable kind of incoherence.
+  const orientation = h > w * 1.15 ? 'portrait' : w > h * 1.15 ? 'landscape' : 'squarish'
+  const res = await fetch(`https://api.unsplash.com/search/photos?query=${q}&per_page=8&orientation=${orientation}&content_filter=high`, {
       headers: { Authorization: `Client-ID ${key}`, 'Accept-Version': 'v1' }
     })
     if (!res.ok) return null
@@ -521,7 +529,7 @@ export async function resolveImages(sections: SectionResult[], shot: ShotPlan, l
     // size is modest enough that the resolution cap does not show.
     const smallSubjectSlot = subjectForRouting && !bigSlot
     const preferStock = !!key && !smallSubjectSlot
-    let url = preferStock ? await fetchUnsplash(r.kw, r.w, r.h, key!, usedIds) : null
+    let url = preferStock ? await fetchUnsplash(r.kw, r.w, r.h, key!, usedIds, stockStyleTerms(world.light, world.texture)) : null
     if (url) unsplashCount++
     else {
       // Continuity is keyed on the KEYWORD showing the subject, not on the beat's role — a prove
