@@ -569,7 +569,20 @@ const MIN_ACCENT_SAT = 0.35
 /** Body-text contrast floor (accessibility.md). */
 const TEXT_CONTRAST = 4.5
 /** Secondary/muted text can sit at the large-text floor. */
-const MUTED_CONTRAST = 3.0
+/**
+ * Muted text must clear AA for SMALL text, not large.
+ *
+ * This was 3.0, which is the AA threshold for text at 24px+ (or 18.66px bold). But
+ * --muted-foreground is what every caption, label, timestamp and secondary line uses — small text,
+ * which needs 4.5. So the palette was guaranteeing body copy at a headline's threshold on every page
+ * this system has produced.
+ *
+ * Caught only when measured contrast landed: one run reported the same pairing four times
+ * (rgb(138,128,115) on rgb(247,244,238), ~3.3:1) and the detector was right. The cost is that muted
+ * text is now genuinely darker — less "muted" than a designer might reach for by eye — and that is
+ * the correct trade, because a caption nobody can read is not a design choice.
+ */
+const MUTED_CONTRAST = 4.5
 
 const COLOR_FILE = 'knowledge/guidelines/color-theory.md'
 
@@ -608,7 +621,7 @@ Respond with ONLY JSON in this exact shape (every color a #rrggbb hex):
   },
   "groundStrategy": "<one of: mono | alternating | punctuated>",
   "surface": {
-    "surface": "<one of: inset-ring | hairline | shadow-stack | tint | glass | flat>",
+    "construction": "<one of: inset-ring | hairline | shadow-stack | tint | glass | flat>",
     "elevation": "<one of: none | hairline | soft | deep>",
     "light": "<one of: none | radial-glow | gradient-mesh | top-sheen>",
     "blend": "<one of: none | overlay | multiply | lighten | hard-light>",

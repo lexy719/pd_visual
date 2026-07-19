@@ -26,6 +26,7 @@ import { revealCss, revealIntensity, revealKind } from './reveal.js'
 import { kitCss, type KitSpec } from './kit.js'
 import { surfaceCss, type SurfaceSpec } from './surface.js'
 import { groundsCss, type GroundPlan } from './grounds.js'
+import type { SketchPlan } from './sketch.js'
 
 /** Only used when themeCss is called outside a run (tests/tools); a real run always passes art.kit. */
 const DEFAULT_KIT: KitSpec = { corner: 'soft', button: 'solid', icon: 'none', edge: 'rule', eyebrow: 'mono-tracked', density: 'regular', rationale: 'default' }
@@ -256,13 +257,13 @@ export function decodeUnicodeEscapes(code: string, log?: (m: string) => void): s
  * Handles both `className="…"` and `className={`…`}`; leaves a section alone if it somehow has no
  * root className rather than corrupting the JSX.
  */
-export function stampRhythm(code: string, beat: { density: string; volume: string } | undefined, kind = 'rise', ground = 'base'): string {
+export function stampRhythm(code: string, beat: { density: string; volume: string } | undefined, kind = 'rise', ground = 'base', bleedMedia = false): string {
   if (!beat) return code
   // `reveal` rides along with the rhythm classes: both are page-level decisions stamped onto the
   // section root, and both exist because a section cannot make them correctly on its own.
   // 'rise' is the default keyframe, so it needs no extra class.
   // The ground rides along too: it re-points the theme tokens for everything inside the section.
-  const add = `ground-${ground} rhythm-${beat.density} vol-${beat.volume} reveal${kind === 'rise' ? '' : ` reveal-${kind}`}`
+  const add = `ground-${ground} rhythm-${beat.density} vol-${beat.volume} reveal${kind === 'rise' ? '' : ` reveal-${kind}`}${bleedMedia ? ' bleed-media' : ''}`
   if (new RegExp(`\\brhythm-`).test(code)) return code // already stamped — never double-stamp
   let done = false
   return code.replace(/(<section\b[^>]*?className=)(?:"([^"]*)"|\{`([^`]*)`\})/s, (full, head, dq, tq) => {
@@ -641,7 +642,7 @@ export interface WriteResult {
   registry: string[]
 }
 
-export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection, grounds?: GroundPlan): WriteResult {
+export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection, grounds?: GroundPlan, sketchPlan?: SketchPlan): WriteResult {
   // Clear the active component / previous generated page so nothing stale leaks in.
   rmSync(GENERATED, { recursive: true, force: true })
   mkdirSync(GENERATED, { recursive: true })
@@ -687,7 +688,13 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection, gr
     sanitized = decodeUnicodeEscapes(sanitized, console.warn)
     // chrome is composed once by the writer — a section must not render a second site nav
     if (hasChromeForRun) sanitized = stripSectionChrome(sanitized, console.warn)
-    sanitized = stampRhythm(sanitized, art.rhythm?.beats[s.index], revealKind(s.composition), grounds?.grounds[s.index] ?? 'base')
+    sanitized = stampRhythm(
+      sanitized,
+      art.rhythm?.beats[s.index],
+      revealKind(s.composition),
+      grounds?.grounds[s.index] ?? 'base',
+      sketchPlan?.beats[s.index]?.arrangement === 'full-bleed-media'
+    )
     sanitized = ensureReactImport(sanitized)
     let { code, repaired } = ensureDefaultExport(sanitized, label)
     if (repaired) console.warn(`  \x1b[33mfixup\x1b[0m [${label}] had no default export — injected one.`)

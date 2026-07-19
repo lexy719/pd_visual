@@ -135,10 +135,10 @@ async function main(): Promise<void> {
 
   // 5. WRITE
   rule('WRITE  → preview/app')
-  const w = writePage(p, gen, art, gp)
+  const w = writePage(p, gen, art, gp, sk)
 
   // 5b. SEE — render, screenshot, critique, revise (accept-if-better), ship-with-warning.
-  const visual = await visualPass(p, gen.sections, APP, () => writePage(p, gen, art, gp))
+  const visual = await visualPass(p, gen.sections, APP, () => writePage(p, gen, art, gp, sk))
   if (visual.ran && visual.surviving.length) {
     console.log(`  \x1b[31mVISUAL\x1b[0m shipped WITH ${visual.surviving.length} visible defect(s) after the revise pass:`)
     for (const d of visual.surviving) console.log(`  \x1b[31m      \x1b[0m [${d.severity}] s${d.sectionIndex} ${d.defectClass}: ${d.evidence.slice(0, 100)}`)

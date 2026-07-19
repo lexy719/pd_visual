@@ -70,7 +70,9 @@ export function clampSurface(raw: unknown, mood: Mood[]): { surface: SurfaceSpec
   const quiet = mood.includes('calm') || mood.includes('minimal') || mood.includes('premium')
 
   const spec: SurfaceSpec = {
-    surface: pick(r.surface, SURFACES, hard ? 'flat' : technical ? 'inset-ring' : quiet ? 'hairline' : 'shadow-stack', 'surface'),
+    // Accepts `construction` (the JSON key) or `surface`; the nested surface.surface key was left
+    // empty by the model on two consecutive runs, which is a prompt-shape problem, not a model failure.
+    surface: pick(r.construction ?? r.surface, SURFACES, hard ? 'flat' : technical ? 'inset-ring' : quiet ? 'hairline' : 'shadow-stack', 'surface'),
     elevation: pick(r.elevation, ELEVATIONS, hard ? 'none' : quiet ? 'hairline' : 'soft', 'elevation'),
     light: pick(r.light, LIGHTS, technical ? 'radial-glow' : hard ? 'none' : 'top-sheen', 'light'),
     blend: pick(r.blend, BLENDS, 'none', 'blend'),

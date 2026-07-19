@@ -500,7 +500,12 @@ export async function resolveImages(sections: SectionResult[], shot: ShotPlan, l
     // cannot return the same subject twice and continuity outranks sharpness.
     const subjectForRouting = !!world.subject && isSubjectKw(r.kw, head)
     const bigSlot = beat ? beat.scale === 'establishing' || beat.scale === 'wide' : r.w >= 1400
-    const preferStock = !!key && !subjectForRouting && (useStock || bigSlot)
+    // At FULL-BLEED size, sharpness outranks subject continuity. A generated image caps near 886px
+    // wide, and a cinematic run duly rendered its focal frame from an 886px file — soft, and the
+    // reason a "cinematic" page did not read as one. A sharp establishing shot that is not literally
+    // the same bottle beats a soft one that is: continuity is invisible if the image looks cheap.
+    // Smaller subject slots still force generation, so the recurring subject survives where it reads.
+    const preferStock = !!key && (bigSlot || (!subjectForRouting && useStock))
     let url = preferStock ? await fetchUnsplash(r.kw, r.w, r.h, key!, usedIds) : null
     if (url) unsplashCount++
     else {

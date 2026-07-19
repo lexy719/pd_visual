@@ -104,8 +104,15 @@ export function planGrounds(
     }
   }
 
-  // A full-bleed image section is better on a dark field whatever the strategy: a photograph sitting
-  // on white has a hard edge at the top and bottom of the page, and on a dark ground it does not.
+  // MONO MEANS MONO. Observed on a real run: a committed "mono" page came out with four different
+  // fields, because the two rules below each overrode it for defensible individual reasons. A
+  // commitment that the system quietly edits is not a commitment — a page that deliberately chose one
+  // field is allowed to have one field, and the anti-monotony rule does not apply to a decision whose
+  // whole point is monotony.
+  if (strategy === 'mono') return { grounds, strategy }
+
+  // A full-bleed image section is better on a dark field: a photograph sitting on white has a hard
+  // edge at the top and bottom of the page, and on a dark ground it does not.
   for (let i = 0; i < sectionCount; i++) {
     if (sketch.beats[i]?.arrangement === 'full-bleed-media' && grounds[i] === 'base') grounds[i] = 'inverse'
   }

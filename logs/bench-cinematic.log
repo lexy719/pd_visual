@@ -1,0 +1,265 @@
+
+brief:      "Halden — a single-origin coffee roastery in Bergen that roasts one lot at a time and names the farm on every bag. A cinematic scroll story about the journey from a hillside in Huila to the cup: the altitude, the hands that pick it, the roast curve, the pour. Mood: premium, calm, cinematic."
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-sonnet-5   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+brand:  Halden
+mood:   premium, calm
+layout: origin-to-proof, editorial-brand-story
+sections:
+  0. masthead         [36mcinematic[0m/xl  Establish Halden's name and the single premise: one lot, one farm, named on every bag
+  1. the-altitude     [36meditorial[0m/lg  Ground the origin story in place — the specific farm, elevation, and family behind this lot
+  2. the-hands        [36mnarrative[0m/lg  Show the labor of the harvest — picking, sorting, washing — as the source of quality, not an abstraction
+  3. the-crossing     [36masymmetric[0m/md  Mark the transition from farm to Bergen roastery — distance, care in transit, the lot arriving intact
+  4. the-roast-curve  [36mimmersive[0m/xl  Reveal the craft of roasting this specific lot — the curve, the listening, the judgment call at first crack
+  5. the-pour         [36mcinematic[0m/lg  Land in Bergen — the finished cup, the ritual of pouring, the moment the origin becomes taste
+  6. the-proof        [36meditorial[0m/md  Close on evidence — this bag, this farm name, this lot number — inviting the reader to hold the origin in hand
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated, subject="a kraft-paper coffee bag with a cream label stampe" · establishing → medium → detail → wide → macro → medium → detail[0m
+  primary   [48;2;92;70;50m   [0m #5C4632
+  accent    [48;2;181;98;43m   [0m #B5622B
+  bg / fg   [48;2;247;244;238m   [0m #F7F4EE  /  [48;2;37;35;30m   [0m #25231E
+  card/bord [48;2;255;255;255m   [0m #FFFFFF  /  [48;2;228;222;210m   [0m #E4DED2
+  motion    [36mparallax-slow[0m  (locked for the whole run)
+  rhythm    [36m██▄▄██▄  peak@0[0m  (page pacing: ▁tight ▄normal █open)
+  kit       [36msolid/pill corners/none icon/rule edges/small-caps eyebrow/regular[0m  (this project's own components, emitted as CSS)
+  [2m(no rationale given)[0m
+  surface   [36mhairline/hairline elevation/top-sheen light/none edges[0m
+  [2m(no rationale given)[0m
+  interact  [36m260ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-2px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2ma warm low-saturation sage-brown palette with a single burnt-terracotta accent, hairline surfaces with soft top-sheen and grain, and slow parallax depth with restrained 260ms easing together let the origin story feel handled and unhurried rather than performed, per the calm/premium restraint principle.[0m
+  [2manchors: Calm / wellness / health, parallax-depth, premium / calm micro-interactions, duration scale, Micro-interactions, Type scale ratios by mood, Calm / wellness typography, Premium / editorial typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, PP Neue Montreal — throughline, Bucks Sauce — Reviews section uses a hand-lettered, sketchy outline t…, Cantor8 — throughline[0m
+  [33mADJUSTED[0m kit.corner "" is not in the grammar → pill
+  [33mADJUSTED[0m kit.button "" is not in the grammar → solid
+  [33mADJUSTED[0m kit.icon "" is not in the grammar → none
+  [33mADJUSTED[0m kit.edge "" is not in the grammar → rule
+  [33mADJUSTED[0m kit.eyebrow "" is not in the grammar → small-caps
+  [33mADJUSTED[0m kit.density "" is not in the grammar → regular
+  [33mADJUSTED[0m surface.surface "" is not in the grammar → hairline
+  [33mADJUSTED[0m surface.elevation "" is not in the grammar → hairline
+  [33mADJUSTED[0m surface.light "" is not in the grammar → top-sheen
+  [33mADJUSTED[0m surface.blend "" is not in the grammar → none
+  [33mADJUSTED[0m surface.edgeFade "" is not in the grammar → none
+  [33mADJUSTED[0m surface.texture "" is not in the grammar → none
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Halden  ·  premium/calm  ·  origin-to-proof
+  motion: parallax-slow   palette: Amber
+┌──────────────────────────────────────────────────┐
+│ masthead  ·  cinematic  ·  pinned-crossfade (mot │
+│   ↳ Establish Halden's name and the single premi │
+│     media: full-bleed still of misty hillside te │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-altitude  ·  editorial  ·  parallax-depth (m │
+│   ↳ Ground the origin story in place — the speci │
+│     media: split image of terrain map/elevation  │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-hands  ·  narrative  ·  Container and grid   │
+│   ↳ Show the labor of the harvest — picking, sor │
+│     media: alternating left-right frames: hands  │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-crossing  ·  asymmetric  ·  asymmetric-grid  │
+│   ↳ Mark the transition from farm to Bergen roas │
+│     media: offset image of raw green coffee sack │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-roast-curve  ·  immersive  ·  parallax-depth │
+│   ↳ Reveal the craft of roasting this specific l │
+│     media: full-viewport pinned sequence of roas │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-pour  ·  cinematic  ·  parallax-depth (motio │
+│   ↳ Land in Bergen — the finished cup, the ritua │
+│     media: slow-motion-style still of pour-over  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-proof  ·  editorial  ·  Premium / calm spaci │
+│   ↳ Close on evidence — this bag, this farm name │
+│     media: close crop of the bag label with farm │
+│   [--] [--]                                      │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+[1m── SKETCH  (compose the whole page before building any of it) [0m
+[2m  composition sketched: full → media → staggered → side → full → anchored → proof  focal@4[0m
+  0. [36mfull-bleed-media  [0m bottom-left   masthead
+     [2meye: The Halden name over a hillside frame at dawn light[0m
+     [2mwhy: this is the opening frame of a scroll story — full-bleed establishes place before a single word of explanation is owed, and bottom-left leaves the sky empty for the name to breathe[0m
+  1. [36mmedia-beside-text [0m top-left      the-altitude
+     [2meye: the farm's name and elevation number set beside a portrait of the terrain[0m
+     [2mwhy: this section grounds one specific place and family, and a split lets the fact (elevation, name) sit still next to the image rather than compete with it as another full-bleed would[0m
+  2. [36mstaggered-grid    [0m top-left      the-hands
+     [2meye: hands mid-sort against cherry-red coffee fruit[0m
+     [2mwhy: staggered-grid suits this section's content; no specific reason was committed[0m
+  3. [36mside-rail         [0m bottom-right  the-crossing
+     [2meye: a thin line marking the shipping route from Huila to Bergen[0m
+     [2mwhy: side-rail suits this section's content; no specific reason was committed[0m
+  4. [36mfull-bleed-media  [0m full          the-roast-curve [35m◀ page focal[0m
+     [2meye: the roast curve overlaid on the drum's glow at first crack[0m
+     [2mwhy: this is the craft climax of the story and the brief marks it xl-immersive; it's the second and last full-bleed on the page, spent here because the roaster's judgment call is the thing worth stopping the scroll for[0m
+  5. [36manchored-statement[0m bottom-left   the-pour
+     [2meye: the cup mid-pour, steam catching light[0m
+     [2mwhy: coming directly off the immersive roast frame, this needs to feel like arrival rather than another spectacle, so the pour sits quietly in a corner instead of claiming the whole frame again[0m
+  6. [36mproof-wall        [0m top-left      the-proof
+     [2meye: the bag itself, farm name and lot number printed plain[0m
+     [2mwhy: the close is evidence, not narrative — a wall of the concrete artifacts (bag, name, lot number) closes the loop the masthead opened, and the reader is left holding facts rather than another scene[0m
+  [33mADJUSTED[0m sketch[2] reason was not substantive ("harvest is many small actions — picking, sorting") — replaced with the structural fact
+  [33mADJUSTED[0m sketch[3] reason was not substantive ("this beat is about distance and transit, a linea") — replaced with the structural fact
+  grounds   [36mmono: █··▒█··[0m  (· base  ▒ raised  █ inverse  ◆ accent)
+
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] masthead/cinematic     → motion-primitive pinned-crossfade (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [1] the-altitude/editorial → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [2] the-hands/narrative    → scratch  [structure: Container and grid, Premium / calm spacing, When to break the grid on purpose]
+       ↳ [bulk]
+  [3] the-crossing/asymmetric → scratch  [structure: asymmetric-grid, When to break the grid on purpose, Premium / calm spacing]
+       ↳ [bulk]
+  [4] the-roast-curve/immersive → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [5] the-pour/cinematic     → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [6] the-proof/editorial    → scratch  [structure: Premium / calm spacing, Container and grid, magazine-editorial]
+       ↳ [bulk]
+       ↳ shot plan [generated, subject-locked]: upgraded 7 image(s) → 7 Flux (staged)
+       ↳ hardened 5 <img> tag(s): explicit width/height + lazy below the fold
+       ↳ pre-warm 1/7 ok (1s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 2/7 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 3/7 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 4/7 ok (44s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 5/7 ok (44s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 6/7 ok (45s — generating fresh imagery, ~1min each)
+       ↳ pre-warm 7/7 ok (46s — generating fresh imagery, ~1min each)
+       ↳ pre-warm: 7/7 image(s) verified real
+       ↳ [33mimage resolution[0m: provider returned 686px wide for a 880px request (it caps near 0.59MP). Generated imagery is only sharp inside container-page, never full-bleed.
+
+[1m── SELF-CRITIQUE ───────────────────────────────────────────[0m
+[2m  reviewing [0] masthead…[0m
+[2m  reviewing [1] the-altitude…[0m
+[2m  reviewing [2] the-hands…[0m
+[2m  reviewing [3] the-crossing…[0m
+[2m  reviewing [4] the-roast-curve…[0m
+[2m  reviewing [5] the-pour…[0m
+[2m  reviewing [6] the-proof…[0m
+  [31mFLAG[0m [0:masthead] uses pinned-crossfade, which carries a known caveat: "Two-panel pinned crossfade on the proven @bsmnt/scrollytelling rail (same as kinetic-text-split). Panel one dissolves into panel two while t"
+  [31mFLAG[0m [1:the-altitude] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [33mwarn[0m [2:the-hands] no obvious vertical padding — guideline wants 96-140px section padding.
+  [33mwarn[0m [3:the-crossing] no obvious vertical padding — guideline wants 96-140px section padding.
+  [31mFLAG[0m [4:the-roast-curve] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [31mFLAG[0m [5:the-pour] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [33mwarn[0m [0:masthead] Second slide uses h3 for a masthead headline, breaking heading hierarchy (should be h2 or consistent with first slide's h2)
+  [33mwarn[0m [0:masthead] Text overlay relies on bg-background/30-40 scrim over photo with no guaranteed contrast ratio check against light/dark image regions — risk of failing WCAG contrast for headline and body text
+  [33mwarn[0m [0:masthead] Padding p-6 md:p-12 is below the premium spacing scale (32px+ card padding expected; p-6 = 24px on mobile)
+  [33mwarn[0m [0:masthead] No focus-visible or interactive affordance defined for the crossfade component despite 'hover, cursor' motion rules being referenced
+  [33mwarn[0m [1:the-altitude] section-pad likely defaults to a smaller scale than the required 140–180px; needs explicit verification/override for this calm/premium section.
+  [33mwarn[0m [1:the-altitude] Card/tag padding not confirmed at 32px+ standard; tags use small inline padding (c-tag) inconsistent with generous spacing rule.
+  [33mwarn[0m [1:the-altitude] Caption 'Doña Marleny Ramírez, third-generation grower' reuses c-tag styling meant for metadata pills, creating ambiguous hierarchy against real tags below the image.
+  [33mwarn[0m [1:the-altitude] No visible hover/motion treatment on the image or tags despite mood requiring a felt, subtle 260ms micro-interaction — ParallaxDepth intensity alone doesn't confirm compliance with easing/duration spec.
+  [33mwarn[0m [2:the-hands] Section uses only mi mi-lift hover on images with no defined duration/easing tokens confirming 260ms cubic-bezier(0.22,1,...) standard-out is applied — cannot verify restraint commitment from this file alone.
+  [33mwarn[0m [2:the-hands] Card/frame spacing uses mt-20/mt-28 (80-112px) between frames, below the 140-180px section rhythm required for premium/calm spacing.
+  [33mwarn[0m [2:the-hands] No explicit padding shown on image or text blocks (s-raised container) to confirm 32px+ card padding rule is met.
+  [33mwarn[0m [2:the-hands] Three accent tags ('Selection', 'Drying', 'Grading') plus eyebrow plus h2/h3 hierarchy risk exceeding a single calm accent if c-tag styling introduces color beyond monochrome+one accent.
+  [33mwarn[0m [3:the-crossing] SVG route markers and dashed line use text-primary/fill-primary — likely a saturated brand accent rather than the required monochrome/desaturated-analogous palette.
+  [33mwarn[0m [3:the-crossing] Two c-tag pairs plus the route diagram plus primary-colored dots create multiple simultaneous accent points, violating the single desaturated accent rule.
+  [33mwarn[0m [3:the-crossing] No visible focus-state or interactive affordance for the image; if this section relies on hover micro-interaction per the mood, none is implemented in code (no transition/duration-260 classes present).
+  [33mwarn[0m [3:the-crossing] SVG route line is aria-hidden but conveys real information (origin-to-destination) with no text alternative beyond the tags, risking a11y gap for screen reader users.
+  [33mwarn[0m [4:the-roast-curve] Text sits directly on photo with no scrim/gradient overlay specified, risking low contrast for h1/body/tags against variable image content
+  [33mwarn[0m [4:the-roast-curve] Three c-tag chips plus eyebrow act as multiple simultaneous accents, conflicting with monochrome + single desaturated accent rule
+  [33mwarn[0m [4:the-roast-curve] h1 uses default heading styling with no explicit line-height/weight restraint check — long headline at full heading scale may exceed calm editorial hierarchy
+  [33mwarn[0m [4:the-roast-curve] pb-16 md:pb-24 (64/96px) bottom padding is well under the 140–180px generous section spacing rule
+  [33mwarn[0m [5:the-pour] No section-level vertical spacing shown beyond generic 'section-pad' class — cannot confirm 140–180px requirement is met; image container capped at max-w-md with 60vh min-height risks feeling cramped rather than generous.
+  [33mwarn[0m [5:the-pour] Card content padding is p-8 md:p-10 (32–40px), acceptable, but text block has no max-width/measure applied beyond 'measure' class on paragraph only — heading and eyebrow not constrained, risking inconsistent line lengths.
+  [33mwarn[0m [5:the-pour] Headline 'The Pour' with no size/weight utility classes shown—relying on default h2 styling gives no confirmation of clear type hierarchy against eyebrow and body.
+  [33mwarn[0m [5:the-pour] Copy 'Huila becomes a cup here — poured slow, tasted quiet' is vague/generic editorial filler rather than specific sensory or provenance detail, weak on premium specificity.
+  [33mwarn[0m [6:the-proof] Five+ mi-lift hover interactions on the image and every c-tile create repetitive, competing motion across the section, violating the 'felt not seen' restraint principle.
+  [33mwarn[0m [6:the-proof] c-tile grid items lack visible spacing evidence in markup (relies on dev-logo-wall utility) — unable to confirm 32px+ card padding is met; risk of undersized padding versus the 32px+ card padding rule.
+  [33mwarn[0m [6:the-proof] s-raised p-2 gives the image frame only 8px padding, far below the 32px+ card padding minimum for this mood.
+  [33mwarn[0m [6:the-proof] Section uses two competing type elements at same visual weight (c-eyebrow appearing twice) with no clear single hierarchy anchor between hero heading and tile labels.
+
+[1m── WRITE  → preview/app ────────────────────────────────────[0m
+  scroll    [36msmooth[0m  (locked from motion language "parallax-slow")
+       ↳ visual critique: 15 defect(s) — 15 actionable (0 minor)
+         [blocking] s4 overflow: MEASURED (DOM, not vision): page scrollWidth 1306px > viewport 1280px; widest offender <div> spans x -130..121
+         [major] s3 dead-zone: MEASURED (DOM, not vision): unequal-columns in <div.dev-side-rail> — short column 442px vs tall 919px under al
+         [major] s4 dead-zone: MEASURED (DOM, not vision): half-empty-grid in <section.section-pad.ground-inverse.rhythm-open.vol-normal> — c
+         [major] s6 dead-zone: MEASURED (DOM, not vision): unequal-columns in <div.mt-16.grid.grid-cols-1.lg:grid-cols-12> — short column 270
+         [major] s1 dead-zone: MEASURED (DOM, not vision): half-empty-grid in <section.section-pad.ground-base.rhythm-open.vol-normal> — cont
+         [blocking] s5 contrast: MEASURED (DOM, not vision): "The Pour" renders rgb(255, 255, 255) on rgb(247, 244, 238) — contrast ratio 1.1:1
+         [blocking] s5 contrast: MEASURED (DOM, not vision): "Huila becomes a cup here — poured slow, tasted quiet." renders rgba(255, 255, 255
+         [blocking] s1 contrast: MEASURED (DOM, not vision): "The Altitude" renders rgb(138, 128, 115) on rgb(247, 244, 238) — contrast ratio 3
+         [blocking] s1 contrast: MEASURED (DOM, not vision): "Above the town of Pitalito, in Huila, the road narrows to a " renders color(srgb 
+         [blocking] s1 contrast: MEASURED (DOM, not vision): "The lot behind this bag came from a single block on the east" renders color(srgb 
+         [blocking] s1 contrast: MEASURED (DOM, not vision): "1,850 masl" renders rgb(138, 128, 115) on rgb(247, 244, 238) — contrast ratio 3.5
+         [blocking] s5 dead-zone: MEASURED (DOM, not vision): section is 986px tall but only 13% of that height carries text or imagery, with an
+         [major] s5 contrast: viewport-6893: 'The Pour' heading and subtext are overlaid directly on a dark photo (cup image) with low contr
+         [major] s0 dead-zone: overview screenshot: large expanse of solid dark background below the hero image and text (from ~y=250 to ~y=6
+         [major] s6 dead-zone: viewport-9191: entire lower half of the viewport (roughly y=460 to y=700) is empty cream background between th
+       ↳ revised section 1 (5 defect(s))
+       ↳ revised section 5 (4 defect(s))
+       ↳ revised section 4 (2 defect(s))
+  scroll    [36msmooth[0m  (locked from motion language "parallax-slow")
+       ↳ section 1 did not improve on re-critique — original restored
+       ↳ section 5 did not improve on re-critique — original restored
+       ↳ section 4 improved: 2 → 0 actionable defect(s)
+  scroll    [36msmooth[0m  (locked from motion language "parallax-slow")
+  [31mVISUAL[0m shipped WITH 15 visible defect(s) after the revise pass:
+  [31m      [0m [blocking] s5 overflow: MEASURED (DOM, not vision): page scrollWidth 1306px > viewport 1280px; widest offender <section.sect
+  [31m      [0m [major] s3 dead-zone: MEASURED (DOM, not vision): unequal-columns in <div.dev-side-rail> — short column 442px vs tall 919p
+  [31m      [0m [major] s6 dead-zone: MEASURED (DOM, not vision): unequal-columns in <div.mt-16.grid.grid-cols-1.lg:grid-cols-12> — short 
+  [31m      [0m [major] s1 dead-zone: MEASURED (DOM, not vision): half-empty-grid in <section.section-pad.ground-base.rhythm-open.vol-norm
+  [31m      [0m [blocking] s5 contrast: MEASURED (DOM, not vision): "The Pour" renders rgb(255, 255, 255) on rgb(247, 244, 238) — contrast r
+  [31m      [0m [blocking] s5 contrast: MEASURED (DOM, not vision): "Huila becomes a cup here — poured slow, tasted quiet." renders rgba(255
+  [31m      [0m [blocking] s1 contrast: MEASURED (DOM, not vision): "The Altitude" renders rgb(138, 128, 115) on rgb(247, 244, 238) — contra
+  [31m      [0m [blocking] s1 contrast: MEASURED (DOM, not vision): "1,850 masl" renders rgb(138, 128, 115) on rgb(247, 244, 238) — contrast
+  [31m      [0m [blocking] s1 contrast: MEASURED (DOM, not vision): "Caturra · Castillo" renders rgb(138, 128, 115) on rgb(247, 244, 238) — 
+  [31m      [0m [blocking] s1 contrast: MEASURED (DOM, not vision): "Doña Marleny Ramírez, third-generation grower" renders rgb(138, 128, 11
+  [31m      [0m [blocking] s5 dead-zone: MEASURED (DOM, not vision): section is 1152px tall but only 11% of that height carries text or image
+  [31m      [0m [major] s1 dead-zone: viewport-2338 and overview: below the Finca La Esperanza text block and portrait image, from roughly
+  [31m      [0m [major] s2 dead-zone: overview screenshot: section 'the-hands' (roughly page y 3083-4533) appears as a large blank dark ar
+  [31m      [0m [major] s3 dead-zone: viewport-4676 and overview: below 'The crossing' text and oval image, from about y=460 to the sectio
+  [31m      [0m [major] s5 dead-zone: viewport-7013: 'The Pour' section shows a small image confined to bottom-left of the viewport with t
+  [31m      [0m screenshots + critiques: logs\visual\2026-07-19T00-16-44-396Z
+  7 sections  (4 motion-primitive, 3 from scratch)
+  primitives: pinned-crossfade, parallax-depth
+  [36mTIERS[0m  plan/art-direction/questions: [35m[reasoning][0m claude-sonnet-5
+         sections: 7 [36m[bulk][0m (none needed escalation)
+           [0] masthead/cinematic → [36m[bulk][0m
+           [1] the-altitude/editorial → [36m[bulk][0m
+           [2] the-hands/narrative → [36m[bulk][0m
+           [3] the-crossing/asymmetric → [36m[bulk][0m
+           [4] the-roast-curve/immersive → [36m[bulk][0m
+           [5] the-pour/cinematic → [36m[bulk][0m
+           [6] the-proof/editorial → [36m[bulk][0m
+  deps:       @bsmnt/scrollytelling, gsap, motion, motion/react
+  files:      13 written under preview/app/src
+  [36mMOTION[0m [0:masthead] wrapped by motion-primitive pinned-crossfade
+  [36mMOTION[0m [1:the-altitude] wrapped by motion-primitive parallax-depth
+  [36mMOTION[0m [4:the-roast-curve] wrapped by motion-primitive parallax-depth
+  [36mMOTION[0m [5:the-pour] wrapped by motion-primitive parallax-depth
+  [31mIMAGE-WARN[0m [0:masthead] generated image inside dev-bleed — the image source caps at ~1173px wide, so a full-viewport band upscales it and it reads soft. Keep generated imagery inside container-page, or reserve dev-bleed for a colour field or stock photography
+  [31mIMAGE-WARN[0m [2:the-hands] unstaged dynamic image src (unrecognised shape) — bypasses the shot plan
+  [31mIMAGE-WARN[0m [4:the-roast-curve] generated image inside dev-bleed — the image source caps at ~1173px wide, so a full-viewport band upscales it and it reads soft. Keep generated imagery inside container-page, or reserve dev-bleed for a colour field or stock photography
+  [36mIMAGES[0m upgraded 7 placeholder(s) to on-theme imagery (Unsplash or Flux-generated).
+
+--no-serve: page written. Start it with:  cd preview/app && npm run dev

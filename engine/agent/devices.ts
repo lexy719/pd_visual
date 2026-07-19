@@ -123,6 +123,15 @@ html { overflow-x: clip; }
    One bleed per page: the device works by contrast with everything that respects the container. */
 .dev-bleed { width: 100vw; margin-inline: calc(50% - 50vw); }
 
+/* BLEED-MEDIA — stamped by the writer on any section whose sketch beat is "full-bleed-media".
+   Asking a section to be full-bleed does not work: measured on a real cinematic run, the page's
+   FOCAL full-bleed beat rendered as a 1082px contained panel because the primitive it used wrapped
+   itself in container-page. The arrangement was communicated and ignored. So the container is
+   released here instead of requested — the section spans the viewport whatever is inside it. */
+.bleed-media > .container-page,
+.bleed-media .container-page { max-width: none; padding-inline: 0; }
+.bleed-media { padding-inline: 0; }
+
 /* dev-stat-row — oversized numerals. The single scale jump, systematised. */
 .dev-stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: clamp(24px, 4vw, 56px); }
 .dev-stat-row .dev-stat-n { font-family: var(--font-display); font-size: clamp(44px, 6vw, 84px); line-height: 0.95; letter-spacing: -0.03em; color: var(--foreground); display: block; }
