@@ -40,7 +40,7 @@ Cramped vertical rhythm is the number one tell of a generated page.
 ## Inside components
 tags: spacing, card-padding, internal-spacing, density, buttons, universal
 
-- Card padding: 24–32px. Buttons: 11–14px vertical, 20–26px horizontal.
+- BUTTON padding is not yours to choose: `c-btn` carries the run committed atom density. Card padding: 24–32px. Buttons: 11–14px vertical, 20–26px horizontal.
 - Heading→body gap inside a block: 8–14px. Block→block: 24–40px.
 - Icon→label gap: 8px. Never 4 (cramped), never 12 (dissociated).
 - Tap targets ≥44×44px. Achieve it with padding, not margin — margin doesn't grow the target.

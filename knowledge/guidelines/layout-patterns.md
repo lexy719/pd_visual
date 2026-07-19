@@ -31,7 +31,7 @@ Video or image fills the viewport edge-to-edge; content sits over it, bottom-anc
 
 **When to use** — the brand *is* motion, texture or atmosphere: sport, automotive, fashion, travel, food.
 **Suits** — aggressive/motorsport, premium/luxury, playful/lifestyle.
-**Required** — a gradient scrim (`linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.25) 60%)`), a `poster`
+**Already guaranteed** when the composition calls for a frame: `dev-stage` emits a scrim keyed to the committed anchor, so never add your own overlay. Historic note: a gradient scrim (`linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.25) 60%)`), a `poster`
 still, `muted playsinline loop`, and a reduced-motion fallback to the poster.
 **Pitfalls** — legibility is not optional; verify contrast against the *lightest frame*, not a lucky still.
 Video over ~3MB is a bounce. Content bottom-anchored, not centred — centred text over video reads as a stock ad.

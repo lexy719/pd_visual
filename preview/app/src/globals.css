@@ -10,67 +10,67 @@
  */
 :root {
   --background: #F7F4EE;
-  --foreground: #25231E;
-  --card: #FFFFFF;
+  --foreground: #211D18;
+  --card: #FDFBF7;
   --card-foreground: #0a0a0a;
-  --popover: #FFFFFF;
+  --popover: #FDFBF7;
   --popover-foreground: #0a0a0a;
-  --primary: #5C4632;
+  --primary: #8A3B25;
   --primary-foreground: #fafafa;
   --secondary: #e6e3dd;
-  --secondary-foreground: #25231E;
+  --secondary-foreground: #211D18;
   --muted: #e6e3dd;
-  --muted-foreground: #8A8073;
-  --accent: #B5622B;
+  --muted-foreground: #6F6659;
+  --accent: #B5652E;
   --accent-foreground: #0a0a0a;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #E4DED2;
-  --input: #E4DED2;
-  --ring: #B5622B;
+  --border: #E4DDCE;
+  --input: #E4DDCE;
+  --ring: #B5652E;
   --radius: 0.5rem;
   --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --mi-tap: 0.98;
-  --font-display: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
-  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --font-body: 'DM Sans Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --container: 1088px;
   --section-pad: clamp(156px, 14vh, 215px);
   /* Base h2 size. The rhythm's .vol-* classes rescale THIS, which cascades to the section's h2. */
-  --h2-base: clamp(37px, 4vw, 49px);
+  --h2-base: clamp(34px, 5vw, 77px);
   --h2: var(--h2-base);
 }
 
 .dark {
   --background: #F7F4EE;
-  --foreground: #25231E;
-  --card: #FFFFFF;
+  --foreground: #211D18;
+  --card: #FDFBF7;
   --card-foreground: #0a0a0a;
-  --popover: #FFFFFF;
+  --popover: #FDFBF7;
   --popover-foreground: #0a0a0a;
-  --primary: #5C4632;
+  --primary: #8A3B25;
   --primary-foreground: #fafafa;
   --secondary: #e6e3dd;
-  --secondary-foreground: #25231E;
+  --secondary-foreground: #211D18;
   --muted: #e6e3dd;
-  --muted-foreground: #8A8073;
-  --accent: #B5622B;
+  --muted-foreground: #6F6659;
+  --accent: #B5652E;
   --accent-foreground: #0a0a0a;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #E4DED2;
-  --input: #E4DED2;
-  --ring: #B5622B;
+  --border: #E4DDCE;
+  --input: #E4DDCE;
+  --ring: #B5652E;
   --radius: 0.5rem;
   --mi-dur: 260ms;
   --mi-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --mi-tap: 0.98;
-  --font-display: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
-  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --font-body: 'DM Sans Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --container: 1088px;
   --section-pad: clamp(156px, 14vh, 215px);
   /* Base h2 size. The rhythm's .vol-* classes rescale THIS, which cascades to the section's h2. */
-  --h2-base: clamp(37px, 4vw, 49px);
+  --h2-base: clamp(34px, 5vw, 77px);
   --h2: var(--h2-base);
 }
 
@@ -100,12 +100,12 @@ h1, h2, h3 {
   line-height: 1.05 !important;
   margin: 0;
 }
-h1 { font-size: clamp(52px, 6.5vw, 86px) !important; }
+h1 { font-size: clamp(45px, 9vw, 168px) !important; }
 /* h2 reads its size from a custom property so the page RHYTHM can bend it per section (.vol-*).
    The !important still locks it against per-section utility classes; only the run's own rhythm,
    which sets --h2 on the section root, can move it. */
 h2 { font-size: var(--h2) !important; }
-h3 { font-size: 33px; }
+h3 { font-size: 30px; }
 
 /*
  * GENERATED PER RUN — the LOCKED LAYOUT SYSTEM. One container width, one section-padding rhythm
@@ -225,31 +225,31 @@ html.lenis, html.lenis body { height: auto; }
   color: var(--foreground);
 }
 .ground-raised {
-  --background: #FFFFFF;
+  --background: #FDFBF7;
   --card: #e6e3dd;
   background: var(--background);
   color: var(--foreground);
 }
 .ground-inverse {
-  --background: #25231E;
+  --background: #211D18;
   --foreground: #F7F4EE;
-  --muted-foreground: color-mix(in srgb, #F7F4EE 62%, #25231E);
-  --border: color-mix(in srgb, #F7F4EE 22%, #25231E);
-  --card: color-mix(in srgb, #F7F4EE 8%, #25231E);
-  --secondary: color-mix(in srgb, #F7F4EE 14%, #25231E);
+  --muted-foreground: color-mix(in srgb, #F7F4EE 62%, #211D18);
+  --border: color-mix(in srgb, #F7F4EE 22%, #211D18);
+  --card: color-mix(in srgb, #F7F4EE 8%, #211D18);
+  --secondary: color-mix(in srgb, #F7F4EE 14%, #211D18);
   color-scheme: dark;
   background: var(--background);
   color: var(--foreground);
 }
 .ground-accent {
-  --background: #B5622B;
+  --background: #B5652E;
   --foreground: #0a0a0a;
-  --muted-foreground: color-mix(in srgb, #0a0a0a 68%, #B5622B);
-  --border: color-mix(in srgb, #0a0a0a 26%, #B5622B);
-  --card: color-mix(in srgb, #0a0a0a 10%, #B5622B);
-  --secondary: color-mix(in srgb, #0a0a0a 16%, #B5622B);
+  --muted-foreground: color-mix(in srgb, #0a0a0a 68%, #B5652E);
+  --border: color-mix(in srgb, #0a0a0a 26%, #B5652E);
+  --card: color-mix(in srgb, #0a0a0a 10%, #B5652E);
+  --secondary: color-mix(in srgb, #0a0a0a 16%, #B5652E);
   --accent: #0a0a0a;
-  --accent-foreground: #B5622B;
+  --accent-foreground: #B5652E;
   background: var(--background);
   color: var(--foreground);
 }
@@ -440,6 +440,15 @@ html { overflow-x: clip; }
    One bleed per page: the device works by contrast with everything that respects the container. */
 .dev-bleed { width: 100vw; margin-inline: calc(50% - 50vw); }
 
+/* BLEED-MEDIA — stamped by the writer on any section whose sketch beat is "full-bleed-media".
+   Asking a section to be full-bleed does not work: measured on a real cinematic run, the page's
+   FOCAL full-bleed beat rendered as a 1082px contained panel because the primitive it used wrapped
+   itself in container-page. The arrangement was communicated and ignored. So the container is
+   released here instead of requested — the section spans the viewport whatever is inside it. */
+.bleed-media > .container-page,
+.bleed-media .container-page { max-width: none; padding-inline: 0; }
+.bleed-media { padding-inline: 0; }
+
 /* dev-stat-row — oversized numerals. The single scale jump, systematised. */
 .dev-stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: clamp(24px, 4vw, 56px); }
 .dev-stat-row .dev-stat-n { font-family: var(--font-display); font-size: clamp(44px, 6vw, 84px); line-height: 0.95; letter-spacing: -0.03em; color: var(--foreground); display: block; }
@@ -493,6 +502,68 @@ html { overflow-x: clip; }
 .dev-faq > details[open] > summary::after { content: '\2212'; }
 .dev-faq > details > :not(summary) { margin-top: 12px; max-width: 68ch; color: var(--muted-foreground); line-height: 1.65; }
 
+/* dev-stage — A FRAME, not a band.
+ *
+ * Every other device arranges content INSIDE a horizontal strip that the page then stacks. That is
+ * why pages read as competent and never as cinematic: cinematic work composes within a frame — media
+ * filling it edge to edge, type anchored hard to one corner, layers rather than flow.
+ *
+ * The stage is the page's one structure that is not a band. Media is absolutely positioned and
+ * covers; the body sits above it and is placed against a corner by a modifier that the writer stamps
+ * FROM THE SKETCH'S ANCHOR — the sketch has been deciding an anchor per section all along and nothing
+ * consumed it until now.
+ *
+ * The scrim is not decoration. Type over a photograph is the single most reliable way to ship
+ * unreadable text, and it cannot be solved by choosing a colour because the photograph is unknown at
+ * authoring time. A gradient scrim keyed to the anchor guarantees contrast under the type wherever it
+ * sits, so the failure stops being possible rather than being caught later. */
+.dev-stage {
+  position: relative;
+  min-height: 86vh;
+  display: grid;
+  overflow: clip;
+  isolation: isolate;
+  padding: clamp(28px, 5vw, 88px);
+}
+/* Media fills the frame. object-fit keeps a portrait photograph from distorting into a landscape box. */
+.dev-stage > .dev-stage-media,
+.dev-stage > .dev-stage-media img,
+.dev-stage > img {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; object-fit: cover;
+}
+/* The readability scrim — strongest at the anchored corner, gone at the opposite one. */
+.dev-stage::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(to top, color-mix(in srgb, #000 72%, transparent) 0%, color-mix(in srgb, #000 28%, transparent) 42%, transparent 72%);
+}
+.dev-stage.dev-stage-tl::before, .dev-stage.dev-stage-tr::before {
+  background: linear-gradient(to bottom, color-mix(in srgb, #000 72%, transparent) 0%, color-mix(in srgb, #000 28%, transparent) 42%, transparent 72%);
+}
+.dev-stage.dev-stage-c::before {
+  background: radial-gradient(75% 65% at 50% 50%, color-mix(in srgb, #000 62%, transparent) 0%, color-mix(in srgb, #000 18%, transparent) 62%, transparent 100%);
+}
+/* The body layers above both, and hangs off the anchor the sketch committed to. */
+.dev-stage > .dev-stage-body {
+  position: relative; z-index: 2;
+  max-width: min(94%, 22ch);
+  /* Type on a stage is white-on-image by construction, so it takes its own tokens rather than the
+     section's ground — the scrim above guarantees this stays readable whatever the photograph is. */
+  color: #fff;
+}
+.dev-stage > .dev-stage-body :is(h1, h2, h3) { color: #fff; }
+.dev-stage-bl > .dev-stage-body { place-self: end start; }
+.dev-stage-br > .dev-stage-body { place-self: end end; text-align: right; }
+.dev-stage-tl > .dev-stage-body { place-self: start start; }
+.dev-stage-tr > .dev-stage-body { place-self: start end; text-align: right; }
+.dev-stage-c  > .dev-stage-body { place-self: center; text-align: center; max-width: min(94%, 26ch); }
+/* A stage is a frame, so it should not also carry the page's section padding. */
+.dev-stage.section-pad, .section-pad > .dev-stage { padding-block: clamp(28px, 5vw, 88px); }
+@media (max-width: 820px) {
+  .dev-stage { min-height: 72vh; }
+  .dev-stage > .dev-stage-body { max-width: 100%; place-self: end start; text-align: left; }
+}
+
 /* dev-price-table — pricing tiers that stay aligned, with ONE emphasised plan. The emphasis is the
    whole point: an undifferentiated row of three prices makes the reader do the work, which is how a
    pricing section fails. Add dev-price-featured to exactly one child. */
@@ -515,7 +586,7 @@ html { overflow-x: clip; }
 }
 .mi-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(37,35,30,0.10);
+  box-shadow: 0 12px 28px -18px rgba(33, 29, 24, 0.35);
 }
 .mi-press:active {
   transform: scale(var(--mi-tap));

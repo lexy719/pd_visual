@@ -769,7 +769,7 @@ async function synthesize(
   seqRules: SearchHit[],
   critiques: SearchHit[],
   push?: string
-): Promise<{ raw: RawPalette; motion: string; interactions: Partial<InteractionSpec>; typography: Partial<TypographySpec>; shotPlan: Partial<ShotPlan>; rationale: string }> {
+): Promise<{ raw: RawPalette; motion: string; interactions: Partial<InteractionSpec>; typography: Partial<TypographySpec>; shotPlan: Partial<ShotPlan>; kit: unknown; surface: unknown; groundStrategy: unknown; rationale: string }> {
   const user = `Brand: ${plan.brand}
 Brief: ${plan.brief}
 Mood: ${plan.moodProfile}
@@ -797,7 +797,22 @@ ${digest(critiques, 220) || '- (none retrieved)'}
 ${push ? `\n${push}` : ''}
 Produce the palette + motion + interactions + typography + shotPlan now.`
   const parsed = extractJson<Partial<RawPalette> & { motion?: string; interactions?: Partial<InteractionSpec>; typography?: Partial<TypographySpec>; shotPlan?: Partial<ShotPlan>; rationale?: string }>(
-    await completeReasoning(SYSTEM, user, { temperature: push ? 0.5 : 0.7 })
+    await (async () => {
+      const out = await completeReasoning(SYSTEM, user, { temperature: push ? 0.5 : 0.7 })
+      // DESIGN_DUMP_AD writes the model's RAW art-direction response. Added because every kit and
+      // surface axis came back empty on three consecutive runs — the specs were being validated and
+      // silently falling back to mood defaults, so a whole layer of per-run variety never existed.
+      // Diagnosing that without the raw text is guesswork.
+      if (process.env.DESIGN_DUMP_AD) {
+        try {
+          const { writeFileSync: wf, mkdirSync: mk } = await import('node:fs')
+          const { join: j } = await import('node:path')
+          mk('logs', { recursive: true })
+          wf(j('logs', 'art-direction-raw.txt'), out, 'utf8')
+        } catch {}
+      }
+      return out
+    })()
   )
   const raw: RawPalette = {
     background: String(parsed.background ?? ''),
@@ -814,6 +829,14 @@ Produce the palette + motion + interactions + typography + shotPlan now.`
     interactions: parsed.interactions ?? {},
     typography: parsed.typography ?? {},
     shotPlan: parsed.shotPlan ?? {},
+    // These three MUST be carried across the boundary. They were read off `raw` in artDirect, which
+    // is only the seven palette hex values — so for three runs every kit, surface and ground
+    // commitment the model made was dropped here and silently replaced by mood fallbacks. The logs
+    // said `kit.corner "" is not in the grammar`, which reads as the model failing to answer when it
+    // had answered perfectly.
+    kit: (parsed as { kit?: unknown }).kit,
+    surface: (parsed as { surface?: unknown }).surface,
+    groundStrategy: (parsed as { groundStrategy?: unknown }).groundStrategy,
     rationale: String(parsed.rationale ?? '').trim()
   }
 }
@@ -862,7 +885,7 @@ export async function artDirect(plan: Plan, log: (m: string) => void = () => {})
   const adjustments: string[] = []
 
   // 1. Synthesize; if the accent comes back gray, re-synthesize ONCE with a stronger push.
-  let { raw, motion: motionRaw, interactions: interactionsRaw, typography: typographyRaw, shotPlan: shotPlanRaw, rationale } = await synthesize(plan, colorRules, motionRules, microRules, typeRules, seqRules, critiques)
+  let { raw, motion: motionRaw, interactions: interactionsRaw, typography: typographyRaw, shotPlan: shotPlanRaw, kit: kitRaw, surface: surfaceRaw, groundStrategy: groundRaw, rationale } = await synthesize(plan, colorRules, motionRules, microRules, typeRules, seqRules, critiques)
   if (!isHex(raw.accent) || saturation(raw.accent) < MIN_ACCENT_SAT) {
     log(`       ↳ accent ${raw.accent || '(missing)'} too gray (sat ${saturation(raw.accent).toFixed(2)}); re-synthesizing…`)
     const retry = await synthesize(
@@ -881,6 +904,11 @@ export async function artDirect(plan: Plan, log: (m: string) => void = () => {})
       interactionsRaw = retry.interactions
       typographyRaw = retry.typography
       shotPlanRaw = retry.shotPlan
+      // The retry path must carry these too, or an accent retry silently reverts the kit, surface
+      // and ground commitments to fallbacks — the same class of loss this whole fix is about.
+      kitRaw = retry.kit
+      surfaceRaw = retry.surface
+      groundRaw = retry.groundStrategy
       rationale = retry.rationale
     }
   }
@@ -953,11 +981,16 @@ export async function artDirect(plan: Plan, log: (m: string) => void = () => {})
   const rhythm = planRhythm(plan.sections)
 
   // The project kit: model commits within a closed grammar, we validate and emit it as real code.
-  const { kit, adjustments: kitAdj } = clampKit((raw as { kit?: unknown }).kit, plan.mood, plan.register)
+  // NOTE: these read `parsed` (the model's full response), NOT `raw` — `raw` is only the seven
+  // palette hex values. They read `raw` for three runs, so every kit, surface and ground commitment
+  // the model made was discarded before it was read and the system silently used mood fallbacks.
+  // The symptom was invisible in the logs: "kit.corner \"\" is not in the grammar" looks like the
+  // model failing to answer, when it had answered perfectly.
+  const { kit, adjustments: kitAdj } = clampKit(kitRaw, plan.mood, plan.register)
   adjustments.push(...kitAdj)
-  const { surface, adjustments: surfAdj } = clampSurface((raw as { surface?: unknown }).surface, plan.mood)
+  const { surface, adjustments: surfAdj } = clampSurface(surfaceRaw, plan.mood)
   adjustments.push(...surfAdj)
-  const groundStrategy = clampGroundStrategy((raw as { groundStrategy?: unknown }).groundStrategy, plan.mood)
+  const groundStrategy = clampGroundStrategy(groundRaw, plan.mood)
 
   return { palette, motion, interactions, typography, layout, kit, surface, groundStrategy, rhythm, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
 }

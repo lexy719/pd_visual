@@ -48,7 +48,7 @@ tags: typography, serif, sans, mono, tone, universal
   condensed sans reads urgent and fast.
 - **Mono** — machine, precision, code. Use for labels, data, code, and eyebrow text — never body copy.
   In technical/developer contexts a mono eyebrow instantly signals the audience.
-- **Uppercase** — only for labels and eyebrows, ≤20 characters, with `letter-spacing: 0.08em`. Uppercase body
+- **Uppercase** — labels and eyebrows are the `c-eyebrow` component, which already carries the committed case and tracking; never hand-roll `uppercase` + `tracking-*`. Historic rule: only for labels and eyebrows, ≤20 characters, with `letter-spacing: 0.08em`. Uppercase body
   copy destroys reading speed; uppercase headlines are a motorsport/brutalist device, not a default.
 
 ## Line length and rhythm
@@ -96,7 +96,7 @@ tags: playful, consumer, friendly, lifestyle, bright, typography, geometric, rou
 ## Minimal / SaaS typography
 tags: minimal, saas, clean, product, restrained, typography, sans, inter
 
-- One neutral grotesque, weights 400/500/600/800. Inter, Geist, or Helvetica. Nothing else.
+- One neutral grotesque, weights 400/500/600/800. The FACE itself is committed once per run and self-hosted, so never name a typeface inside a section.
 - Step ratio 1.25, hero-to-body 3.5–4×. `letter-spacing: -0.03em` on the hero, `-0.02em` on section heads.
 - Body 16–18px, `line-height: 1.6`, `max-width: 65ch`.
 - Every heading is sentence case. Title Case is a marketing tell.

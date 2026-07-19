@@ -1,0 +1,66 @@
+```json
+{
+  "background": "#f4efe6",
+  "foreground": "#2a2420",
+  "card": "#eae3d6",
+  "primary": "#6b3a2c",
+  "mutedForeground": "#7a7168",
+  "border": "#ddd3c2",
+  "accent": "#c1602f",
+  "motion": "parallax-slow",
+  "interactions": {
+    "durationMs": 260,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "hoverTransform": "translateY(-2px)",
+    "hoverShadow": "0 8px 24px rgba(42,36,32,0.12)",
+    "tapScale": 0.98,
+    "cursor": "pointer"
+  },
+  "typography": {
+    "displayFace": "fraunces",
+    "bodyFace": "dm-sans",
+    "scaleRatio": 1.333,
+    "displayWeight": 500,
+    "bodyWeight": 400,
+    "displayTracking": "-0.01em",
+    "displayLineHeight": 1.05,
+    "bodyLineHeight": 1.6,
+    "displayScale": "large",
+    "pairing": "Fraunces' warm, hand-set old-style curves carry the roastery's craft and terroir; DM Sans stays quiet and geometric beneath it so the story, not the interface, holds the eye."
+  },
+  "groundStrategy": "punctuated",
+  "surface": {
+    "construction": "hairline",
+    "elevation": "soft",
+    "light": "top-sheen",
+    "blend": "multiply",
+    "edgeFade": "fade-bottom",
+    "texture": "noise",
+    "rationale": "A hairline card with a soft top sheen and fine grain reads like light on roasted paper stock — tactile and unforced, never glassy or synthetic."
+  },
+  "kit": {
+    "corner": "soft",
+    "button": "underline",
+    "icon": "none",
+    "edge": "hairline",
+    "eyebrow": "small-caps",
+    "density": "generous",
+    "rationale": "An underline button and hairline edges keep the interface out of the way of the cinematic photography, while small-caps eyebrows give the editorial voice quiet authority."
+  },
+  "shotPlan": {
+    "subject": "a squat, matte terracotta ceramic cup of dark coffee with faint crema, resting on unglazed stoneware",
+    "source": "generated",
+    "light": "low, warm directional sunlight raking from one side, long soft shadows",
+    "lens": "35mm-equivalent, shallow depth of field, slight vignette",
+    "texture": "fine film grain, warm-toned, no sharpening halos",
+    "forbid": ["stock-photo gloss", "studio softboxes", "text overlays baked into image", "cool blue tones", "plastic or disposable cups"],
+    "beats": [
+      { "scale": "establishing", "role": "establish" },
+      { "scale": "medium", "role": "humanize" },
+      { "scale": "detail", "role": "prove" }
+    ],
+    "dominantIndex": 0
+  },
+  "rationale": "A warm terracotta-and-parchment palette with a single burnt-orange accent evokes Bergen hillside soil and roasted beans, while restrained 260ms translateY interactions and slow parallax let the cinematic photography — not the interface — carry the premium, calm story."
+}
+```

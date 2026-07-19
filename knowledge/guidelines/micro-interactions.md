@@ -13,7 +13,7 @@ mushy) except where a mood calls for it.
 
 **standard-out** — `cubic-bezier(0.22, 1, 0.36, 1)` — decisive, settles fast. The default for hover and
 state change. Suits premium, minimal, trustworthy, calm.
-**entrance** — `cubic-bezier(0.16, 1, 0.3, 1)` — long, soft landing. For scroll reveals and first paint.
+**entrance** — not chosen here; the locked reveal borrows the run committed easing. `cubic-bezier(0.16, 1, 0.3, 1)` — long, soft landing. For scroll reveals and first paint.
 **mechanical** — `cubic-bezier(0.2, 0, 0, 1)` — sharp in, hard stop, no overshoot. Suits aggressive,
 technical, motorsport. Reads engineered.
 **overshoot** — `cubic-bezier(0.34, 1.56, 0.64, 1)` — springs slightly past then back. Playful/consumer
@@ -29,7 +29,7 @@ tags: micro-interaction, duration, timing, transition, universal
 How long feedback takes. Feedback must feel instant; reveals may take their time.
 
 **Spec** — hover / press feedback **120–180ms**; control state change (toggle, focus ring) **180–220ms**;
-content reveal on scroll **400–600ms**; large hero / pinned transitions up to **800ms**. Never exceed
+content reveal on scroll: NOT YOURS TO SET. The page entrance is a locked CSS class (`reveal`) tied to scroll POSITION, so it has no duration to choose; never write duration-500/600/700 on an entrance. Hover and press timings below still apply. (Historic guidance: **400–600ms**; large hero / pinned transitions up to **800ms**. Never exceed
 **800ms** for anything the user triggers directly — past that it feels laggy, not smooth.
 **Pitfalls** — a 400ms hover is sluggish; a 60ms reveal is a flicker. Match the number to the job.
 

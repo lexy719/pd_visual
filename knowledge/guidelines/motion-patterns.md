@@ -24,7 +24,7 @@ Sibling elements enter in sequence rather than together.
 
 **Spec** — 60–90ms between children. Beyond ~6 items the tail feels slow — stagger the first row only,
 or drop to 40ms.
-**Library** — GSAP `stagger: 0.07` · Framer Motion `staggerChildren: 0.07` on a parent variant.
+**Already built.** Gallery and modular sections receive `reveal-stagger`, whose offset comes from each child's real position in the viewport rather than an invented delay — so it survives any item count and any reflow. Do not import a library; only React is available.
 **Pairs with** — `layout-patterns#bento-grid`, `layout-patterns#card-gallery`.
 **Pitfalls** — never stagger a pricing table; making the user watch tiers arrive one by one delays a decision
 they came to make. Stagger decoration, not choices.
@@ -91,7 +91,7 @@ Steps are content, not slides — each must stand alone if motion is off.
 ## smooth-scroll
 tags: motion, smooth-scroll, lenis, scroll, premium, editorial, immersive, universal, aspirational, needs-primitive
 
-> ⚠ **ASPIRATIONAL — NOT A BUILD INSTRUCTION.** Lenis is **not a dependency of this project** and is
+> ⚠ **ASPIRATIONAL — NOT A BUILD INSTRUCTION.** Lenis IS part of this project now: the scroll feel is committed per run and applied for you, so never import or configure it yourself. (Historically it was not a dependency and was
 > deliberately deferred: it is a page-level scroll-physics layer, not a per-section primitive, so it
 > cannot be introduced by a generated section at all. **Do not import or configure it.** It only becomes
 > relevant if the project later adopts a global scroll layer — and only when something on the page is
@@ -203,7 +203,7 @@ result is double-triggered, unmaintainable motion.
 
 **Decision, in order:** component-scoped effect → **motion/react**. Text-splitting or a big
 multi-element scroll timeline → **anime.js**. Pinned/scrubbed scroll → **GSAP ScrollTrigger**.
-Scrub present → add **Lenis**. Everything else → CSS + `IntersectionObserver`, no library.
+Scrub present → add **Lenis**. Everything else is already handled by the locked `reveal` class. Do NOT write an IntersectionObserver: only React is importable, and a hand-rolled observer strands content invisible if it never runs.
 
 **The no-mixing rule:** a generated page commits to motion/react *or* to the imperative
 anime.js/GSAP stack — not both. If the hero needs kinetic split-text (anime.js) and the cards need
@@ -225,7 +225,7 @@ tags: motion, restraint, performance, accessibility, reduced-motion, universal, 
   a competing duration, easing or hover transform.** The committed per-mood values live in
   `guidelines/micro-interactions.md` — restrained for premium/calm, punchier for aggressive/playful.
 - Every interactive element needs a visible **hover and focus** state. Motion is not a substitute for focus.
-- Reach for CSS first, then `IntersectionObserver`, then a library — and pick ONE library paradigm per
+- Reach for the locked classes first. Never an IntersectionObserver, never a library — and pick ONE paradigm per
   page (see `#choosing-a-motion-library`). Framer Motion (motion/react) is the default here since the
   target is React; anime.js when you need split-text/kinetic typography or a big multi-element scroll
   timeline; GSAP only for `ScrollTrigger` pinning/scrub; Lenis only when something is scrubbed. Never

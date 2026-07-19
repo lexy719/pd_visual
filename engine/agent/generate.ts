@@ -104,7 +104,7 @@ function imageRule(plan: Plan): string {
   if (plan.mood.some((m) => NON_PHOTO_MOODS.includes(m))) {
     return (
       'IMAGERY — this is a technical/minimal brand, so DO NOT use stock photos (they look random and cheap here). ' +
-      'Instead build visuals from code: a code block or terminal snippet (monospace, bg-card, rounded-lg, p-4, a REAL ' +
+      'Instead build visuals from code: a code block or terminal snippet (monospace, class "s-inset" for the well, which carries the committed inset surface; add only padding, a REAL ' +
       'on-brief command/output). ' +
       'ICONS: if a feature/item needs an icon, use a COMPLETE inline <svg> with a visible <path> ' +
       '(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2", class "h-6 w-6 text-primary"). ' +
@@ -1183,8 +1183,10 @@ There is no pre-made component for this section, so build it from scratch. Rules
   needs to arrive separately. Animate ONLY transform and opacity, and gate any other effect behind
   @media (prefers-reduced-motion: reduce). Motion is optional polish, never required to read the content.
 - LAYOUT (hard rules — a broken grid is worse than a plain one): every flex row or grid MUST set an explicit gap (gap-4/gap-8)
-  so children never collide, and multi-item flex rows MUST include flex-wrap. Wrap content in a centered container
-  (max-w-6xl mx-auto px-6). Section vertical padding py-20 to py-28 — NOT more, and NEVER min-h-screen on a non-hero section.
+  so children never collide, and multi-item flex rows MUST include flex-wrap.
+  The container and the vertical padding are NOT yours to choose — wrap content in "container-page" and put
+  "section-pad" on the root section; both carry this run's committed width and rhythm. Never write max-w-*/mx-auto
+  for the outermost wrapper, never py-*/pt-*/pb-* on the root section, and never min-h-screen on a non-hero section.
 - Output ONLY the code (one \`export default function\`). No prose, no markdown fences.
 - Follow the COMPOSITION, STRUCTURE RULES and DESIGN JUDGEMENT provided below. One accent color. Real, on-brief copy — never lorem ipsum.
 - ${THEME_CLASSES}

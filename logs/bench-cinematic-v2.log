@@ -1,0 +1,162 @@
+
+brief:      "Halden — a single-origin coffee roastery in Bergen that roasts one lot at a time and names the farm on every bag. A cinematic scroll story about the journey from a hillside in Huila to the cup: the altitude, the hands that pick it, the roast curve, the pour. Mood: premium, calm, cinematic."
+reasoning:  claude-sonnet-5   (questions · concept · plan · art-direction)
+bulk:       claude-sonnet-5   (section codegen · self-critique; escalates to reasoning on repair)
+design:     claude-haiku-4-5-20251001   (legacy/fallback tier)
+
+[1m── PLAN ────────────────────────────────────────────────────[0m
+brand:  Halden
+mood:   premium, calm
+layout: origin-to-proof, editorial-brand-story
+sections:
+  0. masthead         [36mcinematic[0m/lg  Establish Halden's single premise — one lot at a time, named farm on every bag — as a quiet thesis, not a slogan
+  1. the-hillside     [36mimmersive[0m/xl  Ground the story at altitude — the specific farm, elevation, and soil that give this lot its character
+  2. the-hands        [36mnarrative[0m/lg  Honor the labor of selective picking — named pickers, ripe-cherry selection, the human cost of single-origin quality
+  3. the-crossing     [36meditorial[0m/sm  Mark the transition from farm to Bergen — a quiet beat on distance and care in transit
+  4. the-roast-curve  [36masymmetric[0m/lg  Reveal the roaster's craft — reading the bean, the curve, the exact moment of first crack, tuned to this lot alone
+  5. the-pour         [36mcinematic[0m/xl  Arrive at the cup — the payoff of the whole journey, rendered as a singular, isolated moment
+  6. the-proof        [36meditorial[0m/md  Close on credibility — the named farm on the bag, the lot number, the roast date, making the origin claim verifiable
+  7. the-invitation   [36meditorial[0m/sm  Close the story with where to find the roastery in Bergen and how to get this lot before it's gone
+
+[1m── ART-DIRECTION  (retrieve color rules + critiques → committed palette) [0m
+[2m       ↳ shot plan: source=generated, subject="a kraft-paper coffee bag stamped with a farm name " · establishing → wide → medium → detail → wide → macro → detail → medium[0m
+  primary   [48;2;138;59;37m   [0m #8A3B25
+  accent    [48;2;181;101;46m   [0m #B5652E
+  bg / fg   [48;2;247;244;238m   [0m #F7F4EE  /  [48;2;33;29;24m   [0m #211D18
+  card/bord [48;2;253;251;247m   [0m #FDFBF7  /  [48;2;228;221;206m   [0m #E4DDCE
+  motion    [36mparallax-slow[0m  (locked for the whole run)
+  rhythm    [36m██▄▁██▄▁  peak@1[0m  (page pacing: ▁tight ▄normal █open)
+  kit       [36msolid/pill corners/none icon/rule edges/small-caps eyebrow/regular[0m  (this project's own components, emitted as CSS)
+  [2m(no rationale given)[0m
+  surface   [36mhairline/hairline elevation/top-sheen light/none edges[0m
+  [2m(no rationale given)[0m
+  interact  [36m260ms[0m cubic-bezier(0.22, 1, 0.36, 1)  hover:[36mtranslateY(-2px)[0m  tap:0.98  cursor:pointer  (locked)
+  [2mA low-saturation sage-and-parchment ground with one saturated roast-amber accent keeps the palette unlit and warm rather than dim, punctuated grounds mark the farm-to-cup transitions like film cuts, and restrained 260ms translateY interactions with a huge Fraunces display over quiet DM Sans body let the cinematic photography and single-lot facts carry all the drama.[0m
+  [2manchors: Calm / wellness / health, parallax-depth, premium / calm micro-interactions, duration scale, Micro-interactions, Type scale ratios by mood, Calm / wellness typography, Premium / editorial typography, Scale rhythm: alternate establishing, medium, and detail, Aesthetic constancy: unpredictable content, one constant world, Subject continuity: the product is the same object in every shot, One dominant image per page, PP Neue Montreal — throughline, Bucks Sauce — Reviews section uses a hand-lettered, sketchy outline t…, Cantor8 — throughline[0m
+  [33mADJUSTED[0m kit.corner "" is not in the grammar → pill
+  [33mADJUSTED[0m kit.button "" is not in the grammar → solid
+  [33mADJUSTED[0m kit.icon "" is not in the grammar → none
+  [33mADJUSTED[0m kit.edge "" is not in the grammar → rule
+  [33mADJUSTED[0m kit.eyebrow "" is not in the grammar → small-caps
+  [33mADJUSTED[0m kit.density "" is not in the grammar → regular
+  [33mADJUSTED[0m surface.surface "" is not in the grammar → hairline
+  [33mADJUSTED[0m surface.elevation "" is not in the grammar → hairline
+  [33mADJUSTED[0m surface.light "" is not in the grammar → top-sheen
+  [33mADJUSTED[0m surface.blend "" is not in the grammar → none
+  [33mADJUSTED[0m surface.edgeFade "" is not in the grammar → none
+  [33mADJUSTED[0m surface.texture "" is not in the grammar → none
+
+[1m── WIREFRAME  (approve structure before codegen) ───────────[0m
+
+  Halden  ·  premium/calm  ·  origin-to-proof
+  motion: parallax-slow   palette: Amber
+┌──────────────────────────────────────────────────┐
+│ masthead  ·  cinematic  ·  full-bleed-video      │
+│   ↳ Establish Halden's single premise — one lot  │
+│     media: full-bleed still of misted Huila hill │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-hillside  ·  immersive  ·  parallax-depth (m │
+│   ↳ Ground the story at altitude — the specific  │
+│     media: full-viewport pinned photo sequence o │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-hands  ·  narrative  ·  Premium / calm spaci │
+│   ↳ Honor the labor of selective picking — named │
+│     media: alternating close-up stills of hands  │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-crossing  ·  editorial  ·  Premium / calm sp │
+│   ↳ Mark the transition from farm to Bergen — a  │
+│     media: single small image of green coffee sa │
+│   [--] [--]                                      │
+├──────────────────────────────────────────────────┤
+│ the-roast-curve  ·  asymmetric  ·  asymmetric-gr │
+│   ↳ Reveal the roaster's craft — reading the bea │
+│     media: offset split: large cinematic shot of │
+│   [--] [--]                                      │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-pour  ·  cinematic  ·  parallax-depth (motio │
+│   ↳ Arrive at the cup — the payoff of the whole  │
+│     media: full-bleed macro of coffee pouring in │
+│                                                  │
+│                                                  │
+│                                                  │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-proof  ·  editorial  ·  Premium / calm spaci │
+│   ↳ Close on credibility — the named farm on the │
+│     media: flat-lay of the bag with farm name an │
+│   [--] [--]                                      │
+│                                                  │
+├──────────────────────────────────────────────────┤
+│ the-invitation  ·  editorial  ·  Premium / calm  │
+│   ↳ Close the story with where to find the roast │
+│     media: small interior shot of the Bergen roa │
+│   [--] [--]                                      │
+└──────────────────────────────────────────────────┘
+
+[1m── SKETCH  (compose the whole page before building any of it) [0m
+[2m  composition sketched: centred → full → media → anchored → staggered → full → stat → anchored  focal@5[0m
+  0. [36mcentred-statement [0m centre        masthead
+     [2meye: the line 'one lot at a time' as a standalone thesis[0m
+     [2mwhy: this is a premise not a headline pitch, and a single short statement is the one case where centring reads as composed rather than empty[0m
+  1. [36mfull-bleed-media  [0m bottom-left   the-hillside
+     [2meye: the hillside itself at altitude, farm name and elevation set low in the frame[0m
+     [2mwhy: full-bleed-media suits this section's content; no specific reason was committed[0m
+  2. [36mmedia-beside-text [0m top-left      the-hands
+     [2meye: a picker's hands mid-selection, named in the copy beside them[0m
+     [2mwhy: this is about a named person doing a specific act, so the image and the naming need to sit side by side rather than the image swallowing the credit[0m
+  3. [36manchored-statement[0m bottom-left   the-crossing
+     [2meye: a single line marking distance travelled[0m
+     [2mwhy: brief marks this sm and quiet — after two heavy sections it should hold one sentence low on the page and stop, not compete for space[0m
+  4. [36mstaggered-grid    [0m top-right     the-roast-curve
+     [2meye: the roast curve graph at the moment of first crack[0m
+     [2mwhy: staggered-grid suits this section's content; no specific reason was committed[0m
+  5. [36mfull-bleed-media  [0m centre        the-pour [35m◀ page focal[0m
+     [2meye: the poured cup, isolated, nothing else in frame[0m
+     [2mwhy: full-bleed-media suits this section's content; no specific reason was committed[0m
+  6. [36mstat-row          [0m top-left      the-proof
+     [2meye: farm name, lot number, roast date as three verifiable facts[0m
+     [2mwhy: stat-row suits this section's content; no specific reason was committed[0m
+  7. [36manchored-statement[0m bottom-left   the-invitation
+     [2meye: the Bergen address and how to get this lot[0m
+     [2mwhy: closing beat marked sm — a short practical statement pinned to an edge sends the reader off the page rather than asking for one more look[0m
+  [33mADJUSTED[0m sketch[1] reason was not substantive ("the brief calls this immersive and xl emphasis —") — replaced with the structural fact
+  [33mADJUSTED[0m sketch[4] reason was not substantive ("asymmetric was specified, and a curve read at on") — replaced with the structural fact
+  [33mADJUSTED[0m sketch[5] reason was not substantive ("this is the payoff of the entire journey and the") — replaced with the structural fact
+  [33mADJUSTED[0m sketch[6] reason was not substantive ("these are real discrete data points offered as p") — replaced with the structural fact
+  grounds   [36mmono: ········[0m  (· base  ▒ raised  █ inverse  ◆ accent)
+
+[1m── GENERATE  (retrieve → motion-primitive-or-scratch → code) [0m
+  [0] masthead/cinematic     → scratch  [structure: full-bleed-video, split-hero]
+       ↳ [bulk]
+  [1] the-hillside/immersive → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [2] the-hands/narrative    → scratch  [structure: Premium / calm spacing, Container and grid, Density by mood]
+       ↳ [bulk]
+  [3] the-crossing/editorial → scratch  [structure: Premium / calm spacing, Container and grid, Density by mood]
+       ↳ design-system violation(s): multi-column grid built by hand (grid-cols-*) with no composition device — apply a dev-* class instead of arranging the columns yourself — escalating one retry to reasoning tier…
+       ↳ escalated retry did not improve (1 design, parses:true); keeping the bulk output
+       ↳ [bulk]
+  [4] the-roast-curve/asymmetric → scratch  [structure: asymmetric-grid, When to break the grid on purpose, split-hero]
+       ↳ [bulk]
+  [5] the-pour/cinematic     → motion-primitive parallax-depth (wraps:section-block, motion:parallax-slow)
+       ↳ [bulk]
+  [6] the-proof/editorial    → scratch  [structure: Premium / calm spacing, Container and grid, magazine-editorial]
+       ↳ [bulk]
+  [7] the-invitation/editorial → scratch  [structure: Premium / calm spacing, Container and grid, Section padding]
+       ↳ design-system violation(s): multi-column grid built by hand (grid-cols-*) with no composition device — apply a dev-* class instead of arranging the columns yourself — escalating one retry to reasoning tier…
+       ↳ escalated retry did not improve (1 design, parses:true); keeping the bulk output
+       ↳ [bulk]
+       ↳ shot plan [generated, subject-locked]: upgraded 9 image(s) → 8 Flux (staged) + 1 dynamic src(s) rewritten to staged templates
+       ↳ hardened 8 <img> tag(s): explicit width/height + lazy below the fold
