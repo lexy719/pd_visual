@@ -429,7 +429,9 @@ export async function resolveImages(sections: SectionResult[], shot: ShotPlan, l
   const tplRe = /https:\/\/picsum\.photos\/seed\/((?:\$\{[^}]*\}|[^/"'`\s])+)\/(\d+)\/(\d+)((?:\?[^"'`\s]*)?)/g
   const world = shot.world
   const key = process.env.UNSPLASH_ACCESS_KEY
-  const useStock = world.source === 'stock' && !!key
+  // world.source is retained for the shot-plan prompt, but no longer gates routing: stock is the
+  // default for every slot now, because resolution beats provenance on a page a person looks at.
+  void (world.source === 'stock')
   const head = subjectHead(world.subject)
   const baseSeed = subjectSeed(`${world.subject || 'page'}:${world.light}`)
 
@@ -505,7 +507,15 @@ export async function resolveImages(sections: SectionResult[], shot: ShotPlan, l
     // reason a "cinematic" page did not read as one. A sharp establishing shot that is not literally
     // the same bottle beats a soft one that is: continuity is invisible if the image looks cheap.
     // Smaller subject slots still force generation, so the recurring subject survives where it reads.
-    const preferStock = !!key && (bigSlot || (!subjectForRouting && useStock))
+    // STOCK FIRST. Generated imagery caps near 886px wide and looks it — measured across every run,
+    // and the reason pages with real photography still read as cheap. Unsplash returns
+    // multi-thousand-pixel photographs, so it is the default for EVERY slot, not just large ones.
+    //
+    // Generation is now the fallback, reserved for the case it genuinely wins: a small slot carrying
+    // the page's recurring subject, where keyword search cannot return the same object twice and the
+    // size is modest enough that the resolution cap does not show.
+    const smallSubjectSlot = subjectForRouting && !bigSlot
+    const preferStock = !!key && !smallSubjectSlot
     let url = preferStock ? await fetchUnsplash(r.kw, r.w, r.h, key!, usedIds) : null
     if (url) unsplashCount++
     else {
@@ -1434,7 +1444,22 @@ export async function generateSections(
 
     // MOTION TIER: the locked motion language may offer a primitive whose composition-fit includes this
     // section's composition (already language-filtered by retrieval). Rides the generation rails via genUse.
-    const prim = motion === 'none' ? null : selectMotionPrimitive(section.composition, retrieved.motionPrimitives)
+    // SCROLL BUDGET. Every pinned/parallax primitive buys its effect with SCROLL DISTANCE: the reader
+    // pushes through a runway where the content deliberately does not move. One of those on a page is
+    // an event. Four of them — measured on a real run, 4 of 7 sections — is a page that feels like it
+    // will not scroll, because most of the scrolling does nothing.
+    //
+    // Capped at two per page, and never on consecutive sections, so the effect keeps the contrast it
+    // depends on. Sections beyond the budget fall through to the scratch path and are built normally.
+    const budgetSpent = sections.filter((x) => x.strategy === 'motion-primitive').length
+    const previousWasPrimitive = sections[sections.length - 1]?.strategy === 'motion-primitive'
+    const scrollBudgetLeft = budgetSpent < 2 && !previousWasPrimitive
+
+    const candidate = motion === 'none' ? null : selectMotionPrimitive(section.composition, retrieved.motionPrimitives)
+    if (candidate && !scrollBudgetLeft) {
+      log(`  [${i}] ${label} → scroll budget spent (${budgetSpent} pinned section(s) already); building normally`)
+    }
+    const prim = scrollBudgetLeft ? candidate : null
     if (prim) {
       const comp = asComponent(prim)
       usedComponents.set(comp.id, comp)
