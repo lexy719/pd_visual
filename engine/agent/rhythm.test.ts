@@ -87,9 +87,11 @@ check('volume drives the h2 custom property, not a competing font-size', css.inc
 console.log('\nstamping\n')
 const src = '<section className="section-pad"><div className="container-page"><h2>Title</h2></div></section>'
 const stamped = stampRhythm(src, { density: 'tight', volume: 'quiet' })
-// The stamp carries all three page-level decisions: density, volume, and the locked entrance.
-check('adds density, volume and reveal to the root section', /className="section-pad rhythm-tight vol-quiet reveal"/.test(stamped), stamped.slice(0, 100))
+// The stamp carries every page-level decision a section cannot make for itself: the colour field it
+// stands on, its density, its volume, and the locked entrance.
+check('adds ground, density, volume and reveal to the root section', /className="section-pad ground-base rhythm-tight vol-quiet reveal"/.test(stamped), stamped.slice(0, 110))
 check('every stamped section gets the locked reveal', stamped.includes(' reveal'))
+check('every stamped section gets a ground', /\bground-(base|raised|inverse|accent)\b/.test(stamped))
 check('keeps the existing section-pad', stamped.includes('section-pad'))
 check('never double-stamps', stampRhythm(stamped, { density: 'open', volume: 'loud' }) === stamped)
 check('handles a template-literal className', /rhythm-open/.test(stampRhythm('<section className={`section-pad ${x}`}><p/></section>', { density: 'open', volume: 'loud' })))

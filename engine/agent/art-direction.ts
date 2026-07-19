@@ -18,6 +18,7 @@ import type { Mood, Plan } from './types.js'
 import { planRhythm, type RhythmPlan } from './rhythm.js'
 import { clampKit, type KitSpec } from './kit.js'
 import { clampSurface, type SurfaceSpec } from './surface.js'
+import { clampGroundStrategy, type GroundStrategy } from './grounds.js'
 import { ensureContrast, hslToHex, isHex, mixHex, readableOn, saturation } from './color.js'
 
 /** The 7 committed values the model synthesizes. The rest are derived deterministically. */
@@ -262,6 +263,8 @@ export interface ArtDirection {
   kit: KitSpec
   /** how this project makes a surface and where its light falls (see surface.ts) */
   surface: SurfaceSpec
+  /** how often the page changes the field sections stand on (see grounds.ts) */
+  groundStrategy: GroundStrategy
   /** page-level vertical pacing — decided once, stamped per section (see rhythm.ts) */
   rhythm: RhythmPlan
   /** the ONE locked visual staging plan — how the page's images relate as a sequence. */
@@ -603,6 +606,7 @@ Respond with ONLY JSON in this exact shape (every color a #rrggbb hex):
     "bodyLineHeight": <body leading, 1.5-1.65>,
     "pairing": "one line: why this display+body pairing fits THIS brand"
   },
+  "groundStrategy": "<one of: mono | alternating | punctuated>",
   "surface": {
     "surface": "<one of: inset-ring | hairline | shadow-stack | tint | glass | flat>",
     "elevation": "<one of: none | hairline | soft | deep>",
@@ -651,6 +655,11 @@ RULES:
   premium/editorial → ratio 1.333-1.414, weight 500-600 (restraint reads as expensive; heaviness reads as
   loud — do NOT go heavy here). minimal → ratio 1.25, tracking -0.03em. technical/trustworthy/calm →
   ratio 1.2. Body weight is never below 400, body leading 1.5-1.65.
+- "groundStrategy" decides how often the page CHANGES THE FIELD sections stand on. "mono" keeps one
+  ground throughout (quiet editorial work, and honest about it). "alternating" gives a steady
+  product-page pulse. "punctuated" keeps most of the page on one field and lets one or two inverted
+  or brand-colour fields land like a cut — the strongest choice for cinematic and story pages, where
+  the change of ground replaces every divider and container.
 - "surface" is HOW THIS PROJECT MAKES A SURFACE, and where its light comes from. It decides the page's
   identity far more than button shape does. "inset-ring" (a 1px ring INSIDE the box) reads crisp and
   screen-native; "hairline" is a classic bordered card; "shadow-stack" floats objects above the page;
@@ -891,6 +900,7 @@ export async function artDirect(plan: Plan, log: (m: string) => void = () => {})
   adjustments.push(...kitAdj)
   const { surface, adjustments: surfAdj } = clampSurface((raw as { surface?: unknown }).surface, plan.mood)
   adjustments.push(...surfAdj)
+  const groundStrategy = clampGroundStrategy((raw as { groundStrategy?: unknown }).groundStrategy, plan.mood)
 
-  return { palette, motion, interactions, typography, layout, kit, surface, rhythm, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
+  return { palette, motion, interactions, typography, layout, kit, surface, groundStrategy, rhythm, shotPlan, rationale: rationale || '(no rationale)', adjustments, anchors }
 }

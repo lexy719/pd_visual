@@ -14,6 +14,7 @@ import { describeRhythm } from './rhythm.js'
 import { describeKit } from './kit.js'
 import { describeSurface } from './surface.js'
 import { sketch } from './sketch.js'
+import { planGrounds, describeGrounds } from './grounds.js'
 import { plan } from './plan.js'
 import { artDirect } from './art-direction.js'
 import { generateSections } from './generate.js'
@@ -112,9 +113,14 @@ async function main(): Promise<void> {
   })
   for (const a of skAdj) console.log(`  \x1b[33mADJUSTED\x1b[0m ${a}`)
 
+  // 1e. GROUNDS — which colour field each section stands on. Derived from the committed palette and
+  // strategy, so a dark field carries light tokens and nothing inside it can author unreadable text.
+  const gp = planGrounds(p.sections.length, art.groundStrategy, sk, art.rhythm)
+  console.log(`  grounds   \x1b[36m${describeGrounds(gp)}\x1b[0m  (· base  ▒ raised  █ inverse  ◆ accent)`)
+
   // 2 + 3. RETRIEVE + GENERATE
   rule('GENERATE  (retrieve → motion-primitive-or-scratch → code)')
-  const gen = await generateSections(p, art, sk, (m) => console.log(m))
+  const gen = await generateSections(p, art, sk, gp, (m) => console.log(m))
 
   // 4. SELF-CRITIQUE
   rule('SELF-CRITIQUE')
@@ -129,10 +135,10 @@ async function main(): Promise<void> {
 
   // 5. WRITE
   rule('WRITE  → preview/app')
-  const w = writePage(p, gen, art)
+  const w = writePage(p, gen, art, gp)
 
   // 5b. SEE — render, screenshot, critique, revise (accept-if-better), ship-with-warning.
-  const visual = await visualPass(p, gen.sections, APP, () => writePage(p, gen, art))
+  const visual = await visualPass(p, gen.sections, APP, () => writePage(p, gen, art, gp))
   if (visual.ran && visual.surviving.length) {
     console.log(`  \x1b[31mVISUAL\x1b[0m shipped WITH ${visual.surviving.length} visible defect(s) after the revise pass:`)
     for (const d of visual.surviving) console.log(`  \x1b[31m      \x1b[0m [${d.severity}] s${d.sectionIndex} ${d.defectClass}: ${d.evidence.slice(0, 100)}`)

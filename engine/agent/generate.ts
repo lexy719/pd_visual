@@ -21,6 +21,7 @@ import { lintVoice, voiceFor, voicePromptBlock } from './voice.js'
 import { kitPromptBlock, lintKit, type KitSpec } from './kit.js'
 import { surfacePromptBlock, lintSurface, type SurfaceSpec } from './surface.js'
 import { sketchPromptBlock, ARRANGEMENT_DEVICE, type SketchPlan, type SketchBeat } from './sketch.js'
+import { groundPromptBlock, type GroundPlan, type Ground } from './grounds.js'
 import type { ArtDirection, InteractionSpec, ShotBeat, ShotPlan, ShotScale, ShotWorld } from './art-direction.js'
 import type { Plan, SectionPlan, SectionResult } from './types.js'
 
@@ -1212,6 +1213,8 @@ async function genUse(
   /** this section's place in the page composition */
   beat: SketchBeat,
   isFocal: boolean,
+  /** the colour field this section stands on */
+  ground: Ground,
   tier: GenTier,
   /** dominance (h1 ownership) + image beat — primitive-backed sections need this too, or a
    *  primitive-backed dominant section is never told it owns the page's single h1 (observed live).
@@ -1243,6 +1246,8 @@ Notes: ${comp.notes ?? '(none)'}
 
 USAGE EXAMPLE (adapt the copy/data to the brief; keep the imports + prop shape):
 ${skeleton}
+
+${groundPromptBlock(ground)}
 
 ${sketchPromptBlock(beat, isFocal)}
 
@@ -1304,6 +1309,8 @@ async function genScratch(
   beat: SketchBeat,
   /** true when this section owns the page's strongest composition */
   isFocal: boolean,
+  /** the colour field this section stands on — its tokens have already flipped to suit it */
+  ground: Ground,
   tier: GenTier,
   /** this section's beat in the locked shot plan (omitted for non-photo moods) */
   shot?: { beat?: ShotBeat; dominant: boolean; subjectHead?: string },
@@ -1328,6 +1335,8 @@ READY-MADE DEVICES (globals.css already defines these; their geometry is correct
 ${guidelineDigest(devices, 460) || '- (none retrieved)'}
 The full set of classes available to you: ${DEVICE_NAMES.join(', ')}. Retrieval showed the two most relevant above, but any of these is defined and safe to use.
 DECIDED for this section by the page composition above: ${ARRANGEMENT_DEVICE[beat.arrangement] ?? 'no device — this section is type-led'}. (Composition fallback for a "${section.composition}" section would be ${DEFAULT_DEVICE[section.composition]}.) Apply it, or another device above that genuinely fits this content better. Only skip devices entirely if this section is a single short statement with no repeating items, no media, and no quotation — a section of stacked text blocks and plain rectangles is a FAILURE this library exists to prevent.
+
+${groundPromptBlock(ground)}
 
 ${sketchPromptBlock(beat, isFocal)}
 
@@ -1389,6 +1398,8 @@ export async function generateSections(
   art: ArtDirection,
   /** the page's committed composition — where each section's mass sits and why (see sketch.ts) */
   sketchPlan: SketchPlan,
+  /** which colour field each section stands on (see grounds.ts) */
+  groundPlan: GroundPlan,
   log: (msg: string) => void = () => {}
 ): Promise<GenerateResult> {
   const sections: SectionResult[] = []
@@ -1428,12 +1439,12 @@ export async function generateSections(
       // First pass on BULK; escalate the import-repair retry to REASONING (not a blind bulk retry).
       const uBeat = sketchPlan.beats[i] ?? sketchPlan.beats[0]!
       const uFocal = sketchPlan.focalIndex === i
-      let code = await genUse(plan, section, comp, importPath, mi, art.kit, art.surface, uBeat, uFocal, 'bulk', sectionShot)
+      let code = await genUse(plan, section, comp, importPath, mi, art.kit, art.surface, uBeat, uFocal, groundPlan.grounds[i] ?? 'base', 'bulk', sectionShot)
       let tier: SectionResult['tier'] = 'bulk'
       if (!usesComponent(code, importPath)) {
         log(`       ↳ did not import ${prim.id}; escalating repair to reasoning tier…`)
         tier = 'bulk→escalated'
-        code = await genUse(plan, section, comp, importPath, mi, art.kit, art.surface, uBeat, uFocal, 'reasoning', sectionShot, true)
+        code = await genUse(plan, section, comp, importPath, mi, art.kit, art.surface, uBeat, uFocal, groundPlan.grounds[i] ?? 'base', 'reasoning', sectionShot, true)
         if (!usesComponent(code, importPath) && comp.usage_example) {
           log(`       ↳ still ignored it; falling back to the stored usage_example.`)
           code = comp.usage_example.replace(/'\.\/component'/g, `'${importPath}'`)
@@ -1471,11 +1482,11 @@ export async function generateSections(
       // First pass on BULK, then AT MOST ONE escalation to REASONING — either because the section
       // won't parse (it would be quarantined at write time), or because it ignored the committed
       // palette. Capped at one retry so a section never costs three LLM calls.
-      let code = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, art.kit, art.surface, sketchPlan.beats[i] ?? sketchPlan.beats[0]!, sketchPlan.focalIndex === i, 'bulk', sectionShot)
+      let code = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, art.kit, art.surface, sketchPlan.beats[i] ?? sketchPlan.beats[0]!, sketchPlan.focalIndex === i, groundPlan.grounds[i] ?? 'base', 'bulk', sectionShot)
       if (FORCE_PARSE_FAIL === 'bulk' || FORCE_PARSE_FAIL === 'both') code = corruptSyntax(code)
       let tier: SectionResult['tier'] = 'bulk'
       const retry = async (push?: string) => {
-        const out = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, art.kit, art.surface, sketchPlan.beats[i] ?? sketchPlan.beats[0]!, sketchPlan.focalIndex === i, 'reasoning', sectionShot, push)
+        const out = await genScratch(plan, section, retrieved.guidelines, structural, retrieved.critiques, retrieved.avoidances, craft, devices, mi, art.kit, art.surface, sketchPlan.beats[i] ?? sketchPlan.beats[0]!, sketchPlan.focalIndex === i, groundPlan.grounds[i] ?? 'base', 'reasoning', sectionShot, push)
         return FORCE_PARSE_FAIL === 'both' ? corruptSyntax(out) : out
       }
 
