@@ -25,7 +25,7 @@ const check = (name: string, ok: boolean, detail = '') => {
 
 const MI: InteractionSpec = { durationMs: 200, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', hoverTransform: 'translateY(-2px)', hoverShadow: 'none', tapScale: 0.98, cursor: 'pointer' }
 const TYPE: TypographySpec = {
-  displayStack: 'grotesque', displayFamily: 'system-ui', bodyStack: 'grotesque', bodyFamily: 'system-ui',
+  displayStack: 'inter', displayFamily: 'system-ui', bodyStack: 'inter', bodyFamily: 'system-ui',
   scaleRatio: 1.33, displayScale: 'large' as const, displayWeight: 500, bodyWeight: 400, displayTracking: '-0.01em',
   displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'test'
 }

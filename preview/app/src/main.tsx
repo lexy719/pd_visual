@@ -58,6 +58,16 @@ window.addEventListener(
  * which would fire the scroll listeners in components like hero-004 twice and muddy the exact
  * behaviour we're here to observe. We want production-shaped single mounting.
  */
+/**
+ * Font specimen — a DEV TOOL at ?fonts, never part of a generated page.
+ *
+ * Lazy on purpose: it imports the entire typeface catalogue, and a static import would bundle all ten
+ * families into every page the agent builds. A generated page must download only the two faces its
+ * run committed to.
+ */
+const SHOW_FONTS = typeof location !== 'undefined' && location.search.includes('fonts')
+const FontSpecimen = React.lazy(() => import('./font-specimen'))
+
 function Root(): React.ReactElement {
   const [dark, setDark] = useState(true)
   useEffect(() => {
@@ -98,7 +108,13 @@ function Root(): React.ReactElement {
           {dark ? 'light' : 'dark'}
         </button>
       </div>
-      <App />
+      {SHOW_FONTS ? (
+        <React.Suspense fallback={null}>
+          <FontSpecimen />
+        </React.Suspense>
+      ) : (
+        <App />
+      )}
     </>
   )
 }

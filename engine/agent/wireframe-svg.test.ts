@@ -108,9 +108,9 @@ const ART: ArtDirection = {
     cursor: 'default'
   },
   typography: {
-    displayScale: 'huge' as const, displayStack: 'serif',
+    displayScale: 'huge' as const, displayStack: 'newsreader',
     displayFamily: "Georgia, 'Iowan Old Style', 'Times New Roman', serif",
-    bodyStack: 'grotesque',
+    bodyStack: 'inter',
     bodyFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
     scaleRatio: 1.333,
     displayWeight: 500,

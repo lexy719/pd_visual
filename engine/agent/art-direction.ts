@@ -19,6 +19,7 @@ import { planRhythm, type RhythmPlan } from './rhythm.js'
 import { clampKit, type KitSpec } from './kit.js'
 import { clampSurface, type SurfaceSpec } from './surface.js'
 import { clampGroundStrategy, type GroundStrategy } from './grounds.js'
+import { clampFace, familyStack, faceCatalogueForPrompt, type FaceKey } from './fonts.js'
 import { ensureContrast, hslToHex, isHex, mixHex, readableOn, saturation } from './color.js'
 
 /** The 7 committed values the model synthesizes. The rest are derived deterministically. */
@@ -74,13 +75,7 @@ export interface InteractionSpec {
  * model-proposed family to silently fail to load and degrade to an unintended fallback. The model
  * commits the *character* (ratio / weight / tracking); the family resolves deterministically.
  */
-const FONT_STACKS = {
-  grotesque: "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-  condensed: "'Arial Narrow', 'Helvetica Neue', system-ui, sans-serif",
-  serif: "Georgia, 'Iowan Old Style', 'Times New Roman', serif",
-  mono: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
-} as const
-export type FontStack = keyof typeof FONT_STACKS
+export type FontStack = FaceKey
 
 /**
  * The committed type pairing, locked ONCE per run like the palette and the interaction spec. Numbers
@@ -372,14 +367,14 @@ function lockInteractions(raw: Partial<InteractionSpec> | undefined, mood: Mood[
  * "restraint reads as expensive; heaviness reads as loud".
  */
 const TYPOGRAPHY_BY_MOOD: Record<string, Omit<TypographySpec, 'displayFamily' | 'bodyFamily'>> = {
-  aggressive: { displayScale: 'huge', displayStack: 'condensed', bodyStack: 'grotesque', scaleRatio: 1.5, displayWeight: 800, bodyWeight: 400, displayTracking: '-0.04em', displayLineHeight: 0.95, bodyLineHeight: 1.5, pairing: 'Condensed sans at extreme weight against a neutral body — violent size jumps, nothing in between.' },
-  brutalist: { displayScale: 'huge', displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.618, displayWeight: 900, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.0, bodyLineHeight: 1.5, pairing: 'One grotesque at extreme weights only — deliberately uncomfortable, no second family.' },
-  premium: { displayScale: 'huge', displayStack: 'serif', bodyStack: 'grotesque', scaleRatio: 1.333, displayWeight: 500, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'Editorial serif display at mid weight over a neutral body — restraint and air do the work.' },
-  playful: { displayScale: 'large', displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.25, displayWeight: 700, bodyWeight: 400, displayTracking: '-0.01em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'One rounded grotesque, bouncy but always readable.' },
-  minimal: { displayScale: 'large', displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.25, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.03em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'One neutral grotesque, disciplined scale, nothing else.' },
-  technical: { displayScale: 'large', displayStack: 'mono', bodyStack: 'grotesque', scaleRatio: 1.2, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.15, bodyLineHeight: 1.6, pairing: 'Mono display against a neutral body — information density read as a feature.' },
-  trustworthy: { displayScale: 'large', displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.2, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.01em', displayLineHeight: 1.15, bodyLineHeight: 1.6, pairing: 'A quiet grotesque at a narrow scale — nothing shouts.' },
-  calm: { displayScale: 'huge', displayStack: 'serif', bodyStack: 'grotesque', scaleRatio: 1.2, displayWeight: 500, bodyWeight: 400, displayTracking: '0em', displayLineHeight: 1.2, bodyLineHeight: 1.65, pairing: 'Soft serif display, sentence case, no tracking games — nothing should jolt.' }
+  aggressive: { displayScale: 'huge', displayStack: 'archivo', bodyStack: 'inter', scaleRatio: 1.5, displayWeight: 800, bodyWeight: 400, displayTracking: '-0.04em', displayLineHeight: 0.95, bodyLineHeight: 1.5, pairing: 'Condensed sans at extreme weight against a neutral body — violent size jumps, nothing in between.' },
+  brutalist: { displayScale: 'huge', displayStack: 'space-grotesk', bodyStack: 'space-grotesk', scaleRatio: 1.618, displayWeight: 900, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.0, bodyLineHeight: 1.5, pairing: 'One grotesque at extreme weights only — deliberately uncomfortable, no second family.' },
+  premium: { displayScale: 'huge', displayStack: 'fraunces', bodyStack: 'inter', scaleRatio: 1.333, displayWeight: 500, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'Editorial serif display at mid weight over a neutral body — restraint and air do the work.' },
+  playful: { displayScale: 'large', displayStack: 'dm-sans', bodyStack: 'dm-sans', scaleRatio: 1.25, displayWeight: 700, bodyWeight: 400, displayTracking: '-0.01em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'One rounded grotesque, bouncy but always readable.' },
+  minimal: { displayScale: 'large', displayStack: 'inter', bodyStack: 'inter', scaleRatio: 1.25, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.03em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'One neutral grotesque, disciplined scale, nothing else.' },
+  technical: { displayScale: 'large', displayStack: 'space-grotesk', bodyStack: 'inter', scaleRatio: 1.2, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.15, bodyLineHeight: 1.6, pairing: 'Mono display against a neutral body — information density read as a feature.' },
+  trustworthy: { displayScale: 'large', displayStack: 'inter', bodyStack: 'inter', scaleRatio: 1.2, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.01em', displayLineHeight: 1.15, bodyLineHeight: 1.6, pairing: 'A quiet grotesque at a narrow scale — nothing shouts.' },
+  calm: { displayScale: 'huge', displayStack: 'newsreader', bodyStack: 'inter', scaleRatio: 1.2, displayWeight: 500, bodyWeight: 400, displayTracking: '0em', displayLineHeight: 1.2, bodyLineHeight: 1.65, pairing: 'Soft serif display, sentence case, no tracking games — nothing should jolt.' }
 }
 
 function typographyForMood(mood: Mood[]): Omit<TypographySpec, 'displayFamily' | 'bodyFamily'> {
@@ -388,7 +383,6 @@ function typographyForMood(mood: Mood[]): Omit<TypographySpec, 'displayFamily' |
 }
 
 const TRACKING = /^-?\d*\.?\d+(em|px)$|^0$/
-const isStack = (v: unknown): v is FontStack => typeof v === 'string' && v in FONT_STACKS
 
 /**
  * Validate + repair the model's type pairing against the per-mood committed defaults — same discipline
@@ -399,13 +393,18 @@ function lockTypography(raw: Partial<TypographySpec> | undefined, mood: Mood[], 
   const def = typographyForMood(mood)
   const r = raw ?? {}
 
-  const displayStack = isStack(r.displayStack) ? r.displayStack : def.displayStack
-  if (r.displayStack && !isStack(r.displayStack)) adjustments.push(`type displayStack "${String(r.displayStack)}" not in set → ${def.displayStack}`)
-  // body is never condensed — condensed at body size fails the measure/readability rule.
-  let bodyStack = isStack(r.bodyStack) ? r.bodyStack : def.bodyStack
-  if (bodyStack === 'condensed') {
-    adjustments.push('type bodyStack condensed → grotesque (condensed body fails readability)')
-    bodyStack = 'grotesque'
+  // The model may send either the new key or the legacy field name; both resolve through the
+  // catalogue, and a face that is not usable in the role it was chosen for falls back rather than
+  // shipping (a display-only face as body copy is unreadable at 17px).
+  const rawDisplay = (r as { displayFace?: unknown }).displayFace ?? r.displayStack
+  const rawBody = (r as { bodyFace?: unknown }).bodyFace ?? r.bodyStack
+  const displayStack = clampFace(rawDisplay, 'display', def.displayStack)
+  if (rawDisplay && displayStack !== String(rawDisplay).toLowerCase().trim()) {
+    adjustments.push(`type displayFace "${String(rawDisplay)}" is not a usable display face → ${displayStack}`)
+  }
+  const bodyStack = clampFace(rawBody, 'body', def.bodyStack)
+  if (rawBody && bodyStack !== String(rawBody).toLowerCase().trim()) {
+    adjustments.push(`type bodyFace "${String(rawBody)}" is not usable as body copy → ${bodyStack}`)
   }
 
   let scaleRatio = Number(r.scaleRatio)
@@ -455,9 +454,9 @@ function lockTypography(raw: Partial<TypographySpec> | undefined, mood: Mood[], 
 
   return {
     displayStack,
-    displayFamily: FONT_STACKS[displayStack],
+    displayFamily: familyStack(displayStack),
     bodyStack,
-    bodyFamily: FONT_STACKS[bodyStack],
+    bodyFamily: familyStack(bodyStack),
     scaleRatio,
     displayScale,
     displayWeight,
@@ -639,8 +638,8 @@ Respond with ONLY JSON in this exact shape (every color a #rrggbb hex):
     "cursor": "<default | pointer>"
   },
   "typography": {
-    "displayStack": "<one of: grotesque | condensed | serif | mono>",
-    "bodyStack": "<one of: grotesque | serif | mono>",
+    "displayFace": "<one of the catalogue keys below>",
+    "bodyFace": "<one of the catalogue keys below, must be usable as body>",
     "scaleRatio": <modular step ratio between adjacent type sizes, 1.2-1.618>,
     "displayWeight": <100-900 in hundreds>,
     "bodyWeight": <400-700 in hundreds; never below 400>,
@@ -698,6 +697,14 @@ RULES:
   (~168px) is type as the image — the right choice for cinematic, immersive and story pages, and it
   is NOT in tension with a calm mood: restraint is about how many things shout, not how large the one
   loud thing is.
+- "displayFace" / "bodyFace" choose from THIS CATALOGUE. These are real, self-hosted typefaces —
+  the character note is what to reason about, not the name:
+${faceCatalogueForPrompt()}
+  A face marked display-only is unreadable as body copy at 17px and will be rejected in that role.
+  Pair for CONTRAST of character, not similarity: a high-contrast serif display against a neutral
+  body is the classic editorial answer; one family used for both is the disciplined answer. Do not
+  reach for the neutral workhorse by default — it is correct when the type should have no opinion,
+  and wrong when the page is meant to have one.
 - "typography" is the LOCKED type pairing for the WHOLE site. Choose both stacks ONLY from the closed set
   above — these are system stacks, nothing is downloaded, so do NOT name a specific font (no "Inter",
   no "Neue Haas"). Commit the NUMBERS from the retrieved TYPE RULES for this mood: aggressive → ratio

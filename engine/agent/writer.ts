@@ -19,6 +19,7 @@ import { createRequire } from 'node:module'
 import type { ComponentDoc } from '../types.js'
 import type { GenerateResult } from './generate.js'
 import { SCALE_ASPECT, DISPLAY_MAX } from './art-direction.js'
+import { fontsModule } from './fonts.js'
 import { DEVICE_CSS } from './devices.js'
 import { rhythmCss } from './rhythm.js'
 import { feelForMotion, scrollCss, smoothScrollModule, type ScrollFeel } from './scroll.js'
@@ -622,8 +623,10 @@ function composeApp(gen: GenerateResult, hasChrome: boolean, smooth: boolean): s
   const chromeImport = hasChrome ? `\nimport { SiteNav, SiteFooter } from './generated/chrome'` : ''
   // The locked scroll feel. Absent entirely when the run committed to native scrolling.
   const smoothImport = smooth ? `\nimport { useSmoothScroll } from './generated/smooth-scroll'` : ''
+  // Side-effect import: registers this run's @font-face rules before anything renders.
+  const fontsImport = `\nimport './generated/fonts'`
   return `import React from 'react'
-${imports}${chromeImport}${smoothImport}
+${imports}${chromeImport}${smoothImport}${fontsImport}
 
 class Boundary extends React.Component<{ name: string; children: React.ReactNode }, { err?: Error }> {
   state: { err?: Error } = {}
@@ -669,6 +672,11 @@ export function writePage(plan: Plan, gen: GenerateResult, art: ArtDirection, gr
   writeFileSync(join(SRC, 'globals.css'), themeCss(art.palette, art.interactions, art.typography, art.layout, scrollFeel, revealIntensity(art.motion), art.kit, art.surface), 'utf8')
 
   const files: string[] = []
+
+  // This run's committed typefaces, self-hosted. Only the two faces in use are imported, so the page
+  // downloads two families rather than the catalogue, and there is no font-CDN request to fail.
+  writeFileSync(join(GENERATED, 'fonts.tsx'), fontsModule(art.typography.displayStack, art.typography.bodyStack), 'utf8')
+  files.push('src/generated/fonts.tsx')
   const depSet = new Set<string>()
   const regSet = new Set<string>()
 
