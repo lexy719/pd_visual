@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import type { ComponentDoc } from '../types.js'
 import type { GenerateResult } from './generate.js'
-import { SCALE_ASPECT } from './art-direction.js'
+import { SCALE_ASPECT, DISPLAY_MAX } from './art-direction.js'
 import { DEVICE_CSS } from './devices.js'
 import { rhythmCss } from './rhythm.js'
 import { feelForMotion, scrollCss, smoothScrollModule, type ScrollFeel } from './scroll.js'
@@ -414,12 +414,28 @@ function writeRegistry(files: string[]): void {
  * ratio, then generate every size from it — hand-picked sizes never cohere"). Body base 17px;
  * h1/h2 are responsive clamps so a fixed utility class can't starve the hero.
  */
-function headingSizes(r: number): { h1: string; h2: string; h3: string } {
+/**
+ * The type scale.
+ *
+ * The h1 ceiling comes from displayScale, NOT from the ratio. Those were the same thing, and it was a
+ * conceptual error with a measurable cost: the ratio governs the STEPS between sizes, but it was also
+ * capping the largest heading, so a "calm" mood could never exceed 53px and "minimal" never exceeded
+ * 44px. A cinematic scroll story was architecturally forbidden from having a headline larger than a
+ * blog post's — which is exactly how one came out looking basic.
+ *
+ * Calm is about how MANY things are loud, not how loud the one loud thing is. Restrained pages
+ * routinely set enormous display type; that is much of why they read as expensive.
+ */
+function headingSizes(r: number, displayMax: number): { h1: string; h2: string; h3: string } {
   const body = 17
   const s = (pow: number): number => Math.round(body * Math.pow(r, pow))
+  // The floor still follows the ratio (a tight scale should not jump on small screens), and the
+  // viewport term is what actually carries the size between the two.
+  const h1Min = Math.min(s(3.4), Math.round(displayMax * 0.42))
+  const h2Max = Math.max(s(3.2), Math.round(displayMax * 0.46))
   return {
-    h1: `clamp(${s(3.4)}px, 6.5vw, ${Math.round(s(4.6) * 1.12)}px)`,
-    h2: `clamp(${s(2.4)}px, 4vw, ${s(3.2)}px)`,
+    h1: `clamp(${h1Min}px, 9vw, ${displayMax}px)`,
+    h2: `clamp(${s(2.4)}px, 5vw, ${h2Max}px)`,
     h3: `${s(2)}px`
   }
 }
@@ -429,7 +445,7 @@ const SCALE_ASPECT_CSS = Object.entries(SCALE_ASPECT)
   .join('\n')
 
 export function themeCss(p: Palette, mi: InteractionSpec, type: TypographySpec, layout: LayoutSpec, feel: ScrollFeel = 'native', reveal: 'calm' | 'standard' | 'sharp' = 'standard', kit: KitSpec = DEFAULT_KIT, surface: SurfaceSpec = DEFAULT_SURFACE): string {
-  const h = headingSizes(type.scaleRatio)
+  const h = headingSizes(type.scaleRatio, DISPLAY_MAX[type.displayScale])
   const vars = `  --background: ${p.background};
   --foreground: ${p.foreground};
   --card: ${p.card};

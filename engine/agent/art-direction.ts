@@ -105,9 +105,25 @@ export interface TypographySpec {
   displayLineHeight: number
   /** body leading: 1.5–1.65 */
   bodyLineHeight: number
+  /**
+   * How PRESENT the display type is, independent of the scale ratio.
+   *
+   * These were the same thing, and that was a conceptual error: the ratio governs the STEPS between
+   * h1/h2/h3, but it was also setting h1's ceiling, so a "calm" mood capped display type at 53px and
+   * "minimal" at 44px. A cinematic story was architecturally forbidden from having a headline bigger
+   * than a blog post's. Calm is about how MANY things are loud, not how loud the one loud thing is —
+   * restrained pages routinely use enormous type, which is much of why they read as expensive.
+   */
+  displayScale: DisplayScale
   /** one line: why this display+body pairing fits the brand */
   pairing: string
 }
+
+/** Absolute ceiling for the page's largest heading, as its own decision. */
+export const DISPLAY_SCALES = ['modest', 'large', 'huge'] as const
+export type DisplayScale = (typeof DISPLAY_SCALES)[number]
+/** h1 max in px. `huge` is deliberately cinematic — type as the image. */
+export const DISPLAY_MAX: Record<DisplayScale, number> = { modest: 64, large: 104, huge: 168 }
 
 /** How far the camera stands — the vocabulary of the page's visual tempo (image-sequencing.md). */
 export const SHOT_SCALES = ['establishing', 'wide', 'medium', 'detail', 'macro'] as const
@@ -356,14 +372,14 @@ function lockInteractions(raw: Partial<InteractionSpec> | undefined, mood: Mood[
  * "restraint reads as expensive; heaviness reads as loud".
  */
 const TYPOGRAPHY_BY_MOOD: Record<string, Omit<TypographySpec, 'displayFamily' | 'bodyFamily'>> = {
-  aggressive: { displayStack: 'condensed', bodyStack: 'grotesque', scaleRatio: 1.5, displayWeight: 800, bodyWeight: 400, displayTracking: '-0.04em', displayLineHeight: 0.95, bodyLineHeight: 1.5, pairing: 'Condensed sans at extreme weight against a neutral body — violent size jumps, nothing in between.' },
-  brutalist: { displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.618, displayWeight: 900, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.0, bodyLineHeight: 1.5, pairing: 'One grotesque at extreme weights only — deliberately uncomfortable, no second family.' },
-  premium: { displayStack: 'serif', bodyStack: 'grotesque', scaleRatio: 1.333, displayWeight: 500, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'Editorial serif display at mid weight over a neutral body — restraint and air do the work.' },
-  playful: { displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.25, displayWeight: 700, bodyWeight: 400, displayTracking: '-0.01em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'One rounded grotesque, bouncy but always readable.' },
-  minimal: { displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.25, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.03em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'One neutral grotesque, disciplined scale, nothing else.' },
-  technical: { displayStack: 'mono', bodyStack: 'grotesque', scaleRatio: 1.2, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.15, bodyLineHeight: 1.6, pairing: 'Mono display against a neutral body — information density read as a feature.' },
-  trustworthy: { displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.2, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.01em', displayLineHeight: 1.15, bodyLineHeight: 1.6, pairing: 'A quiet grotesque at a narrow scale — nothing shouts.' },
-  calm: { displayStack: 'serif', bodyStack: 'grotesque', scaleRatio: 1.2, displayWeight: 500, bodyWeight: 400, displayTracking: '0em', displayLineHeight: 1.2, bodyLineHeight: 1.65, pairing: 'Soft serif display, sentence case, no tracking games — nothing should jolt.' }
+  aggressive: { displayScale: 'huge', displayStack: 'condensed', bodyStack: 'grotesque', scaleRatio: 1.5, displayWeight: 800, bodyWeight: 400, displayTracking: '-0.04em', displayLineHeight: 0.95, bodyLineHeight: 1.5, pairing: 'Condensed sans at extreme weight against a neutral body — violent size jumps, nothing in between.' },
+  brutalist: { displayScale: 'huge', displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.618, displayWeight: 900, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.0, bodyLineHeight: 1.5, pairing: 'One grotesque at extreme weights only — deliberately uncomfortable, no second family.' },
+  premium: { displayScale: 'huge', displayStack: 'serif', bodyStack: 'grotesque', scaleRatio: 1.333, displayWeight: 500, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'Editorial serif display at mid weight over a neutral body — restraint and air do the work.' },
+  playful: { displayScale: 'large', displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.25, displayWeight: 700, bodyWeight: 400, displayTracking: '-0.01em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'One rounded grotesque, bouncy but always readable.' },
+  minimal: { displayScale: 'large', displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.25, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.03em', displayLineHeight: 1.1, bodyLineHeight: 1.6, pairing: 'One neutral grotesque, disciplined scale, nothing else.' },
+  technical: { displayScale: 'large', displayStack: 'mono', bodyStack: 'grotesque', scaleRatio: 1.2, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.02em', displayLineHeight: 1.15, bodyLineHeight: 1.6, pairing: 'Mono display against a neutral body — information density read as a feature.' },
+  trustworthy: { displayScale: 'large', displayStack: 'grotesque', bodyStack: 'grotesque', scaleRatio: 1.2, displayWeight: 600, bodyWeight: 400, displayTracking: '-0.01em', displayLineHeight: 1.15, bodyLineHeight: 1.6, pairing: 'A quiet grotesque at a narrow scale — nothing shouts.' },
+  calm: { displayScale: 'huge', displayStack: 'serif', bodyStack: 'grotesque', scaleRatio: 1.2, displayWeight: 500, bodyWeight: 400, displayTracking: '0em', displayLineHeight: 1.2, bodyLineHeight: 1.65, pairing: 'Soft serif display, sentence case, no tracking games — nothing should jolt.' }
 }
 
 function typographyForMood(mood: Mood[]): Omit<TypographySpec, 'displayFamily' | 'bodyFamily'> {
@@ -401,6 +417,19 @@ function lockTypography(raw: Partial<TypographySpec> | undefined, mood: Mood[], 
   }
   scaleRatio = Math.round(scaleRatio * 1000) / 1000
 
+  // Display presence, independent of the ratio. Fallback leans large — the previous behaviour (a
+  // ceiling derived from the ratio) is what capped calm pages at 53px and made every page read as a
+  // blog. Only genuinely dense registers want 'modest'.
+  const rawScale = String((r as { displayScale?: unknown }).displayScale ?? '').toLowerCase().trim()
+  let displayScale: DisplayScale = (DISPLAY_SCALES as readonly string[]).includes(rawScale)
+    ? (rawScale as DisplayScale)
+    : mood.includes('technical') || mood.includes('minimal')
+      ? 'large'
+      : 'huge'
+  if (rawScale && !(DISPLAY_SCALES as readonly string[]).includes(rawScale)) {
+    adjustments.push(`type displayScale "${rawScale}" not in set → ${displayScale}`)
+  }
+
   let displayWeight = Number(r.displayWeight)
   if (!Number.isFinite(displayWeight) || displayWeight < 100 || displayWeight > 900) displayWeight = def.displayWeight
   else displayWeight = Math.min(900, Math.max(100, Math.round(displayWeight / 100) * 100))
@@ -430,6 +459,7 @@ function lockTypography(raw: Partial<TypographySpec> | undefined, mood: Mood[], 
     bodyStack,
     bodyFamily: FONT_STACKS[bodyStack],
     scaleRatio,
+    displayScale,
     displayWeight,
     bodyWeight,
     displayTracking,
@@ -617,6 +647,7 @@ Respond with ONLY JSON in this exact shape (every color a #rrggbb hex):
     "displayTracking": "<letter-spacing at display size, e.g. '-0.02em'>",
     "displayLineHeight": <display leading, 0.95-1.2>,
     "bodyLineHeight": <body leading, 1.5-1.65>,
+    "displayScale": "<one of: modest | large | huge>",
     "pairing": "one line: why this display+body pairing fits THIS brand"
   },
   "groundStrategy": "<one of: mono | alternating | punctuated>",
@@ -661,6 +692,12 @@ RULES:
   recurring physical object (a bottle, a garment, a machine), describe it ONCE in "subject" concretely and
   set source "generated" — keyword-searched stock cannot show the same object twice. Use "stock" only for
   purely illustrative pages with no recurring subject.
+- "displayScale" is how BIG the page's largest heading is allowed to be, and it is INDEPENDENT of
+  scaleRatio: the ratio sets the steps between sizes, this sets the ceiling. "modest" (~64px) suits
+  dense product and documentation pages. "large" (~104px) is the normal editorial answer. "huge"
+  (~168px) is type as the image — the right choice for cinematic, immersive and story pages, and it
+  is NOT in tension with a calm mood: restraint is about how many things shout, not how large the one
+  loud thing is.
 - "typography" is the LOCKED type pairing for the WHOLE site. Choose both stacks ONLY from the closed set
   above — these are system stacks, nothing is downloaded, so do NOT name a specific font (no "Inter",
   no "Neue Haas"). Commit the NUMBERS from the retrieved TYPE RULES for this mood: aggressive → ratio
