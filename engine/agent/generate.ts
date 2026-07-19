@@ -74,6 +74,11 @@ const LAYOUT_SYSTEM =
   '"section-pad-hero"). NEVER put py-*/pt-*/pb-* on the root section — the padding rhythm is decided once per page.\n' +
   '- The content wrapper inside the section takes className "container-page". NEVER hand-roll max-w-* + mx-auto ' +
   'for the outermost wrapper — the container width is decided once per page.\n' +
+  '- ALREADY DONE FOR YOU, so never rebuild any of it: the page scrolls smoothly (committed once per run); \n' +
+  'section padding and heading scale come from the stamped rhythm classes, which MULTIPLY the committed \n' +
+  'rhythm (absolute px padding fights them); the entrance is the locked reveal, and gallery/modular \n' +
+  'sections already stagger their children; the TYPEFACES are committed and self-hosted, so never name a \n' +
+  'font; a well for code or quoted output is "s-inset" and a raised surface is "s-raised".\n' +
   '- HEADINGS: the page has exactly ONE <h1>, in the dominant section only — this section uses <h2>/<h3> unless ' +
   'told it is dominant. Heading font/size/weight/tracking are locked in CSS; do NOT fight them with ' +
   'text-*/font-*/tracking-* classes on h1/h2 (they will lose). Style paragraphs and small text freely.\n' +

@@ -160,3 +160,114 @@ sections:
        ↳ [bulk]
        ↳ shot plan [generated, subject-locked]: upgraded 9 image(s) → 8 Flux (staged) + 1 dynamic src(s) rewritten to staged templates
        ↳ hardened 8 <img> tag(s): explicit width/height + lazy below the fold
+       ↳ pre-warm 1/7 failed twice (content, not rate limit) → on-palette fallback (1680x720)
+       ↳ pre-warm 2/7 failed twice (content, not rate limit) → on-palette fallback (1440x810)
+       ↳ pre-warm 3/7 failed twice (content, not rate limit) → on-palette fallback (880x1100)
+       ↳ pre-warm 4/7 failed twice (content, not rate limit) → on-palette fallback (1440x810)
+       ↳ pre-warm 5/7 failed twice (content, not rate limit) → on-palette fallback (960x960)
+       ↳ pre-warm: rate-limited — waiting 4s (attempt 1/4)
+       ↳ pre-warm 6/7 failed twice (content, not rate limit) → on-palette fallback (880x1100)
+       ↳ pre-warm 7/7 failed twice (content, not rate limit) → on-palette fallback (1200x900)
+       ↳ pre-warm: 0/7 image(s) verified real, 7 → fallback, 1 dynamic skipped
+
+[1m── SELF-CRITIQUE ───────────────────────────────────────────[0m
+[2m  reviewing [0] masthead…[0m
+[2m  reviewing [1] the-hillside…[0m
+[2m  reviewing [2] the-hands…[0m
+[2m  reviewing [3] the-crossing…[0m
+[2m  reviewing [4] the-roast-curve…[0m
+[2m  reviewing [5] the-pour…[0m
+[2m  reviewing [6] the-proof…[0m
+[2m  reviewing [7] the-invitation…[0m
+  [31mFLAG[0m [1:the-hillside] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [33mwarn[0m [3:the-crossing] no obvious vertical padding — guideline wants 96-140px section padding.
+  [31mFLAG[0m [5:the-pour] uses parallax-depth, which carries a known caveat: "Depth parallax via Motion useScroll+useTransform. Wraps a section-block of foreground content over a parallax photo background (wraps:sectio"
+  [33mwarn[0m [0:masthead] Dark 85% black gradient overlay + white text contradicts the light, low-saturation calm palette rule; scheme becomes high-contrast dramatic rather than monochrome + desaturated accent.
+  [33mwarn[0m [0:masthead] Orange accent (#B5652E) radial glow combined with heavy black overlay creates two competing accent/contrast systems instead of one tight, restrained accent.
+  [33mwarn[0m [0:masthead] Parallax transform runs on every scroll frame outside the 260ms/standard-out committed easing spec — no defined duration/easing curve applied, just raw scroll-linked translation.
+  [33mwarn[0m [0:masthead] 92vh forced height with pb-20/28 breaks the 140–180px generous section spacing scale; padding is arbitrary rather than the committed scale.
+  [33mwarn[0m [1:the-hillside] ParallaxDepth is imported but never used, so the specified motion/parallax micro-interaction is not implemented.
+  [33mwarn[0m [1:the-hillside] No hover or transition states defined on any element; motion 'felt not seen' requirement (260ms, standard-out easing) is entirely absent from the code.
+  [33mwarn[0m [1:the-hillside] No explicit spacing scale applied beyond generic 'section-pad'/'container-page' classes; can't verify 140–180px section padding or 32px+ card padding is honored.
+  [33mwarn[0m [1:the-hillside] Body copy paragraph has no max-width constraint tied to a 65ch measure guarantee — max-w-md is ~28ch, undercutting the editorial measure rule.
+  [33mwarn[0m [2:the-hands] Card padding uses p-8 md:p-10 (32px/40px) which is at the low end; combined with s-raised card likely adding shadow/border, risks feeling less 'calm' if shadow contrast is high — verify s-raised isn't a heavy elevation accent.
+  [33mwarn[0m [2:the-hands] text-primary used for role line introduces a second accent color alongside foreground/muted-foreground, risking more than one accent in a monochrome+desaturated-accent scheme.
+  [33mwarn[0m [2:the-hands] No visible focus states or interactive affordance defined for images/cards despite hover/micro-interaction rule being invoked — unclear if hover motion exists or meets 260ms/cubic-bezier(0.22,1,...) spec.
+  [33mwarn[0m [2:the-hands] Section-to-section rhythm: gap-24 md:gap-32 (96–128px) between rows is below the specified 140–180px section spacing standard for this mood.
+  [33mwarn[0m [3:the-crossing] Small image (220px) paired with a decorative radial accent gradient inside its own SVG background risks exceeding the ~45% saturation / low-key palette rule if #B5652E accent is too warm/saturated relative to monochrome base — verify saturation stays under 45%.
+  [33mwarn[0m [3:the-crossing] Caption 'Finca La Esperanza — lot 14' uses c-tag styling with no visible focus/contrast check against off-white background; verify text-muted-foreground and c-tag meet 4.5:1 contrast on #F7F4EE.
+  [33mwarn[0m [3:the-crossing] h3 heading has no explicit type-scale class shown (relies on global h3 default) — cannot confirm it sits correctly in hierarchy relative to c-eyebrow and body per editorial scale.
+  [33mwarn[0m [3:the-crossing] No explicit gap/margin values confirm 140–180px section rhythm; section-pad is opaque and unverifiable from this snippet.
+  [33mwarn[0m [4:the-roast-curve] mb-16 (64px) header spacing and default section-pad likely fall short of the 140–180px generous section rhythm required by the calm/premium spacing rule.
+  [33mwarn[0m [4:the-roast-curve] lg:mt-20 offset on the curve card is an arbitrary stagger value, not clearly tied to the defined spacing scale.
+  [33mwarn[0m [4:the-roast-curve] Orange/rust accent (#B5652E radial glow and text-primary curve stroke) used in both the image glow and the chart line — two accent applications risk exceeding the single desaturated-accent limit.
+  [33mwarn[0m [4:the-roast-curve] SVG image gradient stop colors are hardcoded hex values rather than theme tokens, risking inconsistency with the monochrome+accent palette rule.
+  [33mwarn[0m [5:the-pour] Image marked hidden (className includes 'hidden'), so the intended visual never renders — only gradient placeholder shows, leaving no real cinematic content.
+  [33mwarn[0m [5:the-pour] No visible spacing/padding tokens confirming 140-180px section rhythm or 32px+ card padding; relies entirely on generic 'section-pad' and 'dev-stage' utility classes with no evidence of generous whitespace scale.
+  [33mwarn[0m [5:the-pour] No max-width/measure constraint (65ch) applied to the paragraph text, risking overly wide line length.
+  [33mwarn[0m [5:the-pour] h1 'Huila, poured.' and p run directly with no visible type-scale distinction or defined hierarchy classes — heading/subhead sizing not demonstrated.
+  [33mwarn[0m [6:the-proof] dev-stat-row uses default gap/margin classes not confirmed against 32px+ / generous spacing scale — mt-16 (64px) between blocks may be below the 140–180px section rhythow required by this mood if section-pad doesn't compensate.
+  [33mwarn[0m [6:the-proof] s-light card padding is p-6 (24px), below the 32px+ card padding minimum for premium/calm spacing.
+  [33mwarn[0m [6:the-proof] Three accent uses in one section (radial accent in placeholder image, dev-stat numerals, plus hover lift) risk exceeding the single desaturated-accent restraint rule — verify dev-stat-n color token isn't a second accent hue.
+  [33mwarn[0m [6:the-proof] No visible focus state or interactive affordance shown for the image card despite mi-lift hover class — keyboard-focus parity with hover not confirmed.
+  [33mwarn[0m [7:the-invitation] Urgency/scarcity copy ('Come get it before it's gone', 'Reserve this lot', 'Remaining 38 bags') conflicts with calm/wellness restraint mood — creates pressure rather than serenity.
+  [33mwarn[0m [7:the-invitation] No explicit vertical spacing scale confirmation: section relies solely on 'section-pad' class, cannot verify 140–180px section padding or 32px+ card padding is met (image wrapper uses only p-2).
+  [33mwarn[0m [7:the-invitation] Three-stat row (Open now / This lot / Remaining) plus eyebrow, heading, body, CTA, link creates multiple competing focal points — exceeds single-accent restraint expected for calm/editorial mood.
+  [33mwarn[0m [7:the-invitation] Accent color in decorative SVG gradient (#B5652E, warm orange-brown) not confirmed under 45% saturation cap; visually reads as a stronger accent than 'desaturated' rule allows.
+
+[1m── WRITE  → preview/app ────────────────────────────────────[0m
+  scroll    [36msmooth[0m  (locked from motion language "parallax-slow")
+       ↳ visual critique: 10 defect(s) — 10 actionable (0 minor)
+         [blocking] s5 overflow: MEASURED (DOM, not vision): page scrollWidth 1306px > viewport 1280px; widest offender <div> spans x -139..141
+         [blocking] s0 contrast: MEASURED (DOM, not vision): "one lot at a time" renders rgb(255, 255, 255) on rgb(247, 244, 238) — contrast ra
+         [blocking] s0 contrast: MEASURED (DOM, not vision): "Every bag names the farm it came from, the elevation it grew" renders rgba(255, 2
+         [blocking] s1 contrast: MEASURED (DOM, not vision): "The Hillside" renders rgb(255, 255, 255) on rgb(247, 244, 238) — contrast ratio 1
+         [blocking] s1 contrast: MEASURED (DOM, not vision): "Finca Monteverde, where the slope holds the fog until noon a" renders rgb(255, 25
+         [blocking] s5 contrast: MEASURED (DOM, not vision): "Huila, poured." renders rgb(255, 255, 255) on rgb(247, 244, 238) — contrast ratio
+         [blocking] s5 contrast: MEASURED (DOM, not vision): "Finca El Mirador — 1,850 masl, this lot, this cup." renders rgb(255, 255, 255) on
+         [blocking] s5 dead-zone: MEASURED (DOM, not vision): section is 1673px tall but only 18% of that height carries text or imagery, with a
+         [major] s5 broken-image: viewport-8128 shows a large blank grey gradient rectangle above the text 'Huila, poured.' — reads as an empty/
+         [major] s6 broken-image: viewport-10837 shows an empty tinted rounded rectangle to the right of the text with a caption below it ('The 
+       ↳ revised section 5 (5 defect(s))
+       ↳ revised section 0 (2 defect(s))
+       ↳ revised section 1 (2 defect(s))
+  scroll    [36msmooth[0m  (locked from motion language "parallax-slow")
+       ↳ section 5 improved: 5 → 3 actionable defect(s)
+       ↳ section 0 did not improve on re-critique — original restored
+       ↳ section 1 did not improve on re-critique — original restored
+  scroll    [36msmooth[0m  (locked from motion language "parallax-slow")
+  [31mVISUAL[0m shipped WITH 9 visible defect(s) after the revise pass:
+  [31m      [0m [blocking] s5 overflow: MEASURED (DOM, not vision): page scrollWidth 1306px > viewport 1280px; widest offender <div> spans x
+  [31m      [0m [blocking] s0 contrast: MEASURED (DOM, not vision): "one lot at a time" renders rgb(255, 255, 255) on rgb(247, 244, 238) — c
+  [31m      [0m [blocking] s0 contrast: MEASURED (DOM, not vision): "Every bag names the farm it came from, the elevation it grew" renders r
+  [31m      [0m [blocking] s1 contrast: MEASURED (DOM, not vision): "The Hillside" renders rgb(255, 255, 255) on rgb(247, 244, 238) — contra
+  [31m      [0m [blocking] s5 contrast: MEASURED (DOM, not vision): "Huila, poured." renders rgb(255, 255, 255) on rgb(247, 244, 238) — cont
+  [31m      [0m [blocking] s5 dead-zone: MEASURED (DOM, not vision): section is 1590px tall but only 19% of that height carries text or image
+  [31m      [0m [major] s0 contrast: viewport-0: eyebrow text above 'one lot at a time' is barely visible, nearly illegible orange-on-gra
+  [31m      [0m [major] s4 broken-image: viewport-10757: framed panel to the right of 'Come get it before it's gone' with caption 'The roaste
+  [31m      [0m [major] s1 dead-zone: viewport-2689: large empty whitespace area from roughly y=220 to y=600 (below the Rosalba portrait p
+  [31m      [0m screenshots + critiques: logs\visual\2026-07-19T09-54-40-260Z
+  8 sections  (2 motion-primitive, 6 from scratch)
+  primitives: parallax-depth
+  [36mTIERS[0m  plan/art-direction/questions: [35m[reasoning][0m claude-sonnet-5
+         sections: 8 [36m[bulk][0m (none needed escalation)
+           [0] masthead/cinematic → [36m[bulk][0m
+           [1] the-hillside/immersive → [36m[bulk][0m
+           [2] the-hands/narrative → [36m[bulk][0m
+           [3] the-crossing/editorial → [36m[bulk][0m
+           [4] the-roast-curve/asymmetric → [36m[bulk][0m
+           [5] the-pour/cinematic → [36m[bulk][0m
+           [6] the-proof/editorial → [36m[bulk][0m
+           [7] the-invitation/editorial → [36m[bulk][0m
+  deps:       motion, motion/react
+  files:      14 written under preview/app/src
+  [36mMOTION[0m [1:the-hillside] wrapped by motion-primitive parallax-depth
+  [31mMOTION-WARN[0m [1:the-hillside] does not render <Parallax Depth> (wraps:section-block contract unmet)
+  [36mMOTION[0m [5:the-pour] wrapped by motion-primitive parallax-depth
+  [35mOFF-THEME[0m [0:masthead] bypasses palette tokens: text-white
+  [31mIMAGE-WARN[0m [0:masthead] generated image inside dev-bleed — the image source caps at ~1173px wide, so a full-viewport band upscales it and it reads soft. Keep generated imagery inside container-page, or reserve dev-bleed for a colour field or stock photography
+  [33mDESIGN[0m [3:the-crossing] multi-column grid built by hand (grid-cols-*) with no composition device — apply a dev-* class instead of arranging the columns yourself
+  [33mDESIGN[0m [7:the-invitation] multi-column grid built by hand (grid-cols-*) with no composition device — apply a dev-* class instead of arranging the columns yourself
+  [36mIMAGES[0m upgraded 9 placeholder(s) to on-theme imagery (Unsplash or Flux-generated).
+
+--no-serve: page written. Start it with:  cd preview/app && npm run dev

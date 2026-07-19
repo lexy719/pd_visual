@@ -181,7 +181,13 @@ export function groundsCss(p: Palette): string {
 
 /** Told to the section so its copy and imagery suit the field it will sit on. */
 export function groundPromptBlock(ground: Ground): string {
-  if (ground === 'base') return ''
+  // A base-ground section used to be told nothing at all, so it had no idea the page changes field
+  // elsewhere — and would happily hardcode a colour that breaks the moment a neighbour inverts.
+  if (ground === 'base')
+    return `GROUND — this section sits on the page's base field. Other sections on this page stand on DIFFERENT
+fields (a lifted tint, a dark inversion, or the brand colour), and every colour token flips to suit whichever
+one a section is on. So never hardcode a colour: use text-foreground / text-muted-foreground / border-border
+and they stay correct everywhere.`
   const what = {
     raised: 'a slightly lifted field, one step away from the page background',
     inverse: 'a DARK field — the page inverts here',
